@@ -1,0 +1,22 @@
+@use 'sass:math';
+
+html {
+  height: 100%;
+  overflow: auto;
+}
+
+body {
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+}
+
+p, li, u, a, span, div {
+  user-select: none !important;
+}
+
+.hidden {
+  display: none;
+}
+
+@import "popup.scss";
