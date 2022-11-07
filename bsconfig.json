@@ -1,0 +1,29 @@
+{
+  "name": "cards-front",
+  "reason": {
+    "react-jsx": 3
+  },
+  "sources": {
+    "dir": "src",
+    "subdirs": true
+  },
+  "package-specs": [
+    {
+      "module": "commonjs",
+      "in-source": false
+    }
+  ],
+  "suffix": ".bs.js",
+  "namespace": false,
+  "bs-dependencies": [
+    "bs-fetch",
+    "@rescript/react",
+    "@glennsl/bs-json",
+    "bs-promise-monad",
+    "rescript-react-intl"
+  ],
+  "refmt": 3,
+  "bsc-flags": [
+    "-bs-g"
+  ]
+}

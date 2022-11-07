@@ -1,0 +1,54 @@
+image: node:10.15.3
+definitions:
+  steps:
+    - step: &install-build
+        name: Install & Build
+        caches:
+          - node
+        script:
+          - npm ci
+          - npm run build
+          - npm run webpack:staging
+        artifacts:
+          - build/**
+    - step: &install-build-prod
+        name: Install & Build Production
+        caches:
+          - node
+        script:
+          - npm ci
+          - npm run build
+          - npm run webpack:production
+        artifacts:
+          - build/**
+    - step: &deploy
+        name: Default Deploy
+        image: amazon/aws-cli
+        script:
+          - aws s3 sync build $BUCKET_PATH --metadata-directive REPLACE --cache-control max-age=43200 --delete
+          - aws s3 cp $BUCKET_PATH/index.html $BUCKET_PATH/index.html --metadata-directive REPLACE --cache-control max-age=0,no-cache,no-store,must-revalidate --content-type text/html
+
+pipelines:
+  branches:
+    master:
+      - step: *install-build
+    staging:
+      - step: *install-build
+      - step:
+          <<: *deploy
+          name: Deploy to staging
+          deployment: staging
+
+    production:
+      - step: *install-build-prod
+      - step:
+          <<: *deploy
+          name: Deploy to production
+          deployment: production
+
+    pre:
+      - step: *install-build-prod
+      - step:
+          <<: *deploy
+          name: Deploy to production
+          deployment: pre
