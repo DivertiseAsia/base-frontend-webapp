@@ -26,7 +26,7 @@
   "dependencies": {
     "@glennsl/bs-json": "^5.0.4",
     "bs-fetch": "^0.6.2",
-    "bs-promise-monad": "^0.4.4",
+    "bs-promise-monad": "^0.5.1",
     "react": "^17.0.2",
     "react-dom": "17.0.2",
     "react-intl": "^6.0.5",
