@@ -4,109 +4,120 @@ open Utils
 open ControlledFormGroup
 
 type state = {
-  sending: bool,
-  hasSuccess: bool,
-  submitError: option<string>,
   data: Js.Dict.t<Js_json.t>,
+  profile: Js.Dict.t<Js_json.t>,
+  registerSuccess: WebData.t<bool>,
 }
 type action =
-  | Submit
+  | SubmitRequest(WebData.apiAction<bool>)
   | SetField(string, string)
-  | SubmitFailed(string)
-  | SubmitSuccess
 
 @react.component
-let make = () => {
+let make = (~defaultEmail: string="", ~defaultFirstName="", ~defaultLastName="") => {
   let (state, dispatch) = React.useReducer((state, action) =>
     switch action {
-    | Submit => {...state, sending: true, submitError: None}
-    | SubmitSuccess => {...state, sending: false, hasSuccess: true}
-    | SetField(fieldName, fieldValue) => {
-        let _ = Js.Dict.set(state.data, fieldName, Js.Json.string(fieldValue))
-        let _ = Js.log(state.data)
-        {...state, data: state.data}
+    | SubmitRequest(submitAction) => {
+        ...state,
+        registerSuccess: WebData.updateWebData(state.registerSuccess, submitAction),
       }
-    | SubmitFailed(error) => {...state, submitError: Some(error), sending: false}
+    | SetField(fieldName, fieldValue) => {
+        switch fieldName {
+        | "email" | "password" | "confirm_password" =>
+          Js.Dict.set(state.data, fieldName, Js.Json.string(fieldValue))
+        | fieldName => Js.Dict.set(state.profile, fieldName, Js.Json.string(fieldValue))
+        }
+        {...state, data: state.data, profile: state.profile}
+      }
     }
-  , {sending: false, submitError: None, data: Js.Dict.empty(), hasSuccess: false})
+  , {registerSuccess: RemoteData.NotAsked, data: Js.Dict.empty(), profile: Js.Dict.empty()})
   let submitData = data => {
     let payload = data
-    let _ = dispatch(Submit)
+    Js.Dict.set(payload, "profile", state.profile |> Js.Json.object_)
+    let _ = dispatch(SubmitRequest(WebData.RequestLoading))
     requestJsonResponseToAction(
       ~headers=buildHeader(~verb=Post, ~body=payload, None),
-      ~url=RestApi.requestRegisterPath,
+      ~url=ApiUrl.requestRegisterPath,
       ~successAction=_ => {
-        dispatch(SubmitSuccess)
+        dispatch(SubmitRequest(WebData.RequestSuccess(true)))
       },
-      ~failAction=json => dispatch(SubmitFailed(getResponseMsgFromJson(json))),
+      ~failAction=json =>
+        dispatch(SubmitRequest(WebData.RequestError(getResponseMsgFromJson(json)))),
     )
   }
-  <div className={"register-container " ++ (state.sending ? "loading" : "not-loading")}>
+  let sending = switch state.registerSuccess {
+  | RemoteData.Loading(_) => true
+  | _ => false
+  }
+  let hasSuccess = switch state.registerSuccess {
+  | RemoteData.Success(_) => true
+  | _ => false
+  }
+  <div className={"register-container " ++ (sending ? "loading" : "not-loading")}>
     <form
+      disabled=hasSuccess
       onSubmit={e => {
         ReactEvent.Form.preventDefault(e)
-        Js.log(state.data)
-        submitData(state.data) |> ignore
+        if !hasSuccess {
+          submitData(state.data) |> ignore
+        }
       }}>
       <ControlledFormGroup
-        placeholder="Email"
+        placeholder=IntlTextLabel(Messages.Auth.email)
         validationStrategy=Empty
-        warning=TextWarning("Email must not be blank")
-        disabled={state.sending || state.hasSuccess}
+        warning=IntlTextWarning(Messages.Auth.warningEmailNotBlank)
+        disabled={sending || hasSuccess}
         type_="email"
         onChange={e => dispatch(SetField("email", Utils.valueFromEvent(e)))}
         required=true
+        defaultValue=defaultEmail
       />
       <ControlledFormGroup
-        placeholder="Password"
+        placeholder=TextLabel("John")
         validationStrategy=Empty
-        warning=TextWarning("Password must not be blank")
-        disabled={state.sending || state.hasSuccess}
+        warning=IntlTextWarning(Messages.Auth.warningEmailNotBlank)
+        disabled={sending || hasSuccess}
+        type_="text"
+        onChange={e => dispatch(SetField("first_name", Utils.valueFromEvent(e)))}
+        required=true
+        defaultValue=defaultFirstName
+      />
+      <ControlledFormGroup
+        placeholder=TextLabel("Smith")
+        validationStrategy=Empty
+        warning=IntlTextWarning(Messages.Auth.warningEmailNotBlank)
+        disabled={sending || hasSuccess}
+        type_="text"
+        onChange={e => dispatch(SetField("last_name", Utils.valueFromEvent(e)))}
+        required=true
+        defaultValue=defaultLastName
+      />
+      <ControlledFormGroup
+        placeholder=IntlTextLabel(Messages.Auth.password)
+        validationStrategy=Empty
+        warning=IntlTextWarning(Messages.Auth.warningPasswordNotBlank)
+        disabled={sending || hasSuccess}
         type_="password"
         onChange={e => dispatch(SetField("password", Utils.valueFromEvent(e)))}
         required=true
       />
       <ControlledFormGroup
-        placeholder="Password Confirmation"
+        placeholder=IntlTextLabel(Messages.Auth.confirmPassword)
         validationStrategy=Empty
-        warning=TextWarning("Password must not be blank")
-        disabled={state.sending || state.hasSuccess}
+        warning=IntlTextWarning(Messages.Auth.warningPasswordNotBlank)
+        disabled={sending || hasSuccess}
         type_="password"
         onChange={e => dispatch(SetField("confirm_password", Utils.valueFromEvent(e)))}
         required=true
       />
-      <div className="container">
-        <div className="row mt-3">
-          <div className="col-2 text-center">
-            <input
-              disabled={state.sending || state.hasSuccess}
-              onChange={e =>
-                dispatch(SetField("checkbox", Utils.boolFromCheckbox(e) |> string_of_bool))}
-              type_="checkbox"
-              required=true
-            />
-          </div>
-          <div className="col-10">
-            <p>
-              {string("Lorem lpsum is simple dummy text of the printing and typesetting industry.")}
-            </p>
-          </div>
-        </div>
-      </div>
-      <input
-        type_="submit" className="btn btn-filled btn-filled-auth-page btn-default mb-4" value="Next"
-      />
+      <input id="terms" disabled={sending || hasSuccess} type_="checkbox" required=true />
+      <label htmlFor="terms"> <IntlMessage message=Messages.Auth.termsAgree /> </label>
+      <SubmitButton disabled=hasSuccess message=Messages.Auth.register />
     </form>
-    {state.sending === true ? <Loading /> : React.null}
-    {state.hasSuccess
-      ? <div className="text-info">
-          {string("Registration complete. You will need to be approved to login.")}
-        </div>
-      : null}
-    {switch state.submitError {
-    | Some("")
-    | None => null
-    | Some(x) => <div className="text-error"> {string(x)} </div>
+    {switch state.registerSuccess {
+    | RemoteData.Loading(_) => <Loading />
+    | RemoteData.NotAsked => React.null
+    | RemoteData.Success(_) => <IntlMessage message=Messages.Auth.registerSuccess />
+    | RemoteData.Failure(x) => <div className="text-error"> {string(x)} </div>
     }}
   </div>
 }

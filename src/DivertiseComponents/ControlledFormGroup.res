@@ -1,12 +1,16 @@
+open ReactIntl
+
 type validationStrategy =
   | Empty
   | Func(string => bool)
 
 type warning =
   | TextWarning(string)
+  | IntlTextWarning(ReactIntl.message)
   | TextWarningWithIcon(string, string)
+  | IntlTextWarningWithIcon(ReactIntl.message, string)
 
-type label = TextLabel(string)
+type label = TextLabel(string) | IntlTextLabel(ReactIntl.message)
 
 @react.component
 let make = (
@@ -26,12 +30,21 @@ let make = (
   ~required=?,
   ~list=?,
   ~autoComplete=?,
-  ~placeholder: option<string>=?,
+  ~placeholder: option<label>=?,
 ) => {
+  let intl = ReactIntl.useIntl()
   let (hasError, setHasError) = React.useState(() => false)
   let warning = switch (hasError, warning) {
   | (_, None) | (false, _) => None
   | (true, Some(TextWarning(warningString))) => Some(React.string(warningString))
+  | (true, Some(IntlTextWarning(warningMessage))) => Some(<IntlMessage message=warningMessage />)
+  | (true, Some(IntlTextWarningWithIcon(warningMessage, iconClass))) =>
+    Some(
+      <p className="warning-text-with-icon">
+        <span className="icon-container"> <i className=iconClass /> </span>
+        <IntlMessage message=warningMessage />
+      </p>,
+    )
   | (true, Some(TextWarningWithIcon(warningString, iconClass))) =>
     Some(
       <p className="warning-text-with-icon">
@@ -46,6 +59,9 @@ let make = (
     | Some(TextLabel(text)) =>
       let htmlFor = id
       <label className="active" ?htmlFor> {React.string(text)} </label>
+    | Some(IntlTextLabel(message)) =>
+      let htmlFor = id
+      <label className="active" ?htmlFor> <IntlMessage message /> </label>
     }}
     <TextInput
       className={"form-control " ++ Js.Option.getWithDefault("", inputClassName)}
@@ -57,7 +73,11 @@ let make = (
       ?required
       ?list
       ?autoComplete
-      ?placeholder
+      placeholder={switch placeholder {
+      | None => ""
+      | Some(TextLabel(x)) => x
+      | Some(IntlTextLabel(message)) => intl->Intl.formatMessage(message)
+      }}
       type_
       onBlur={e => {
         let value = ReactEvent.Focus.target(e)["value"]
