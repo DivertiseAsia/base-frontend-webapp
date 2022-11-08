@@ -13,6 +13,7 @@ type action =
 
 @react.component
 let make = (~defaultEmail: string="") => {
+  let setToken = User.Context.getSetToken()
   let (state, dispatch) = React.useReducer((state, action) =>
     switch action {
     | SubmitRequest(submitAction) => {
@@ -30,12 +31,11 @@ let make = (~defaultEmail: string="") => {
     let _ = dispatch(SubmitRequest(WebData.RequestLoading))
     requestJsonResponseToAction(
       ~headers=buildHeader(~verb=Post, ~body=payload, None),
-      ~url=ApiUrl.requestLoginPath,
+      ~url=Api.requestLoginPath,
       ~successAction=json => {
         let token = json |> Json.Decode.field("token", Json.Decode.string)
-        dispatch(SubmitRequest(WebData.RequestSuccess(token))) |> (
-          _ => RescriptReactRouter.push(Links.home)
-        )
+        dispatch(SubmitRequest(WebData.RequestSuccess(token)))
+        setToken(token)
       },
       ~failAction=json =>
         dispatch(SubmitRequest(WebData.RequestError(getResponseMsgFromJson(json)))),

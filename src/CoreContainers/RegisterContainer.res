@@ -36,7 +36,7 @@ let make = (~defaultEmail: string="", ~defaultFirstName="", ~defaultLastName="")
     let _ = dispatch(SubmitRequest(WebData.RequestLoading))
     requestJsonResponseToAction(
       ~headers=buildHeader(~verb=Post, ~body=payload, None),
-      ~url=ApiUrl.requestRegisterPath,
+      ~url=Api.requestRegisterPath,
       ~successAction=_ => {
         dispatch(SubmitRequest(WebData.RequestSuccess(true)))
       },
