@@ -1,0 +1,87 @@
+[
+  {
+    "id": "auth.changePassword",
+    "defaultMessage": "Change Password",
+    "message": ""
+  },
+  {
+    "id": "auth.confirmPassword",
+    "defaultMessage": "Confirm Password",
+    "message": ""
+  },
+  {
+    "id": "auth.email",
+    "defaultMessage": "Email",
+    "message": ""
+  },
+  {
+    "id": "auth.forgotPassword",
+    "defaultMessage": "Forgot Password",
+    "message": ""
+  },
+  {
+    "id": "auth.login",
+    "defaultMessage": "Log In",
+    "message": ""
+  },
+  {
+    "id": "auth.loginSuccess",
+    "defaultMessage": "Login Success",
+    "message": ""
+  },
+  {
+    "id": "auth.logout",
+    "defaultMessage": "Logout",
+    "message": ""
+  },
+  {
+    "id": "auth.password",
+    "defaultMessage": "Password",
+    "message": ""
+  },
+  {
+    "id": "auth.register",
+    "defaultMessage": "Register",
+    "message": ""
+  },
+  {
+    "id": "auth.registerSuccess",
+    "defaultMessage": "Register Success",
+    "message": ""
+  },
+  {
+    "id": "auth.sendMeAReset",
+    "defaultMessage": "Send Reset Email",
+    "message": ""
+  },
+  {
+    "id": "auth.termsAgree",
+    "defaultMessage": "Agree to terms & conditions",
+    "message": ""
+  },
+  {
+    "id": "auth.warningEmailNotBlank",
+    "defaultMessage": "Email must not be blank",
+    "message": ""
+  },
+  {
+    "id": "auth.warningPasswordNotBlank",
+    "defaultMessage": "Password must not be blank",
+    "message": ""
+  },
+  {
+    "id": "global.loading",
+    "defaultMessage": "Loading",
+    "message": ""
+  },
+  {
+    "id": "helloworld.hello",
+    "defaultMessage": "Hello {name}!",
+    "message": ""
+  },
+  {
+    "id": "notfound.header",
+    "defaultMessage": "404 - Page Not Found",
+    "message": ""
+  }
+]
