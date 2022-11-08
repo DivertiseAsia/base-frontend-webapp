@@ -77,12 +77,6 @@ let buildUploadFileHeader = (~method_, ~token, ~file, ~key) => {
   )
 }
 
-@val external _server: string = "API_SERVER"
-
-let internalUrl = endPoint => {
-  _server ++ endPoint
-}
-
 let decode = (json, decoder) => {
   switch json |> decoder {
   | data => Some(data)
