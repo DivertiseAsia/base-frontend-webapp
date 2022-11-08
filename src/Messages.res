@@ -36,6 +36,7 @@ module Auth = {
   }
   let loginSuccess = {id: "auth.loginSuccess", defaultMessage: "Login Success"}
   let registerSuccess = {id: "auth.registerSuccess", defaultMessage: "Register Success"}
+  let resetSuccess = {id: "auth.resetSuccess", defaultMessage: "Reset Success"}
   let changePassword = {id: "auth.changePassword", defaultMessage: "Change Password"}
   let termsAgree = {id: "auth.termsAgree", defaultMessage: "Agree to terms & conditions"}
 }

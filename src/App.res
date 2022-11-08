@@ -92,7 +92,7 @@ let make = () => {
       | None =>
         switch state.route.path {
         | list{"register"} => <PageRegister queryString={state.route.search} />
-        | list{"forgot"} => <PageForgot />
+        | list{"forgot"} => <PageForgot queryString={state.route.search} />
         | list{"reset"} => <PageResetConfirm queryString={state.route.search} />
         | list{"login"} | _ => <PageLogin queryString={state.route.search} />
         }

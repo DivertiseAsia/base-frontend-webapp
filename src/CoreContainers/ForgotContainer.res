@@ -1,60 +1,77 @@
 open React
 open RequestUtils
 open Utils
+open ControlledFormGroup
 
 type state = {
-  sending: bool,
-  success: option<string>,
-  error: option<string>,
-  email: string,
+  data: Js.Dict.t<Js_json.t>,
+  resetAction: WebData.t<bool>,
 }
-
 type action =
-  | ResetPassword
-  | SetEmail(string)
-  | Failed(string)
-  | Success(string)
+  | SubmitRequest(WebData.apiAction<bool>)
+  | SetField(string, string)
 
 @react.component
-let make = () => {
+let make = (~defaultEmail: string="") => {
   let (state, dispatch) = React.useReducer((state, action) =>
     switch action {
-    | ResetPassword => {...state, sending: true, error: None}
-    | Success(msg) => {...state, sending: false, success: Some(msg)}
-    | SetEmail(email) => {...state, email: email}
-    | Failed(error) => {...state, error: Some(error), sending: false}
+    | SubmitRequest(submitAction) => {
+        ...state,
+        resetAction: WebData.updateWebData(state.resetAction, submitAction),
+      }
+    | SetField(fieldName, fieldValue) => {
+        Js.Dict.set(state.data, fieldName, Js.Json.string(fieldValue))
+        {...state, data: state.data}
+      }
     }
-  , {sending: false, error: None, email: "", success: None})
-  let resetPassword = email => {
-    let payload = Js.Dict.empty()
-    Js.Dict.set(payload, "email", Js.Json.string(email))
-    let _ = dispatch(ResetPassword)
+  , {resetAction: RemoteData.NotAsked, data: Js.Dict.empty()})
+  let submitData = data => {
+    let payload = data
+    let _ = dispatch(SubmitRequest(WebData.RequestLoading))
     requestJsonResponseToAction(
       ~headers=buildHeader(~verb=Post, ~body=payload, None),
-      ~url=RestApi.requestResetPasswordPath,
-      ~successAction=_ => dispatch(Success("Please check your email for a reset password link.")),
-      ~failAction=json => dispatch(Failed(getResponseMsgFromJson(json))),
+      ~url=Api.requestResetPasswordPath,
+      ~successAction=_ => {
+        dispatch(SubmitRequest(WebData.RequestSuccess(true)))
+      },
+      ~failAction=json =>
+        dispatch(SubmitRequest(WebData.RequestError(getResponseMsgFromJson(json)))),
     )
   }
-  <div className={"forgot-container " ++ (state.sending ? "loading" : "not-loading")}>
-    <ForgotForm
-      loading={state.sending || state.success |> Js.Option.isSome}
-      setEmail={input => dispatch(SetEmail(input))}
+  let sending = switch state.resetAction {
+  | RemoteData.Loading(_) => true
+  | _ => false
+  }
+  let hasSuccess = switch state.resetAction {
+  | RemoteData.Success(_) => true
+  | _ => false
+  }
+  <div className={"forgot-container " ++ (sending ? "loading" : "not-loading")}>
+    <form
+      disabled=hasSuccess
       onSubmit={e => {
         ReactEvent.Form.preventDefault(e)
-        Js.log(e)
-        resetPassword(state.email) |> ignore
-      }}
-    />
-    <Loading loading=state.sending />
-    {switch state.success {
-    | None => React.null
-    | Some(msg) => <div className="text-info"> {string(msg)} </div>
-    }}
-    {switch state.error {
-    | Some("")
-    | None => React.null
-    | Some(msg) => <div className="text-error"> {string(msg)} </div>
+        if !hasSuccess {
+          submitData(state.data) |> ignore
+        }
+      }}>
+      <ControlledFormGroup
+        placeholder=IntlTextLabel(Messages.Auth.email)
+        validationStrategy=Empty
+        warning=IntlTextWarning(Messages.Auth.warningEmailNotBlank)
+        disabled={sending || hasSuccess}
+        type_="email"
+        onChange={e => dispatch(SetField("email", Utils.valueFromEvent(e)))}
+        required=true
+        defaultValue=defaultEmail
+      />
+      <SubmitButton disabled=hasSuccess message=Messages.Auth.sendMeAReset />
+    </form>
+    {switch state.resetAction {
+    | RemoteData.Loading(_) => <Loading />
+    | RemoteData.NotAsked => React.null
+    | RemoteData.Success(_) => <IntlMessage message=Messages.Auth.resetSuccess />
+    | RemoteData.Failure(x) => <div className="text-error"> {string(x)} </div>
     }}
   </div>
 }
