@@ -5,6 +5,11 @@
     "message": ""
   },
   {
+    "id": "auth.changePasswordSuccess",
+    "defaultMessage": "Change Password Success",
+    "message": ""
+  },
+  {
     "id": "auth.confirmPassword",
     "defaultMessage": "Confirm Password",
     "message": ""
@@ -47,6 +52,11 @@
   {
     "id": "auth.registerSuccess",
     "defaultMessage": "Register Success",
+    "message": ""
+  },
+  {
+    "id": "auth.resetSuccess",
+    "defaultMessage": "Reset Success",
     "message": ""
   },
   {

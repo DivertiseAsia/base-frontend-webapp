@@ -1,69 +1,86 @@
 open React
 open RequestUtils
 open Utils
+open ControlledFormGroup
 
 type state = {
-  sending: bool,
-  success: option<string>,
-  error: option<string>,
-  password: string,
-  passwordConfirm: string,
+  data: Js.Dict.t<Js_json.t>,
+  resetChangePassword: WebData.t<bool>,
 }
-
 type action =
-  | SendingAction
-  | SetPassword(string)
-  | SetPasswordConfirm(string)
-  | Failed(string)
-  | Success(string)
+  | SubmitRequest(WebData.apiAction<bool>)
+  | SetField(string, string)
 
 @react.component
 let make = (~token: string) => {
   let (state, dispatch) = React.useReducer((state, action) =>
     switch action {
-    | SendingAction => {...state, sending: true, error: None}
-    | Success(msg) => {...state, sending: false, success: Some(msg)}
-    | SetPassword(password) => {...state, password: password}
-    | SetPasswordConfirm(passwordConfirm) => {...state, passwordConfirm: passwordConfirm}
-    | Failed(error) => {...state, error: Some(error), sending: false}
+    | SubmitRequest(submitAction) => {
+        ...state,
+        resetChangePassword: WebData.updateWebData(state.resetChangePassword, submitAction),
+      }
+    | SetField(fieldName, fieldValue) => {
+        Js.Dict.set(state.data, fieldName, Js.Json.string(fieldValue))
+        {...state, data: state.data}
+      }
     }
-  , {sending: false, error: None, password: "", passwordConfirm: "", success: None})
-  let changePassword = (password, passwordConfirm) => {
-    if password !== passwordConfirm {
-      dispatch(Failed("Passwords must match"))
-    } else {
-      let payload = Js.Dict.empty()
-      Js.Dict.set(payload, "password", Js.Json.string(password))
-      Js.Dict.set(payload, "token", Js.Json.string(token))
-      let _ = dispatch(SendingAction)
-      requestJsonResponseToAction(
-        ~headers=buildHeader(~verb=Post, ~body=payload, None),
-        ~url=RestApi.requestResetPasswordConfirmPath,
-        ~successAction=_ => dispatch(Success("Your password has been changed. Please login")),
-        ~failAction=json => dispatch(Failed(getResponseMsgFromJson(json))),
-      ) |> ignore
-    }
+  , {resetChangePassword: RemoteData.NotAsked, data: Js.Dict.empty()})
+  let submitData = data => {
+    let payload = data
+    let _ = dispatch(SubmitRequest(WebData.RequestLoading))
+    requestJsonResponseToAction(
+      ~headers=buildHeader(~verb=Post, ~body=payload, None),
+      ~url=Api.requestResetPasswordConfirmPath,
+      ~successAction=_ => {
+        dispatch(SubmitRequest(WebData.RequestSuccess(true)))
+      },
+      ~failAction=json =>
+        dispatch(SubmitRequest(WebData.RequestError(getResponseMsgFromJson(json)))),
+    )
   }
-  <div className={"reset-confirm-container " ++ (state.sending ? "loading" : "not-loading")}>
-    <ResetPasswordConfirmForm
-      token
-      loading={state.sending || state.success |> Js.Option.isSome}
-      setPassword={input => dispatch(SetPassword(input))}
-      setPasswordConfirm={input => dispatch(SetPasswordConfirm(input))}
+  let sending = switch state.resetChangePassword {
+  | RemoteData.Loading(_) => true
+  | _ => false
+  }
+  let hasSuccess = switch state.resetChangePassword {
+  | RemoteData.Success(_) => true
+  | _ => false
+  }
+  <div className={"resetconfirm-container " ++ (sending ? "loading" : "not-loading")}>
+    <form
+      disabled=hasSuccess
       onSubmit={e => {
         ReactEvent.Form.preventDefault(e)
-        changePassword(state.password, state.passwordConfirm) |> ignore
-      }}
-    />
-    <Loading loading=state.sending />
-    {switch state.success {
-    | None => React.null
-    | Some(msg) => <div className="text-info"> {string(msg)} </div>
-    }}
-    {switch state.error {
-    | Some("")
-    | None => React.null
-    | Some(msg) => <div className="text-error"> {string(msg)} </div>
+        if !hasSuccess {
+          submitData(state.data) |> ignore
+        }
+      }}>
+      <input type_="text" className="hidden" name="token" value=token />
+      <ControlledFormGroup
+        placeholder=IntlTextLabel(Messages.Auth.password)
+        validationStrategy=Empty
+        warning=IntlTextWarning(Messages.Auth.warningPasswordNotBlank)
+        disabled={sending || hasSuccess}
+        type_="password"
+        onChange={e => dispatch(SetField("password", Utils.valueFromEvent(e)))}
+        required=true
+      />
+      <ControlledFormGroup
+        placeholder=IntlTextLabel(Messages.Auth.confirmPassword)
+        validationStrategy=Empty
+        warning=IntlTextWarning(Messages.Auth.warningPasswordNotBlank)
+        disabled={sending || hasSuccess}
+        type_="password"
+        onChange={e => dispatch(SetField("confirm_password", Utils.valueFromEvent(e)))}
+        required=true
+      />
+      <SubmitButton disabled=hasSuccess message=Messages.Auth.changePassword />
+    </form>
+    {switch state.resetChangePassword {
+    | RemoteData.Loading(_) => <Loading />
+    | RemoteData.NotAsked => React.null
+    | RemoteData.Success(_) => <IntlMessage message=Messages.Auth.changePasswordSuccess />
+    | RemoteData.Failure(x) => <div className="text-error"> {string(x)} </div>
     }}
   </div>
 }
