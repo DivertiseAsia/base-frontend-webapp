@@ -1,5 +1,13 @@
 @react.component
 let make = () => {
+  let createCardList = () => {
+    let numbers = Belt.Array.makeBy(15, (i) => i)
+    let cardList = Belt.Array.map(numbers, (number) => {
+      {<Card key={Belt.Int.toString(number)} />}
+    })
+    cardList
+  }
+
   <>
     <section
       style={ReactDOM.Style.make(
@@ -9,9 +17,7 @@ let make = () => {
         ~width="100%",
         (),
       )}>
-      <Card />
-      <Card />
-      <Card />
+      {createCardList()->React.array}
     </section>
   </>
 }

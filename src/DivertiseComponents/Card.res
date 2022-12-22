@@ -2,7 +2,7 @@
 let make = () => {
   let randomHeight = () => {
     let random = Js.Math.random_int(100, 300)
-    random -> string_of_int
+    random->string_of_int
   }
 
   <>
