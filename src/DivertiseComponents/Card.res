@@ -1,5 +1,5 @@
 @react.component
-let make = () => {
+let make = (~className: string) => {
   let randomHeight = () => {
     let random = Js.Math.random_int(100, 300)
     random->string_of_int
@@ -7,6 +7,7 @@ let make = () => {
 
   <>
     <div
+      className
       style={ReactDOM.Style.make(
         ~margin="10px 10px",
         ~padding="10px 10px",
@@ -16,7 +17,8 @@ let make = () => {
         ~minWidth="150px",
         ~height={randomHeight() ++ "px"},
         (),
-      )}>
+      )}
+    >
       {React.string("Card")}
     </div>
   </>

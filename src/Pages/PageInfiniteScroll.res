@@ -1,12 +1,22 @@
 @react.component
 let make = () => {
-  let createCardList = () => {
-    let numbers = Belt.Array.makeBy(15, (i) => i)
-    let cardList = Belt.Array.map(numbers, (number) => {
-      {<Card key={Belt.Int.toString(number)} />}
+  let (cardsList, setCardsList) = React.useState(_ => [])
+
+  let createCardList = (cardsList) => {
+    let numbers = Belt.Array.makeBy(15, i => i)
+    let cardList = Belt.Array.map(numbers, number => {
+      <Card
+        key={Belt.Int.toString(number + Belt.Array.length(cardsList) + 1)}
+        className={Belt.Int.toString(number + Belt.Array.length(cardsList) + 1)}
+      />
     })
     cardList
   }
+
+  React.useEffect0(() => {
+    setCardsList(_ => createCardList(cardsList))
+    None
+  })
 
   <>
     <section
@@ -17,7 +27,7 @@ let make = () => {
         ~width="100%",
         (),
       )}>
-      {createCardList()->React.array}
+      {cardsList->React.array}
     </section>
   </>
 }
