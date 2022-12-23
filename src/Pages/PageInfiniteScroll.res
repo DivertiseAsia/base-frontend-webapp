@@ -25,22 +25,42 @@ let make = () => {
       ()
     }
 
-    let (clientHeight, scrollHeight, scrollTop) = switch Js.Nullable.toOption(
-      scrollContainerRef.current,
-    ) {
-    | None => (0., 0., 0.)
-    | Some(element) => (
-        Webapi.Dom.Element.clientHeight(element)->Belt.Int.toFloat,
-        Webapi.Dom.Element.scrollHeight(element)->Belt.Int.toFloat,
-        Webapi.Dom.Element.scrollTop(element),
-      )
+    let handleScroll = _e => {
+      let (clientHeight, scrollHeight, scrollTop) = switch Js.Nullable.toOption(
+        scrollContainerRef.current,
+      ) {
+      | None => (0., 0., 0.)
+      | Some(element) => (
+          Webapi.Dom.Element.clientHeight(element)->Belt.Int.toFloat,
+          Webapi.Dom.Element.scrollHeight(element)->Belt.Int.toFloat,
+          Webapi.Dom.Element.scrollTop(element),
+        )
+      }
+      Js.logMany([clientHeight, scrollHeight, scrollTop])
+
+      let reachedBottom = scrollHeight -. clientHeight *. 1.1 <= scrollTop +. 1.
+      Js.log(reachedBottom)
+
+      if reachedBottom {
+        setLoading(_ => true)
+        setCardsList(_ => createCardList(cardsList))
+        setLoading(_ => false)
+      }
     }
-    Js.logMany([clientHeight, scrollHeight, scrollTop])
 
-    let reachedBottom = scrollHeight -. clientHeight *. 1.2 <= scrollTop +. 1.
-    Js.log(reachedBottom)
+    let _ = switch Js.Nullable.toOption(scrollContainerRef.current) {
+    | None => ()
+    | Some(element) => Webapi.Dom.Element.addEventListener(element, "scroll", handleScroll)
+    }
 
-    None
+    Some(
+      () => {
+        let _ = switch Js.Nullable.toOption(scrollContainerRef.current) {
+        | None => ()
+        | Some(element) => Webapi.Dom.Element.removeEventListener(element, "scroll", handleScroll)
+        }
+      },
+    )
   })
 
   <div className="scroll-wrapper" style={ReactDOM.Style.make(~height="100vh", ())}>
