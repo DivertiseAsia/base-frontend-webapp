@@ -184,3 +184,11 @@ let getSearchParameter = (parameter: string, queryString: string): option<string
     }
   }
 }
+
+// let getLenghtValue = %raw("(ref) =>
+//   if (ref) {
+//     return ref.current.scrollHeight
+//   } else {
+//     return 0
+//   }
+// ")
