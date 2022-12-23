@@ -19,7 +19,7 @@ let make = (~className: string) => {
         (),
       )}
     >
-      {React.string("Card")}
+      {React.string("Card " ++ className)}
     </div>
   </>
 }

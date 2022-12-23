@@ -38,12 +38,12 @@ let make = () => {
       }
       Js.logMany([clientHeight, scrollHeight, scrollTop])
 
-      let reachedBottom = scrollHeight -. clientHeight *. 1.1 <= scrollTop +. 1.
+      let reachedBottom = scrollHeight -. clientHeight *. 1.2 <= scrollTop +. 1.
       Js.log(reachedBottom)
 
       if reachedBottom {
         setLoading(_ => true)
-        setCardsList(_ => createCardList(cardsList))
+        setCardsList(ele => Belt.Array.concat(ele, createCardList(cardsList)))
         setLoading(_ => false)
       }
     }
