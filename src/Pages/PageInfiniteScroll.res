@@ -1,27 +1,33 @@
 @react.component
 let make = () => {
-  let (cardsList, setCardsList) = React.useState(_ => [])
-  let (loading, setLoading) = React.useState(_ => false)
+  let (cardsList, setCardsList) = React.useState(_ => React.array([]))
+  let (isLoading, setIsLoading) = React.useState(_ => false)
+  let (isShown, setIsShown) = React.useState(_ => false)
   let scrollContainerRef = React.useRef(Js.Nullable.null)
 
-  let createCardList = cardsList => {
+  let createCardList = () => {
     let numbers = Belt.Array.makeBy(15, i => i)
-    let cardList = Belt.Array.map(numbers, number => {
-      <Card
-        key={Belt.Int.toString(number + Belt.Array.length(cardsList) + 1)}
-        className={Belt.Int.toString(number + Belt.Array.length(cardsList) + 1)}
-      />
-    })
+    let cardList = {
+      Belt.Array.map(numbers, number => {
+        <Card
+          key={Belt.Int.toString(number + Belt.Array.length(React.Children.toArray(cardsList)) + 1)}
+          className={Belt.Int.toString(
+            number + Belt.Array.length(React.Children.toArray(cardsList)) + 1,
+          )}
+        />
+      })->React.array
+    }
+    Js.log(cardList)
     cardList
   }
 
   React.useEffect0(() => {
-    setCardsList(_ => createCardList(cardsList))
+    setCardsList(_ => createCardList())
     None
   })
 
   React.useEffect(() => {
-    if loading {
+    if isLoading {
       ()
     }
 
@@ -42,9 +48,18 @@ let make = () => {
       Js.log(reachedBottom)
 
       if reachedBottom {
-        setLoading(_ => true)
-        setCardsList(ele => Belt.Array.concat(ele, createCardList(cardsList)))
-        setLoading(_ => false)
+        setIsLoading(_ => true)
+        setIsShown(_ => false)
+        let timer = Js.Global.setTimeout(() => setIsShown(_ => true), 2000)
+        let loadedItem = createCardList()
+        Js.Global.clearTimeout(timer)
+        setCardsList(ele => {
+          Belt.Array.concat(
+            ele->React.Children.toArray,
+            (isShown ? loadedItem : React.null)->React.Children.toArray,
+          )->React.array
+        })
+        setIsLoading(_ => false)
       }
     }
 
@@ -63,6 +78,12 @@ let make = () => {
     )
   })
 
+  React.useEffect1(() => {
+    let timer = Js.Global.setTimeout(() => setIsShown(_ => true), 2000)
+
+    Some(_ => Js.Global.clearTimeout(timer))
+  }, [cardsList])
+
   <div className="scroll-wrapper" style={ReactDOM.Style.make(~height="100vh", ())}>
     <section
       id="scroll-container"
@@ -78,7 +99,7 @@ let make = () => {
         ~backgroundColor="coral",
         (),
       )}>
-      {cardsList->React.array}
+      {isShown ? cardsList : React.null}
     </section>
   </div>
 }
