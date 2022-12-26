@@ -27,7 +27,7 @@ let make = () => {
   })
 
   React.useEffect(() => {
-    if isLoading {
+    if isLoading && !isShown {
       ()
     }
 
@@ -49,17 +49,12 @@ let make = () => {
 
       if reachedBottom {
         setIsLoading(_ => true)
-        setIsShown(_ => false)
-        let timer = Js.Global.setTimeout(() => setIsShown(_ => true), 2000)
-        let loadedItem = createCardList()
-        Js.Global.clearTimeout(timer)
         setCardsList(ele => {
           Belt.Array.concat(
             ele->React.Children.toArray,
-            (isShown ? loadedItem : React.null)->React.Children.toArray,
+            (isShown ? createCardList() : React.null)->React.Children.toArray,
           )->React.array
         })
-        setIsLoading(_ => false)
       }
     }
 
@@ -79,10 +74,13 @@ let make = () => {
   })
 
   React.useEffect1(() => {
-    let timer = Js.Global.setTimeout(() => setIsShown(_ => true), 2000)
+    let timer = Js.Global.setTimeout(() => {
+      setIsShown(_ => true)
+      setIsLoading(_ => false)
+    }, 3000)
 
     Some(_ => Js.Global.clearTimeout(timer))
-  }, [cardsList])
+  }, [isLoading])
 
   <div className="scroll-wrapper" style={ReactDOM.Style.make(~height="100vh", ())}>
     <section
@@ -95,7 +93,7 @@ let make = () => {
         ~position="relative",
         (),
       )}>
-      {isShown ? cardsList : React.null}
+      cardsList
     </section>
   </div>
 }
