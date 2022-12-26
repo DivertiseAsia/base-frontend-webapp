@@ -93,7 +93,6 @@ let make = () => {
         ~height="100%",
         ~overflow="auto",
         ~position="relative",
-        ~backgroundColor="coral",
         (),
       )}>
       {isShown ? cardsList : React.null}
