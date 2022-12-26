@@ -9,7 +9,7 @@ let make = (~className: string) => {
     <div
       className
       style={ReactDOM.Style.make(
-        ~margin="10px 10px",
+        ~margin="10px auto",
         ~padding="10px 10px",
         ~textAlign="center",
         ~border="1px solid black",

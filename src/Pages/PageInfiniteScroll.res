@@ -89,9 +89,6 @@ let make = () => {
       id="scroll-container"
       ref={ReactDOM.Ref.domRef(scrollContainerRef)}
       style={ReactDOM.Style.make(
-        ~display="flex",
-        ~flexDirection="column",
-        ~alignItems="center",
         ~width="100%",
         ~height="100%",
         ~overflow="auto",
