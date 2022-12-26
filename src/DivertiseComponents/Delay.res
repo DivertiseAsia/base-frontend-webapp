@@ -1,3 +1,4 @@
+@react.component
 let make = (~delay=2000: int, ~children: React.element) => {
   let (isShown, setIsShown) = React.useState(_ => false)
 
