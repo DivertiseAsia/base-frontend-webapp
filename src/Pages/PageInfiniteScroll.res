@@ -21,22 +21,22 @@ let make = () => {
 
   let onScrollDown = _ => {
     setIsLoading(_ => true)
-    // let _ = Js.Global.setTimeout(() => {
-    //   setCardsList(ele => {
-    //     Belt.Array.concat(
-    //       ele->React.Children.toArray,
-    //       createCardList(cardsList)->React.Children.toArray,
-    //     )->React.array
-    //   })
-    //   setIsLoading(_ => false)
-    // }, 3000)
-    setCardsList(ele => {
-      Belt.Array.concat(
-        ele->React.Children.toArray,
-        createCardList(cardsList)->React.Children.toArray,
-      )->React.array
-    })
-    setIsLoading(_ => false)
+    let _ = Js.Global.setTimeout(() => {
+      setCardsList(ele => {
+        Belt.Array.concat(
+          ele->React.Children.toArray,
+          createCardList(cardsList)->React.Children.toArray,
+        )->React.array
+      })
+      setIsLoading(_ => false)
+    }, 3000)
+    // setCardsList(ele => {
+    //   Belt.Array.concat(
+    //     ele->React.Children.toArray,
+    //     createCardList(cardsList)->React.Children.toArray,
+    //   )->React.array
+    // })
+    // setIsLoading(_ => false)
   }
 
   <InfiniteScroll

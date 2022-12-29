@@ -59,6 +59,7 @@ let make = (
         ~height="100%",
         ~overflow="auto",
         ~position="relative",
+        ~textAlign="center",
         (),
       )}>
       children
