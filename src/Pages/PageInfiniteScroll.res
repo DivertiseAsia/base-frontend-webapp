@@ -16,16 +16,16 @@ let make = () => {
     cardList
   }
 
-  let (cardsList, setCardsList) = React.useState(_ => createCardList(cardsList))
+  let (cardsList, setCardsList) = React.useState(_ => createCardList(React.array([])))
   let (isLoading, setIsLoading) = React.useState(_ => false)
 
   let onScrollDown = _ => {
     setIsLoading(_ => true)
-    Js.Global.setTimeout(() => {
+    let timer = Js.Global.setTimeout(() => {
       setCardsList(ele => {
         Belt.Array.concat(
           ele->React.Children.toArray,
-          (isShown ? createCardList() : React.null)->React.Children.toArray,
+          createCardList(cardsList)->React.Children.toArray,
         )->React.array
       })
       setIsLoading(_ => false)
@@ -34,9 +34,9 @@ let make = () => {
 
   <InfiniteScroll
     isLoading
-    loadingComponent={React.string("Loading....")}
     isOutOfItems=false
-    onScrollDown
+    loadingComponent={React.string("Loading....")}
+    onScrollDown={onScrollDown}
     onScrollPercent=0.8>
     cardsList
   </InfiniteScroll>

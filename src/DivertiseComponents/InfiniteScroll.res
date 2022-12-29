@@ -1,9 +1,16 @@
 @react.component
-let make = (~delay=2000: int, ~children: React.element) => {
+let make = (
+  ~isLoading: bool,
+  ~isOutOfItems: bool,
+  ~loadingComponent: React.element,
+  ~children: React.element,
+  ~onScrollDown: unit => Js.Global.timeoutId,
+  ~onScrollPercent: float,
+) => {
   let scrollContainerRef = React.useRef(Js.Nullable.null)
 
   React.useEffect(() => {
-    if isLoading && !isShown {
+    if (isLoading && !isOutOfItems) {
       ()
     }
 
@@ -20,12 +27,14 @@ let make = (~delay=2000: int, ~children: React.element) => {
       }
       Js.logMany([clientHeight, scrollHeight, scrollTop])
 
-      let reachedBottom = scrollHeight -. clientHeight *. 1.2 <= scrollTop +. 1.
+      let reachedBottom = scrollHeight -. clientHeight *. (1. +. (1. -. onScrollPercent)) <= scrollTop +. 1.
       Js.log(reachedBottom)
 
       if reachedBottom {
         onScrollDown()
       }
+
+      ()
     }
 
     let _ = switch Js.Nullable.toOption(scrollContainerRef.current) {
@@ -43,19 +52,19 @@ let make = (~delay=2000: int, ~children: React.element) => {
     )
   })
 
-  // <div className="scroll-wrapper" style={ReactDOM.Style.make(~height="100vh", ())}>
-  //   <section
-  //     id="scroll-container"
-  //     ref={ReactDOM.Ref.domRef(scrollContainerRef)}
-  //     style={ReactDOM.Style.make(
-  //       ~width="100%",
-  //       ~height="100%",
-  //       ~overflow="auto",
-  //       ~position="relative",
-  //       (),
-  //     )}>
-  //     cardsList
-  //   loadingComponent
-  //   </section>
-  // </div>
+  <div className="scroll-wrapper" style={ReactDOM.Style.make(~height="100vh", ())}>
+    <section
+      id="scroll-container"
+      ref={ReactDOM.Ref.domRef(scrollContainerRef)}
+      style={ReactDOM.Style.make(
+        ~width="100%",
+        ~height="100%",
+        ~overflow="auto",
+        ~position="relative",
+        (),
+      )}>
+      cardsList
+      {isLoading ? loadingComponent : React.null}
+    </section>
+  </div>
 }
