@@ -43,7 +43,7 @@ let make = () => {
     isLoading
     isOutOfItems=false
     loadingComponent={React.string("Loading....")}
-    onScrollDown={onScrollDown}
+    onScrollDown
     onScrollPercent=0.8>
     cardsList
   </InfiniteScroll>
