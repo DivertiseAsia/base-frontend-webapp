@@ -1,18 +1,13 @@
 @react.component
 let make = () => {
-  let (cardsList, setCardsList) = React.useState(_ => React.array([]))
-  let (isLoading, setIsLoading) = React.useState(_ => false)
-  let (isShown, setIsShown) = React.useState(_ => false)
-  let scrollContainerRef = React.useRef(Js.Nullable.null)
-
-  let createCardList = () => {
+  let createCardList = list => {
     let numbers = Belt.Array.makeBy(15, i => i)
     let cardList = {
       Belt.Array.map(numbers, number => {
         <Card
-          key={Belt.Int.toString(number + Belt.Array.length(React.Children.toArray(cardsList)) + 1)}
+          key={Belt.Int.toString(number + Belt.Array.length(React.Children.toArray(list)) + 1)}
           className={Belt.Int.toString(
-            number + Belt.Array.length(React.Children.toArray(cardsList)) + 1,
+            number + Belt.Array.length(React.Children.toArray(list)) + 1,
           )}
         />
       })->React.array
@@ -21,79 +16,28 @@ let make = () => {
     cardList
   }
 
-  React.useEffect0(() => {
-    setCardsList(_ => createCardList())
-    None
-  })
+  let (cardsList, setCardsList) = React.useState(_ => createCardList(cardsList))
+  let (isLoading, setIsLoading) = React.useState(_ => false)
 
-  React.useEffect(() => {
-    if isLoading && !isShown {
-      ()
-    }
-
-    let handleScroll = _e => {
-      let (clientHeight, scrollHeight, scrollTop) = switch Js.Nullable.toOption(
-        scrollContainerRef.current,
-      ) {
-      | None => (0., 0., 0.)
-      | Some(element) => (
-          Webapi.Dom.Element.clientHeight(element)->Belt.Int.toFloat,
-          Webapi.Dom.Element.scrollHeight(element)->Belt.Int.toFloat,
-          Webapi.Dom.Element.scrollTop(element),
-        )
-      }
-      Js.logMany([clientHeight, scrollHeight, scrollTop])
-
-      let reachedBottom = scrollHeight -. clientHeight *. 1.2 <= scrollTop +. 1.
-      Js.log(reachedBottom)
-
-      if reachedBottom {
-        setIsLoading(_ => true)
-        setCardsList(ele => {
-          Belt.Array.concat(
-            ele->React.Children.toArray,
-            (isShown ? createCardList() : React.null)->React.Children.toArray,
-          )->React.array
-        })
-      }
-    }
-
-    let _ = switch Js.Nullable.toOption(scrollContainerRef.current) {
-    | None => ()
-    | Some(element) => Webapi.Dom.Element.addEventListener(element, "scroll", handleScroll)
-    }
-
-    Some(
-      () => {
-        let _ = switch Js.Nullable.toOption(scrollContainerRef.current) {
-        | None => ()
-        | Some(element) => Webapi.Dom.Element.removeEventListener(element, "scroll", handleScroll)
-        }
-      },
-    )
-  })
-
-  React.useEffect1(() => {
-    let timer = Js.Global.setTimeout(() => {
-      setIsShown(_ => true)
+  let onScrollDown = _ => {
+    setIsLoading(_ => true)
+    Js.Global.setTimeout(() => {
+      setCardsList(ele => {
+        Belt.Array.concat(
+          ele->React.Children.toArray,
+          (isShown ? createCardList() : React.null)->React.Children.toArray,
+        )->React.array
+      })
       setIsLoading(_ => false)
     }, 3000)
+  }
 
-    Some(_ => Js.Global.clearTimeout(timer))
-  }, [isLoading])
-
-  <div className="scroll-wrapper" style={ReactDOM.Style.make(~height="100vh", ())}>
-    <section
-      id="scroll-container"
-      ref={ReactDOM.Ref.domRef(scrollContainerRef)}
-      style={ReactDOM.Style.make(
-        ~width="100%",
-        ~height="100%",
-        ~overflow="auto",
-        ~position="relative",
-        (),
-      )}>
-      cardsList
-    </section>
-  </div>
+  <InfiniteScroll
+    isLoading
+    loadingComponent={React.string("Loading....")}
+    isOutOfItems=false
+    onScrollDown
+    onScrollPercent=0.8>
+    cardsList
+  </InfiniteScroll>
 }
