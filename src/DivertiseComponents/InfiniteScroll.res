@@ -4,7 +4,7 @@ let make = (
   ~isOutOfItems: bool,
   ~loadingComponent: React.element,
   ~children: React.element,
-  ~onScrollDown: unit => Js.Global.timeoutId,
+  ~onScrollDown: unit => unit,
   ~onScrollPercent: float,
 ) => {
   let scrollContainerRef = React.useRef(Js.Nullable.null)
@@ -27,14 +27,12 @@ let make = (
       }
       Js.logMany([clientHeight, scrollHeight, scrollTop])
 
-      let reachedBottom = scrollHeight -. clientHeight *. (1. +. (1. -. onScrollPercent)) <= scrollTop +. 1.
+      let reachedBottom = scrollHeight -. clientHeight *. (1. +. (1. -. onScrollPercent)) < scrollTop
       Js.log(reachedBottom)
 
       if reachedBottom {
         onScrollDown()
       }
-
-      ()
     }
 
     let _ = switch Js.Nullable.toOption(scrollContainerRef.current) {
@@ -63,7 +61,7 @@ let make = (
         ~position="relative",
         (),
       )}>
-      cardsList
+      children
       {isLoading ? loadingComponent : React.null}
     </section>
   </div>
