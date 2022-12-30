@@ -14,9 +14,9 @@ let make = (
     let break = ref(false)
 
     if isLoading && !isOutOfItems && !break.contents {
-      Js.log2("isLoading", isLoading)
       Some(_ => break := true)
-    } else {
+    }
+    else {
       let handleScroll = _e => {
         let (clientHeight, scrollHeight, scrollTop) = switch Js.Nullable.toOption(
           scrollContainerRef.current,
@@ -28,19 +28,13 @@ let make = (
             Webapi.Dom.Element.scrollTop(element),
           )
         }
-        Js.logMany([clientHeight, scrollHeight, scrollTop])
 
         setIsReachedBottom(_ =>
           scrollHeight -. clientHeight *. (1. +. (1. -. onScrollPercent)) < scrollTop
         )
-        Js.log2("isReachedBottom", isReachedBottom)
 
         if isReachedBottom {
-          Js.log("onScrollDown")
           onScrollDown()
-          setIsReachedBottom(_ =>
-            scrollHeight -. clientHeight *. (1. +. (1. -. onScrollPercent)) < scrollTop
-          )
         }
       }
 
@@ -72,7 +66,8 @@ let make = (
         ~textAlign="center",
         (),
       )}>
-      children {isLoading ? loadingComponent : React.null}
+      children 
+      {isLoading ? loadingComponent : React.null}
     </section>
   </div>
 }
