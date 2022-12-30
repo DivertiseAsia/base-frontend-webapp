@@ -12,7 +12,6 @@ let make = () => {
         />
       })->React.array
     }
-    Js.log(cardList)
     cardList
   }
 
