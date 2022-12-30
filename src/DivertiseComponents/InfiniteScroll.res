@@ -13,7 +13,7 @@ let make = (
   React.useEffect(() => {
     let break = ref(false)
 
-    if isLoading && !isOutOfItems && !break.contents {
+    if isLoading || isOutOfItems || !break.contents {
       Some(_ => break := true)
     }
     else {
@@ -66,7 +66,7 @@ let make = (
         ~textAlign="center",
         (),
       )}>
-      children 
+      children
       {isLoading ? loadingComponent : React.null}
     </section>
   </div>

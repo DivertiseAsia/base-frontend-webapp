@@ -33,7 +33,7 @@ let make = () => {
 
   <InfiniteScroll
     isLoading
-    isOutOfItems=false
+    isOutOfItems=true
     loadingComponent={React.string("Loading....")}
     onScrollDown
     onScrollPercent=0.8>
