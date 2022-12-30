@@ -7,47 +7,57 @@ let make = (
   ~onScrollDown: unit => unit,
   ~onScrollPercent: float,
 ) => {
+  let (isReachedBottom, setIsReachedBottom) = React.useState(_ => false)
   let scrollContainerRef = React.useRef(Js.Nullable.null)
 
   React.useEffect(() => {
-    if (isLoading && !isOutOfItems) {
-      ()
-    }
+    let break = ref(false)
 
-    let handleScroll = _e => {
-      let (clientHeight, scrollHeight, scrollTop) = switch Js.Nullable.toOption(
-        scrollContainerRef.current,
-      ) {
-      | None => (0., 0., 0.)
-      | Some(element) => (
-          Webapi.Dom.Element.clientHeight(element)->Belt.Int.toFloat,
-          Webapi.Dom.Element.scrollHeight(element)->Belt.Int.toFloat,
-          Webapi.Dom.Element.scrollTop(element),
-        )
-      }
-      Js.logMany([clientHeight, scrollHeight, scrollTop])
-
-      let reachedBottom = scrollHeight -. clientHeight *. (1. +. (1. -. onScrollPercent)) < scrollTop
-      Js.log(reachedBottom)
-
-      if reachedBottom {
-        onScrollDown()
-      }
-    }
-
-    let _ = switch Js.Nullable.toOption(scrollContainerRef.current) {
-    | None => ()
-    | Some(element) => Webapi.Dom.Element.addEventListener(element, "scroll", handleScroll)
-    }
-
-    Some(
-      () => {
-        let _ = switch Js.Nullable.toOption(scrollContainerRef.current) {
-        | None => ()
-        | Some(element) => Webapi.Dom.Element.removeEventListener(element, "scroll", handleScroll)
+    if isLoading && !isOutOfItems && !break.contents {
+      Js.log2("isLoading", isLoading)
+      Some(_ => break := true)
+    } else {
+      let handleScroll = _e => {
+        let (clientHeight, scrollHeight, scrollTop) = switch Js.Nullable.toOption(
+          scrollContainerRef.current,
+        ) {
+        | None => (0., 0., 0.)
+        | Some(element) => (
+            Webapi.Dom.Element.clientHeight(element)->Belt.Int.toFloat,
+            Webapi.Dom.Element.scrollHeight(element)->Belt.Int.toFloat,
+            Webapi.Dom.Element.scrollTop(element),
+          )
         }
-      },
-    )
+        Js.logMany([clientHeight, scrollHeight, scrollTop])
+
+        setIsReachedBottom(_ =>
+          scrollHeight -. clientHeight *. (1. +. (1. -. onScrollPercent)) < scrollTop
+        )
+        Js.log2("isReachedBottom", isReachedBottom)
+
+        if isReachedBottom {
+          Js.log("onScrollDown")
+          onScrollDown()
+          setIsReachedBottom(_ =>
+            scrollHeight -. clientHeight *. (1. +. (1. -. onScrollPercent)) < scrollTop
+          )
+        }
+      }
+
+      let _ = switch Js.Nullable.toOption(scrollContainerRef.current) {
+      | None => ()
+      | Some(element) => Webapi.Dom.Element.addEventListener(element, "scroll", handleScroll)
+      }
+
+      Some(
+        () => {
+          let _ = switch Js.Nullable.toOption(scrollContainerRef.current) {
+          | None => ()
+          | Some(element) => Webapi.Dom.Element.removeEventListener(element, "scroll", handleScroll)
+          }
+        },
+      )
+    }
   })
 
   <div className="scroll-wrapper" style={ReactDOM.Style.make(~height="100vh", ())}>
@@ -62,8 +72,7 @@ let make = (
         ~textAlign="center",
         (),
       )}>
-      children
-      {isLoading ? loadingComponent : React.null}
+      children {isLoading ? loadingComponent : React.null}
     </section>
   </div>
 }
