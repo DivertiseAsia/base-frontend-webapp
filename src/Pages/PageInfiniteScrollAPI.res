@@ -15,7 +15,7 @@ open Promise
 let make = () => {
   let (cardsList, setCardsList) = React.useState(_ => React.array([]))
   let (query, setQuery) = React.useState(_ => "")
-  let (page, setPage) = React.useState(_ => 0)
+  let (page, setPage) = React.useState(_ => 1)
   let (isLoading, setIsLoading) = React.useState(_ => false)
   let (isOutOfItems, setIsOutOfItems) = React.useState(_ => false)
 
@@ -56,12 +56,21 @@ let make = () => {
     // }, 3000)
   }
 
+  let handleSearch = (event) => {
+    let value = ReactEvent.Form.currentTarget(event)["value"]
+    setQuery(_=> value);
+    setPage(_ => 1);
+    Js.log(query)
+  }
+
   <InfiniteScroll
     isLoading
     isOutOfItems
     loadingComponent={React.string("Loading....")}
     onScrollDown
     onScrollPercent=0.8>
+    <label htmlFor="search"> {"Search"->React.string} </label>
+    <input id="search" type_="text" onChange={handleSearch} />
     cardsList
   </InfiniteScroll>
 }
