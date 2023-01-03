@@ -21,7 +21,8 @@
     "@glennsl/bs-json",
     "bs-promise-monad",
     "rescript-react-intl",
-    "rescript-webapi"
+    "rescript-webapi",
+    "@ryyppy/rescript-promise"
   ],
   "refmt": 3,
   "bsc-flags": ["-bs-g"]
