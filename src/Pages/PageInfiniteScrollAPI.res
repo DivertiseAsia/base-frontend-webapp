@@ -75,6 +75,11 @@ let make = () => {
           dispatch(SetIsOutOfItems(isOutOfItems))
 
           let books = Book.decodeList(json["data"]["docs"])
+          // after get it working with a single page can uncomment below to figure out how to get multiple pages back
+          // switch(state.books) {
+          //   | Loading(Some(previousData)) => //concat data
+          //   | _ => ()
+          // }
           dispatch(LoadBooksRequest(WebData.RequestSuccess(books)))
         },
         ~failAction=json => {
