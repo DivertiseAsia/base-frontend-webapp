@@ -2,11 +2,11 @@
 let make = (
   ~isLoading: bool,
   ~isOutOfItems: bool,
-  ~loadingComponent: React.element,
-  ~endingComponent: React.element,
+  ~loadingComponent: React.element=React.null,
+  ~endingComponent: React.element=React.null,
   ~children: React.element,
   ~onScrollDown: unit => unit,
-  ~onScrollPercent: float,
+  ~onScrollPercent: float=0.8,
 ) => {
   let (isReachedBottom, setIsReachedBottom) = React.useState(_ => false)
   let scrollContainerRef = React.useRef(Js.Nullable.null)
