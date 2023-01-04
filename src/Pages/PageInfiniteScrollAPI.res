@@ -20,15 +20,8 @@ let make = () => {
   let (isError, setIsError) = React.useState(_ => false)
   let (isOutOfItems, setIsOutOfItems) = React.useState(_ => false)
 
-  React.useEffect1(() => {
-    setBooks(_ => [])
-    None
-  }, [query])
-
-  React.useEffect2(() => {
-    setIsLoading(_ => true)
-    setIsError(_ => false)
-    let getData = Js.Global.setTimeout(() => {
+  let getData = () => {
+    let timeOut = Js.Global.setTimeout(() => {
       let _ =
         axiosGet(
           book_api,
@@ -57,7 +50,21 @@ let make = () => {
         })
     }, 1000)
 
-    Some(() => Js.Global.clearTimeout(getData))
+    timeOut
+  }
+
+  React.useEffect1(() => {
+    setBooks(_ => [])
+    None
+  }, [query])
+
+  React.useEffect2(() => {
+    setIsLoading(_ => true)
+    setIsError(_ => false)
+
+    let timeOut = getData()
+    
+    Some(() => Js.Global.clearTimeout(timeOut))
   }, (query, page))
 
   let onScrollDown = _ => {
