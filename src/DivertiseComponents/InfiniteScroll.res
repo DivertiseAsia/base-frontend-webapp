@@ -69,7 +69,7 @@ let make = (
       )}>
       children
       {isLoading ? loadingComponent : React.null}
-      {isOutOfItems ? endingComponent : React.null}
+      {isOutOfItems && !isLoading ? endingComponent : React.null}
     </section>
   </div>
 }

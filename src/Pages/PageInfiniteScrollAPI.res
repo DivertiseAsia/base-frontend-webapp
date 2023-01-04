@@ -35,11 +35,21 @@ let make = () => {
         )
         ->then(data => {
           setIsLoading(_ => false)
+          setIsOutOfItems(_ => false)
           data["data"]["docs"]->Belt.Array.length > 0
             ? setIsOutOfItems(_ => false)
             : setIsOutOfItems(_ => true)
           data["data"]["numFound"]->setNumFound
-          data->Js.log->resolve
+          let sortedData = Belt.Array.map(data["data"]["docs"], books => {
+            <CardAPI
+              title={books["title"]}
+              author_name={books["author_name"]}
+              publish_year={books["publish_year"]}
+              publish_place={books["publish_place"]}
+            />
+          })
+          setBooks(ele => Belt.Array.concat(ele, sortedData))
+          sortedData->Js.log->resolve
         })
         ->catch(err => {
           setIsError(_ => true)
@@ -73,15 +83,6 @@ let make = () => {
     setIsLoading(_ => true)
     setPage(page => page + 1)
     let timeOut = getData()
-    // let _ = Js.Global.setTimeout(() => {
-    //   setCardsList(ele => {
-    //     Belt.Array.concat(
-    //       ele->React.Children.toArray,
-    //       createCardList(cardsList, page, 15, 32)->React.Children.toArray,
-    //     )->React.array
-    //   })
-    //   setIsLoading(_ => false)
-    // }, 3000)
     Js.Global.clearTimeout(timeOut)
   }
 
