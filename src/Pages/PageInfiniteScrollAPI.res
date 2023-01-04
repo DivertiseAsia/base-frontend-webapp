@@ -122,7 +122,7 @@ let make = () => {
     | NotAsked => <div> {"Type something to get started"} </div>
     | Loading(Some(books)) | Success(books) => {
         let sortedData = Belt.Array.map(books, (currentBook: Book.t) => {
-          <CardAPI
+          <DemoBook
             title={currentBook.title}
             author_name={currentBook.authorName}
             publish_year={currentBook.publishYear}
