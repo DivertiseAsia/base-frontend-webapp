@@ -16,7 +16,7 @@ let make = () => {
       let numbers = Belt.Array.makeBy(remainder, i => i)
       let cardList = {
         Belt.Array.map(numbers, number => {
-          <Card
+          <DemoCard
             key={Belt.Int.toString(number + Belt.Array.length(React.Children.toArray(list)) + 1)}
             className={Belt.Int.toString(
               number + Belt.Array.length(React.Children.toArray(list)) + 1,
