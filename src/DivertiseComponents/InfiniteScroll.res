@@ -16,8 +16,7 @@ let make = (
 
     if isLoading || isOutOfItems || break.contents {
       Some(_ => break := true)
-    }
-    else {
+    } else {
       let handleScroll = _e => {
         let (clientHeight, scrollHeight, scrollTop) = switch Js.Nullable.toOption(
           scrollContainerRef.current,
@@ -35,6 +34,9 @@ let make = (
         )
 
         if isReachedBottom {
+          Js.log(
+            "TODO: check if i keep scrolling fast - should not see this message until new items",
+          )
           onScrollDown()
         }
       }
@@ -56,6 +58,7 @@ let make = (
   })
 
   <div className="scroll-wrapper" style={ReactDOM.Style.make(~height="100vh", ())}>
+    //TODO: make this not require 100vh; can you remove this parent?
     <section
       id="scroll-container"
       ref={ReactDOM.Ref.domRef(scrollContainerRef)}
@@ -68,8 +71,11 @@ let make = (
         (),
       )}>
       children
-      {isLoading ? loadingComponent : React.null}
-      {isOutOfItems && !isLoading ? endingComponent : React.null}
+      {switch (isLoading, isOutOfItems) {
+      | (true, _) => loadingComponent
+      | (false, true) => endingComponent
+      | _ => React.null
+      }}
     </section>
   </div>
 }
