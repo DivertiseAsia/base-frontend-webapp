@@ -50,7 +50,7 @@ let make = () => {
       setCardsList(ele => {
         Belt.Array.concat(
           ele->React.Children.toArray,
-          createCardList(cardsList, page, 15, 32)->React.Children.toArray,
+          createCardList(cardsList, page, 15, 50)->React.Children.toArray,
         )->React.array
       })
       setIsLoading(_ => false)
@@ -58,7 +58,7 @@ let make = () => {
   }
 
   React.useEffect0(() => {
-    setCardsList(_ => createCardList(cardsList, page, 15, 32))
+    setCardsList(_ => createCardList(cardsList, page, 15, 50))
     None
   })
 
