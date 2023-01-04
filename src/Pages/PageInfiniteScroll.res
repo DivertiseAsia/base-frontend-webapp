@@ -66,6 +66,7 @@ let make = () => {
     isLoading
     isOutOfItems
     loadingComponent={React.string("Loading....")}
+    endingComponent={React.string("...End...")}
     onScrollDown
     onScrollPercent=0.8>
     cardsList

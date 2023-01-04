@@ -3,6 +3,7 @@ let make = (
   ~isLoading: bool,
   ~isOutOfItems: bool,
   ~loadingComponent: React.element,
+  ~endingComponent: React.element,
   ~children: React.element,
   ~onScrollDown: unit => unit,
   ~onScrollPercent: float,
@@ -68,6 +69,7 @@ let make = (
       )}>
       children
       {isLoading ? loadingComponent : React.null}
+      {isOutOfItems ? endingComponent : React.null}
     </section>
   </div>
 }
