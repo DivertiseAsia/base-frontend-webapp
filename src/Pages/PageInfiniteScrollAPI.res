@@ -111,33 +111,35 @@ let make = () => {
     dispatch(SetQuery(value))
   }
 
-  <InfiniteScroll
-    loadingComponent={React.string("Loading....")}
-    endingComponent={React.string("...End...")}
-    loadMoreItems
-    onScrollPercent=0.8>
-    <h1> {"Book Searching"->React.string} </h1>
-    <label htmlFor="search"> {"Search"->React.string} </label>
-    <input id="search" type_="text" onChange={handleSearch} />
-    <p> {("We have found: " ++ state.totalResults->Belt.Int.toString)->React.string} </p>
-    {switch state.books {
-    | NotAsked => <div> {"Type something to get started"->React.string} </div>
-    | Loading(Some(books)) | Success(books) => {
-        let sortedData =
-          books
-          ->Belt.List.toArray
-          ->Belt.Array.map((currentBook: Book.t) => {
-            <DemoBook
-              title={currentBook.title}
-              author_name={[currentBook.authorName->React.string]}
-              publish_year={[currentBook.publishYear->React.string]}
-              publish_place={[currentBook.publishPlace->React.string]}
-            />
-          })
-        sortedData->React.array
-      }
-    | Failure(error) => <div> {error->React.string} </div>
-    | _ => <div> {"Type something to get started"->React.string} </div>
-    }}
-  </InfiniteScroll>
+  <div className="scroll-wrapper" style={ReactDOM.Style.make(~height="100vh", ())}>
+    <InfiniteScroll
+      loadingComponent={React.string("Loading....")}
+      endingComponent={React.string("...End...")}
+      loadMoreItems
+      onScrollPercent=0.8>
+      <h1> {"Book Searching"->React.string} </h1>
+      <label htmlFor="search"> {"Search"->React.string} </label>
+      <input id="search" type_="text" onChange={handleSearch} />
+      <p> {("We have found: " ++ state.totalResults->Belt.Int.toString)->React.string} </p>
+      {switch state.books {
+      | NotAsked => <div> {"Type something to get started"->React.string} </div>
+      | Loading(Some(books)) | Success(books) => {
+          let sortedData =
+            books
+            ->Belt.List.toArray
+            ->Belt.Array.map((currentBook: Book.t) => {
+              <DemoBook
+                title={currentBook.title}
+                author_name={[currentBook.authorName->React.string]}
+                publish_year={[currentBook.publishYear->React.string]}
+                publish_place={[currentBook.publishPlace->React.string]}
+              />
+            })
+          sortedData->React.array
+        }
+      | Failure(error) => <div> {error->React.string} </div>
+      | _ => <div> {"Type something to get started"->React.string} </div>
+      }}
+    </InfiniteScroll>
+  </div>
 }
