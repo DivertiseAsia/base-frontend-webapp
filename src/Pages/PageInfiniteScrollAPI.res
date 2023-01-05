@@ -3,7 +3,7 @@ module Book = {
   type t = {
     title: string,
     authorName: string,
-    publishYear: int,
+    publishYear: string,
     publishPlace: string,
   }
   let apiUrl = "https://openlibrary.org/search.json"
@@ -13,7 +13,7 @@ module Book = {
     {
       title: json->field("title", string, _),
       authorName: json->field("author_name", string, _),
-      publishYear: json->field("publish_year", int, _),
+      publishYear: json->field("publish_year", string, _),
       publishPlace: json->field("publish_place", string, _),
     }
   }
@@ -67,14 +67,18 @@ let make = () => {
   let getData = () => {
     let timeOut = Js.Global.setTimeout(() => {
       let _ = dispatch(LoadBooksRequest(WebData.RequestLoading))
-      requestJsonResponseToAction(
+      let _ = requestJsonResponseToAction(
         ~headers=buildHeader(~verb=Get, None),
         ~url=`${Book.apiUrl}?q=${state.query}&page=${string_of_int(state.page)}`,
         ~successAction=json => {
-          let isOutOfItems = json["data"]["docs"]->Belt.Array.length > 0
+          Js.log(json)
+          let isOutOfItems = false
+          // json["docs"]->Belt.Array.length > 0
           dispatch(SetIsOutOfItems(isOutOfItems))
 
-          let books = Book.decodeList(json["data"]["docs"])
+          let books = list{}
+          // Book.decodeList(json["data"]["docs"])
+
           // after get it working with a single page can uncomment below to figure out how to get multiple pages back
           // switch(state.books) {
           //   | Loading(Some(previousData)) => //concat data
@@ -96,10 +100,10 @@ let make = () => {
   React.useEffect2(() => {
     let timeOut = getData()
     Some(() => Js.Global.clearTimeout(timeOut))
-  }, (query, page))
+  }, (state.query, state.page))
 
   let onScrollDown = _ => {
-    setPage(page => page + 1)
+    dispatch(SetPage(state.page + 1))
   }
 
   let handleSearch = event => {
@@ -108,8 +112,6 @@ let make = () => {
   }
 
   <InfiniteScroll
-    isLoading
-    isOutOfItems
     loadingComponent={React.string("Loading....")}
     endingComponent={React.string("...End...")}
     onScrollDown
@@ -117,20 +119,25 @@ let make = () => {
     <h1> {"Book Searching"->React.string} </h1>
     <label htmlFor="search"> {"Search"->React.string} </label>
     <input id="search" type_="text" onChange={handleSearch} />
-    <p> {("We have found: " ++ numFound->Belt.Int.toString)->React.string} </p>
+    <p> {("We have found: " ++ state.totalResults->Belt.Int.toString)->React.string} </p>
     {switch state.books {
-    | NotAsked => <div> {"Type something to get started"} </div>
+    | NotAsked => <div> {"Type something to get started"->React.string} </div>
     | Loading(Some(books)) | Success(books) => {
-        let sortedData = Belt.Array.map(books, (currentBook: Book.t) => {
-          <DemoBook
-            title={currentBook.title}
-            author_name={currentBook.authorName}
-            publish_year={currentBook.publishYear}
-            publish_place={currentBook.publishPlace}
-          />
-        })->React.array
+        let sortedData =
+          books
+          ->Belt.List.toArray
+          ->Belt.Array.map((currentBook: Book.t) => {
+            <DemoBook
+              title={currentBook.title}
+              author_name={[currentBook.authorName->React.string]}
+              publish_year={[currentBook.publishYear->React.string]}
+              publish_place={[currentBook.publishPlace->React.string]}
+            />
+          })
+        sortedData->React.array
       }
-    | Error(error) => <div> {error->React.string} </div>
+    | Failure(error) => <div> {error->React.string} </div>
+    | _ => <div> {"Type something to get started"->React.string} </div>
     }}
   </InfiniteScroll>
 }
