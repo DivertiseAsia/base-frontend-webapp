@@ -44,13 +44,13 @@ let make = () => {
     }
   }
 
-  let onScrollDown = _ => {
+  let loadMoreItems = _ => {
     setIsLoading(_ => true)
     let _ = Js.Global.setTimeout(() => {
       setCardsList(ele => {
         Belt.Array.concat(
           ele->React.Children.toArray,
-          createCardList(cardsList, page, 15, 50)->React.Children.toArray,
+          createCardList(cardsList, page, 30, 100)->React.Children.toArray,
         )->React.array
       })
       setIsLoading(_ => false)
@@ -58,17 +58,20 @@ let make = () => {
   }
 
   React.useEffect0(() => {
-    setCardsList(_ => createCardList(cardsList, page, 15, 50))
+    setCardsList(_ => createCardList(cardsList, page, 30, 100))
     None
   })
 
-  <InfiniteScroll
-    isLoading
-    isOutOfItems
-    loadingComponent={React.string("Loading....")}
-    endingComponent={React.string("...End...")}
-    onScrollDown
-    onScrollPercent=0.8>
-    cardsList
-  </InfiniteScroll>
+  // * : This div is needed to collect the height of the screen (clientHeight)
+  <div className="scroll-wrapper" style={ReactDOM.Style.make(~height="100vh", ())}>
+    <InfiniteScroll
+      isLoading
+      isOutOfItems
+      loadingComponent={React.string("Loading....")}
+      endingComponent={React.string("...End...")}
+      loadMoreItems
+      onScrollPercent=0.8>
+      cardsList
+    </InfiniteScroll>
+  </div>
 }
