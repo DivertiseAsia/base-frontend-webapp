@@ -1,3 +1,20 @@
+let buildWithoutHeader = (
+  ~verb: Fetch.requestMethod=Get,
+  ~body: option<Js.Dict.t<Js.Json.t>>=?,
+  ()
+) => {
+
+  switch body {
+  | None => Fetch.RequestInit.make(~method_=verb, ())
+  | Some(body) =>
+    Fetch.RequestInit.make(
+      ~method_=verb,
+      ~body=Fetch.BodyInit.make(Js.Json.stringify(Js.Json.object_(body))),
+      (),
+    )
+  }
+}
+
 let buildHeader = (
   ~verb: Fetch.requestMethod=Get,
   ~body: option<Js.Dict.t<Js.Json.t>>=?,

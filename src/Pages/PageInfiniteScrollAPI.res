@@ -68,10 +68,10 @@ let make = () => {
     let timeOut = Js.Global.setTimeout(() => {
       let _ = dispatch(LoadBooksRequest(WebData.RequestLoading))
       let _ = requestJsonResponseToAction(
-        ~headers=buildHeader(~verb=Get, None),
+        ~headers=buildWithoutHeader(~verb=Get, ()),
         ~url=`${Book.apiUrl}?q=${state.query}&page=${string_of_int(state.page)}`,
         ~successAction=json => {
-          Js.log(json)
+          Js.log2("successAction", json)
           let isOutOfItems = false
           // json["docs"]->Belt.Array.length > 0
           dispatch(SetIsOutOfItems(isOutOfItems))
@@ -87,7 +87,7 @@ let make = () => {
           dispatch(LoadBooksRequest(WebData.RequestSuccess(books)))
         },
         ~failAction=json => {
-          Js.log(json)
+          Js.log2("failAction", json)
           // TODO: make it use error from json instead of hardcode
           dispatch(LoadBooksRequest(WebData.RequestError("We have run into a problem.")))
         },
@@ -102,7 +102,7 @@ let make = () => {
     Some(() => Js.Global.clearTimeout(timeOut))
   }, (state.query, state.page))
 
-  let onScrollDown = _ => {
+  let loadMoreItems = _ => {
     dispatch(SetPage(state.page + 1))
   }
 
@@ -114,7 +114,7 @@ let make = () => {
   <InfiniteScroll
     loadingComponent={React.string("Loading....")}
     endingComponent={React.string("...End...")}
-    onScrollDown
+    loadMoreItems
     onScrollPercent=0.8>
     <h1> {"Book Searching"->React.string} </h1>
     <label htmlFor="search"> {"Search"->React.string} </label>
