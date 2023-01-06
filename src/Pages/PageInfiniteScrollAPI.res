@@ -37,23 +37,6 @@ module Book = {
   }
 }
 
-module Error = {
-  type t = {error: string}
-
-  let decoderError = (json): t => {
-    Js.log(json)
-    open Json.Decode
-    {
-      error: json->field("Error", string, _),
-    }
-  }
-
-  let decodeError = (json): list<t> => {
-    Js.log(json)
-    Json.Decode.list(decoderError, json)
-  }
-}
-
 type action =
   | SetQuery(string)
   | SetIsOutOfItems(bool)
@@ -101,31 +84,34 @@ let make = () => {
 
   let getData = () => {
     let timeOut = Js.Global.setTimeout(() => {
-      let _ = dispatch(LoadBooksRequest(WebData.RequestLoading))
       let _ = requestJsonResponseToAction(
         ~headers=buildWithoutHeader(~verb=Get, ()),
         ~url=`${Book.apiUrl}?q=${state.query}&page=${string_of_int(state.page)}`,
         ~successAction=json => {
           let booksDocs = json->Book.decodeBooksFromDocs
           let numFound = json->Book.decodeNumFound
-          
-          let isOutOfItems = booksDocs->Belt.List.length > 0
+
+          let isOutOfItems = booksDocs->Belt.List.length <= 0
           dispatch(SetIsOutOfItems(isOutOfItems))
 
-          // let concatBooksDocs = switch(state.books) {
-          //   | Loading(Some(previousData)) => list{previousData, ...booksDocs}
-          //   | _ => list{...booksDocs}
-          // }
-
-          dispatch(LoadBooksRequest(WebData.RequestSuccess(booksDocs)))
-          dispatch(SetTotalResults(numFound))
+          switch state.books {
+          | Loading(Some(previousData)) | Success(previousData) => {
+              dispatch(
+                LoadBooksRequest(WebData.RequestSuccess(previousData->Belt.List.concat(booksDocs))),
+              )
+              dispatch(SetTotalResults(numFound))
+            }
+          | _ => {
+              dispatch(LoadBooksRequest(WebData.RequestSuccess(booksDocs)))
+              dispatch(SetTotalResults(numFound))
+            }
+          }
         },
         ~failAction=json => {
-          let error =
-            json->Error.decodeError->Belt.List.get(0)->Belt.Option.getWithDefault({error: "Error"})
-          Js.log2("failAction", error)
+          Js.log2("failAction", json)
           // TODO: make it use error from json instead of hardcode
-          dispatch(LoadBooksRequest(WebData.RequestError(error.error)))
+          // * : This APIs returns error in HTML format
+          dispatch(LoadBooksRequest(WebData.RequestError("We have an error")))
         },
       )
     }, 1000)
@@ -134,6 +120,7 @@ let make = () => {
   }
 
   React.useEffect2(() => {
+    let _ = dispatch(LoadBooksRequest(WebData.RequestLoading))
     let timeOut = getData()
     Some(() => Js.Global.clearTimeout(timeOut))
   }, (state.query, state.page))
@@ -150,6 +137,8 @@ let make = () => {
   // * : This div is needed to collect the height of the screen (clientHeight)
   <div className="scroll-wrapper" style={ReactDOM.Style.make(~height="100vh", ())}>
     <InfiniteScroll
+      isLoading={state.books->RemoteData.isLoading}
+      isOutOfItems={state.isOutOfItems}
       loadingComponent={React.string("Loading....")}
       endingComponent={React.string("...End...")}
       loadMoreItems
@@ -159,29 +148,26 @@ let make = () => {
       <input id="search" type_="text" onChange={handleSearch} />
       <p> {("We have found: " ++ state.totalResults->Belt.Int.toString)->React.string} </p>
       {switch state.books {
-      | NotAsked => <div> {"Type something to get started"->React.string} </div>
-      | Loading(Some(books)) | Success(books) => {
-          let sortedData =
-            books
-            ->Belt.List.toArray
-            ->Belt.Array.map((currentBook: Book.t) => {
-              <DemoBook
-                title={currentBook.title->Belt.Option.getWithDefault("")}
-                authorName={currentBook.authorName
-                ->Belt.Option.getWithDefault([""])
-                ->Belt.Array.map(_, i => i->React.string)}
-                publishYear={currentBook.publishYear
-                ->Belt.Option.getWithDefault([0])
-                ->Belt.Array.map(_, i => i->Belt.Int.toString->React.string)}
-                publishPlace={currentBook.publishPlace
-                ->Belt.Option.getWithDefault([""])
-                ->Belt.Array.map(_, i => i->React.string)}
-              />
-            })
-          sortedData->React.array
-        }
+      | NotAsked | Loading(None) => <div> {"Type something to get started"->React.string} </div>
+      | Loading(Some(books)) | Success(books) =>
+        books
+        ->Belt.List.toArray
+        ->Belt.Array.map((currentBook: Book.t) => {
+          <DemoBook
+            title={currentBook.title->Belt.Option.getWithDefault("")}
+            authorName={currentBook.authorName
+            ->Belt.Option.getWithDefault([""])
+            ->Belt.Array.map(_, i => i->React.string)}
+            publishYear={currentBook.publishYear
+            ->Belt.Option.getWithDefault([0])
+            ->Belt.Array.map(_, i => i->Belt.Int.toString->React.string)}
+            publishPlace={currentBook.publishPlace
+            ->Belt.Option.getWithDefault([""])
+            ->Belt.Array.map(_, i => i->React.string)}
+          />
+        })
+        ->React.array
       | Failure(error) => <div> {error->React.string} </div>
-      | _ => <div> {"Type something to get started"->React.string} </div>
       }}
     </InfiniteScroll>
   </div>
