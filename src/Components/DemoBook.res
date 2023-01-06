@@ -1,9 +1,9 @@
 @react.component
 let make = (
   ~title: string,
-  ~author_name: array<'a>,
-  ~publish_year: array<'a>,
-  ~publish_place: array<'a>,
+  ~authorName: array<'a>,
+  ~publishYear: array<'a>,
+  ~publishPlace: array<'a>,
 ) => {
   <>
     <div
@@ -17,9 +17,9 @@ let make = (
         (),
       )}>
       <h2> {React.string(title)} </h2>
-      <p> {React.array(author_name)} </p>
-      <p> {React.array(publish_year)} </p>
-      <p> {React.array(publish_place)} </p>
+      <p> {React.array(authorName)} </p>
+      <p> {React.array(publishYear)} </p>
+      <p> {React.array(publishPlace)} </p>
     </div>
   </>
 }

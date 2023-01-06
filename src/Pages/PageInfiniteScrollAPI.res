@@ -1,24 +1,57 @@
 open RequestUtils
 module Book = {
-  type t = {
-    title: string,
-    authorName: string,
-    publishYear: string,
-    publishPlace: string,
+  open Json.Decode
+  type rec t = {
+    title: option<string>,
+    authorName: option<array<string>>,
+    publishYear: option<array<int>>,
+    publishPlace: option<array<string>>,
   }
+  and result = {
+    docs: list<t>,
+    numFound: int,
+  }
+
   let apiUrl = "https://openlibrary.org/search.json"
 
   let decode = (json): t => {
+    let result = {
+      title: optional(field("title", string, _), json),
+      authorName: optional(field("author_name", array(string), _), json),
+      publishYear: optional(field("publish_year", array(int), _), json),
+      publishPlace: optional(field("publish_place", array(string), _), json),
+    }
+    result
+  }
+
+  let decodeList = (docListJson): list<t> => {
+    list(decode, docListJson)
+  }
+
+  let decodeBooksFromDocs = (json): list<t> => {
+    field("docs", decodeList, json)
+  }
+
+  let decodeNumFound = (json): int => {
+    field("numFound", int, json)
+  }
+}
+
+module Error = {
+  type t = {error: string}
+
+  let decoderError = (json): t => {
+    Js.log(json)
     open Json.Decode
     {
-      title: json->field("title", string, _),
-      authorName: json->field("author_name", string, _),
-      publishYear: json->field("publish_year", string, _),
-      publishPlace: json->field("publish_place", string, _),
+      error: json->field("Error", string, _),
     }
   }
 
-  let decodeList = (json): list<t> => Json.Decode.list(decode, json)
+  let decodeError = (json): list<t> => {
+    Js.log(json)
+    Json.Decode.list(decoderError, json)
+  }
 }
 
 type action =
@@ -26,6 +59,7 @@ type action =
   | SetIsOutOfItems(bool)
   | LoadBooksRequest(WebData.apiAction<list<Book.t>>)
   | SetPage(int)
+  | SetTotalResults(int)
 
 type state = {
   query: string,
@@ -49,6 +83,7 @@ let make = () => {
         }
       | SetIsOutOfItems(isOutOfItems) => {...state, isOutOfItems: isOutOfItems}
       | SetPage(page) => {...state, page: page}
+      | SetTotalResults(totalResults) => {...state, totalResults: totalResults}
       | LoadBooksRequest(bookAction) => {
           ...state,
           books: WebData.updateWebData(state.books, bookAction),
@@ -71,25 +106,26 @@ let make = () => {
         ~headers=buildWithoutHeader(~verb=Get, ()),
         ~url=`${Book.apiUrl}?q=${state.query}&page=${string_of_int(state.page)}`,
         ~successAction=json => {
-          Js.log2("successAction", json)
-          let isOutOfItems = false
-          // json["docs"]->Belt.Array.length > 0
+          let booksDocs = json->Book.decodeBooksFromDocs
+          let numFound = json->Book.decodeNumFound
+          
+          let isOutOfItems = booksDocs->Belt.List.length > 0
           dispatch(SetIsOutOfItems(isOutOfItems))
 
-          let books = list{}
-          // Book.decodeList(json["data"]["docs"])
-
-          // after get it working with a single page can uncomment below to figure out how to get multiple pages back
-          // switch(state.books) {
-          //   | Loading(Some(previousData)) => //concat data
-          //   | _ => ()
+          // let concatBooksDocs = switch(state.books) {
+          //   | Loading(Some(previousData)) => list{previousData, ...booksDocs}
+          //   | _ => list{...booksDocs}
           // }
-          dispatch(LoadBooksRequest(WebData.RequestSuccess(books)))
+
+          dispatch(LoadBooksRequest(WebData.RequestSuccess(booksDocs)))
+          dispatch(SetTotalResults(numFound))
         },
         ~failAction=json => {
-          Js.log2("failAction", json)
+          let error =
+            json->Error.decodeError->Belt.List.get(0)->Belt.Option.getWithDefault({error: "Error"})
+          Js.log2("failAction", error)
           // TODO: make it use error from json instead of hardcode
-          dispatch(LoadBooksRequest(WebData.RequestError("We have run into a problem.")))
+          dispatch(LoadBooksRequest(WebData.RequestError(error.error)))
         },
       )
     }, 1000)
@@ -111,6 +147,7 @@ let make = () => {
     dispatch(SetQuery(value))
   }
 
+  // * : This div is needed to collect the height of the screen (clientHeight)
   <div className="scroll-wrapper" style={ReactDOM.Style.make(~height="100vh", ())}>
     <InfiniteScroll
       loadingComponent={React.string("Loading....")}
@@ -129,10 +166,16 @@ let make = () => {
             ->Belt.List.toArray
             ->Belt.Array.map((currentBook: Book.t) => {
               <DemoBook
-                title={currentBook.title}
-                author_name={[currentBook.authorName->React.string]}
-                publish_year={[currentBook.publishYear->React.string]}
-                publish_place={[currentBook.publishPlace->React.string]}
+                title={currentBook.title->Belt.Option.getWithDefault("")}
+                authorName={currentBook.authorName
+                ->Belt.Option.getWithDefault([""])
+                ->Belt.Array.map(_, i => i->React.string)}
+                publishYear={currentBook.publishYear
+                ->Belt.Option.getWithDefault([0])
+                ->Belt.Array.map(_, i => i->Belt.Int.toString->React.string)}
+                publishPlace={currentBook.publishPlace
+                ->Belt.Option.getWithDefault([""])
+                ->Belt.Array.map(_, i => i->React.string)}
               />
             })
           sortedData->React.array
