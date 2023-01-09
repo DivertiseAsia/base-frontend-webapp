@@ -155,6 +155,7 @@ let make = () => {
         ->Belt.Array.mapWithIndex((i, (currentBook: Book.t)) => {
           <DemoBook
             key={i->Belt.Int.toString}
+            className={i->Belt.Int.toString}
             title={currentBook.title->Belt.Option.getWithDefault("")}
             authorName={currentBook.authorName
             ->Belt.Option.getWithDefault([""])

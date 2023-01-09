@@ -1,5 +1,6 @@
 @react.component
 let make = (
+  ~className: string,
   ~title: string,
   ~authorName: array<'a>,
   ~publishYear: array<'a>,
@@ -7,6 +8,7 @@ let make = (
 ) => {
   <>
     <div
+      className
       style={ReactDOM.Style.make(
         ~margin="10px auto",
         ~padding="10px 10px",
