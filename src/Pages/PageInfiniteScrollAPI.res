@@ -152,8 +152,9 @@ let make = () => {
       | Loading(Some(books)) | Success(books) =>
         books
         ->Belt.List.toArray
-        ->Belt.Array.map((currentBook: Book.t) => {
+        ->Belt.Array.mapWithIndex((i, (currentBook: Book.t)) => {
           <DemoBook
+            key={i->Belt.Int.toString}
             title={currentBook.title->Belt.Option.getWithDefault("")}
             authorName={currentBook.authorName
             ->Belt.Option.getWithDefault([""])
