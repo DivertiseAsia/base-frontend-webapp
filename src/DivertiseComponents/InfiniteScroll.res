@@ -8,7 +8,6 @@ let make = (
   ~loadMoreItems: unit => unit,
   ~onScrollPercent: float=1.0,
 ) => {
-  let (isReachedBottom, setIsReachedBottom) = React.useState(_ => false)
   let scrollContainerRef = React.useRef(Js.Nullable.null)
 
   React.useEffect(() => {
@@ -29,11 +28,7 @@ let make = (
           )
         }
 
-        setIsReachedBottom(_ =>
-          scrollHeight -. clientHeight *. (1. +. (1. -. onScrollPercent)) < scrollTop
-        )
-
-        if isReachedBottom {
+        if scrollHeight -. clientHeight *. (1. +. (1. -. onScrollPercent)) < scrollTop {
           Js.log(
             "TODO: check if i keep scrolling fast - should not see this message until new items",
           )
