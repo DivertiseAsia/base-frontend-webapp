@@ -45,6 +45,7 @@ let make = () => {
   }
 
   let loadMoreItems = _ => {
+    // * : You can add your APIs here.
     setIsLoading(_ => true)
     let _ = Js.Global.setTimeout(() => {
       setCardsList(ele => {

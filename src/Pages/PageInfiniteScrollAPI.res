@@ -109,7 +109,6 @@ let make = () => {
         },
         ~failAction=json => {
           Js.log2("failAction", json)
-          // TODO: make it use error from json instead of hardcode
           // * : This APIs returns error in HTML format
           dispatch(LoadBooksRequest(WebData.RequestError("We have an error")))
         },

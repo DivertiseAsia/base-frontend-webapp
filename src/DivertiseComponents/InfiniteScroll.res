@@ -28,12 +28,7 @@ let make = (
           )
         }
 
-        Js.log3(clientHeight, scrollHeight, scrollTop)
-
         if (scrollHeight -. clientHeight *. (1. +. (1. -. onScrollPercent)) <=  scrollTop +. 1.) {
-          Js.log(
-            "TODO: check if i keep scrolling fast - should not see this message until new items",
-          )
           loadMoreItems()
         }
       }
