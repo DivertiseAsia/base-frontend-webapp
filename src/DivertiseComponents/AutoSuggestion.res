@@ -2,8 +2,10 @@
 let make = (~triggerSymbol: string, ~triggerOptions: list<string>) => {
   let (inputValue, setInputValue) = React.useState(_ => "")
   let (filteredOptions, setFilteredOptions) = React.useState(_ => list{})
+  let (showOptions, setShowOptions) = React.useState(_ => false)
+  let (selectedIndex, setSelectedIndex) = React.useState(_ => 0)
 
-  React.useEffect1(() => {
+  React.useEffect2(() => {
     let atIndex = inputValue->Js.String2.lastIndexOf(triggerSymbol)
     switch atIndex {
     | -1 => setFilteredOptions(_ => list{})
@@ -19,19 +21,25 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>) => {
         })
       }
     }
+    setShowOptions(_ => true)
     None
-  }, [inputValue])
+  }, (inputValue, triggerOptions))
 
   let handleInputKeyDown = event => {
     let key = ReactEvent.Keyboard.key(event)
     switch key {
     | "ArrowUp" => {
         ReactEvent.Keyboard.preventDefault(event)
-        Js.log("ArrowUp")
+        let nextIndex = mod(
+          selectedIndex - 1 + Js.List.length(filteredOptions),
+          Js.List.length(filteredOptions)
+        )
+        setSelectedIndex(_ => nextIndex)
       }
     | "ArrowDown" => {
         ReactEvent.Keyboard.preventDefault(event)
-        Js.log("ArrowUp")
+        let nextIndex = mod(selectedIndex + 1, Js.List.length(filteredOptions))
+        setSelectedIndex(_ => nextIndex)
       }
     | "Enter" => {
         ReactEvent.Keyboard.preventDefault(event)
@@ -46,5 +54,21 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>) => {
     setInputValue(_ => value)
   }
 
-  <input type_="text" onKeyDown={handleInputKeyDown} onChange={handleInputChange} />
+  <>
+    <input type_="text" onKeyDown={handleInputKeyDown} onChange={handleInputChange} />
+    {switch showOptions {
+    | true =>
+      <ul>
+        {filteredOptions
+        ->Belt.List.mapWithIndex((index, suggestion) =>
+          <li key={suggestion} className={index === selectedIndex ? "selected" : ""}>
+            {suggestion->React.string}
+          </li>
+        )
+        ->Belt.List.toArray
+        ->React.array}
+      </ul>
+    | false => React.null
+    }}
+  </>
 }
