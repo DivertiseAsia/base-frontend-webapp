@@ -7,7 +7,17 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>) => {
     let atIndex = inputValue->Js.String2.lastIndexOf(triggerSymbol)
     switch atIndex {
     | -1 => setFilteredOptions(_ => list{})
-    | _ => Js.log("None")
+    | _ => {
+        let prefix = inputValue->Js.String2.sliceToEnd(~from=atIndex + 1)
+        setFilteredOptions(_ => {
+          triggerOptions->Belt.List.keep(option => {
+            switch option->Js.Re.exec_(prefix->Js.Re.fromStringWithFlags(~flags="i"), _) {
+            | Some(_) => true
+            | None => false
+            }
+          })
+        })
+      }
     }
     None
   }, [inputValue])

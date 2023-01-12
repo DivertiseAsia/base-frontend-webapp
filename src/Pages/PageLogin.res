@@ -5,6 +5,6 @@ let make = (~queryString: string) => {
     <LoginContainer defaultEmail=email />
     <Link href=Links.forgot> <IntlMessage message=Messages.Auth.forgotPassword /> </Link>
     <Link href=Links.register> <IntlMessage message=Messages.Auth.register /> </Link>
-    // <AutoSuggestion triggerSymbol="@" triggerOptions=list{"Tata"} />
+    <AutoSuggestion triggerSymbol="@" triggerOptions=list{"Alice", "Bob", "Charlie"} />
   </div>
 }
