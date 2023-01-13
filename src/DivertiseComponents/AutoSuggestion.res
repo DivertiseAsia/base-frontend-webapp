@@ -1,5 +1,5 @@
 @react.component
-let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~triggerCallback=?) => {
+let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCallback=?) => {
   let (inputValue, setInputValue) = React.useState(_ => "")
   let (filteredOptions, setFilteredOptions) = React.useState(_ => list{})
   let (showOptions, setShowOptions) = React.useState(_ => false)
@@ -72,6 +72,10 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~triggerCallb
     }
   }
 
+  let handleInputBlur = _event => {
+    setShowOptions(_ => false)
+  }
+
   let handleInputChange = event => {
     let value = ReactEvent.Form.currentTarget(event)["value"]
     setInputValue(_ => value)
@@ -82,6 +86,7 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~triggerCallb
       type_="text"
       ref={ReactDOM.Ref.domRef(inputRef)}
       value={inputValue}
+      onBlur={handleInputBlur}
       onKeyDown={handleInputKeyDown}
       onChange={handleInputChange}
     />
@@ -94,6 +99,7 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~triggerCallb
             key={suggestion}
             className={index === selectedIndex ? "selected" : ""}
             onMouseOver={_ => handleSuggestionHover(index)}
+            onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
             onClick={_ => handleSuggestionClick(suggestion)}>
             {switch index === selectedIndex {
             | true => <strong> {suggestion->React.string} </strong>
