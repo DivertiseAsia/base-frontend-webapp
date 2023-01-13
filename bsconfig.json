@@ -20,10 +20,9 @@
     "@rescript/react",
     "@glennsl/bs-json",
     "bs-promise-monad",
-    "rescript-react-intl"
+    "rescript-react-intl",
+    "rescript-webapi"
   ],
   "refmt": 3,
-  "bsc-flags": [
-    "-bs-g"
-  ]
+  "bsc-flags": ["-bs-g"]
 }

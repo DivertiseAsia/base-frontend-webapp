@@ -52,9 +52,9 @@ let checkIntfromStr = text =>
 
 let checkFloatfromStr: string => bool = %raw(`
   function(value) {
-    if (/^-?\d*[.,]?\d{0,2}$/.test(value)) 
+    if (/^-?\d*[.,]?\d{0,2}$/.test(value))
       return true;
-    else 
+    else
       return false;
   }
 `)

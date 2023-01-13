@@ -91,6 +91,8 @@ let make = () => {
         }
       | None =>
         switch state.route.path {
+        | list{"infinite-scroll"} => <PageInfiniteScroll />
+        | list{"infinite-scroll-api"} => <PageInfiniteScrollAPI />
         | list{"register"} => <PageRegister queryString={state.route.search} />
         | list{"forgot"} => <PageForgot queryString={state.route.search} />
         | list{"reset"} => <PageResetConfirm queryString={state.route.search} />
