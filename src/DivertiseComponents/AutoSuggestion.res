@@ -1,9 +1,10 @@
 @react.component
-let make = (~triggerSymbol: string, ~triggerOptions: list<string>) => {
+let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~triggerCallback=?) => {
   let (inputValue, setInputValue) = React.useState(_ => "")
   let (filteredOptions, setFilteredOptions) = React.useState(_ => list{})
   let (showOptions, setShowOptions) = React.useState(_ => false)
   let (selectedIndex, setSelectedIndex) = React.useState(_ => 0)
+  let inputRef = React.useRef(Js.Nullable.null)
 
   React.useEffect2(() => {
     let atIndex = inputValue->Js.String2.lastIndexOf(triggerSymbol)
@@ -25,27 +26,49 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>) => {
     None
   }, (inputValue, triggerOptions))
 
+  let handleSuggestionClick = suggestion => {
+    setInputValue(_ =>
+      inputValue->Js.String2.replaceByRe(
+        `${triggerSymbol}[^${triggerSymbol}]*$`->Js.Re.fromString,
+        suggestion,
+      )
+    )
+    setShowOptions(_ => false)
+  }
+
+  let handleSuggestionHover = index => {
+    setSelectedIndex(_ => index)
+  }
+
   let handleInputKeyDown = event => {
     let key = ReactEvent.Keyboard.key(event)
-    switch key {
-    | "ArrowUp" => {
-        ReactEvent.Keyboard.preventDefault(event)
-        let nextIndex = mod(
-          selectedIndex - 1 + Js.List.length(filteredOptions),
-          Js.List.length(filteredOptions)
-        )
-        setSelectedIndex(_ => nextIndex)
+    switch Js.List.length(filteredOptions) {
+    | 0 => ()
+    | _ =>
+      switch key {
+      | "ArrowUp" => {
+          ReactEvent.Keyboard.preventDefault(event)
+          let nextIndex = mod(
+            selectedIndex - 1 + Js.List.length(filteredOptions),
+            Js.List.length(filteredOptions),
+          )
+          setSelectedIndex(_ => nextIndex)
+        }
+      | "ArrowDown" => {
+          ReactEvent.Keyboard.preventDefault(event)
+          let nextIndex = mod(selectedIndex + 1, Js.List.length(filteredOptions))
+          setSelectedIndex(_ => nextIndex)
+        }
+      | "Enter" => {
+          ReactEvent.Keyboard.preventDefault(event)
+          handleSuggestionClick(Belt.List.toArray(filteredOptions)[selectedIndex])
+        }
+      | "Escape" => {
+          ReactEvent.Keyboard.preventDefault(event)
+          setShowOptions(_ => false)
+        }
+      | _ => ()
       }
-    | "ArrowDown" => {
-        ReactEvent.Keyboard.preventDefault(event)
-        let nextIndex = mod(selectedIndex + 1, Js.List.length(filteredOptions))
-        setSelectedIndex(_ => nextIndex)
-      }
-    | "Enter" => {
-        ReactEvent.Keyboard.preventDefault(event)
-        Js.log("Enter")
-      }
-    | _ => ()
     }
   }
 
@@ -55,14 +78,27 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>) => {
   }
 
   <>
-    <input type_="text" onKeyDown={handleInputKeyDown} onChange={handleInputChange} />
+    <input
+      type_="text"
+      ref={ReactDOM.Ref.domRef(inputRef)}
+      value={inputValue}
+      onKeyDown={handleInputKeyDown}
+      onChange={handleInputChange}
+    />
     {switch showOptions {
     | true =>
       <ul>
         {filteredOptions
         ->Belt.List.mapWithIndex((index, suggestion) =>
-          <li key={suggestion} className={index === selectedIndex ? "selected" : ""}>
-            {suggestion->React.string}
+          <li
+            key={suggestion}
+            className={index === selectedIndex ? "selected" : ""}
+            onMouseOver={_ => handleSuggestionHover(index)}
+            onClick={_ => handleSuggestionClick(suggestion)}>
+            {switch index === selectedIndex {
+            | true => <strong> {suggestion->React.string} </strong>
+            | false => suggestion->React.string
+            }}
           </li>
         )
         ->Belt.List.toArray
