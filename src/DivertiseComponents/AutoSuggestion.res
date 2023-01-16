@@ -94,19 +94,20 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
     | true =>
       <ul>
         {filteredOptions
-        ->Belt.List.mapWithIndex((index, suggestion) =>
+        ->Belt.List.mapWithIndex((index, suggestion) => {
+          let isSelected = index === selectedIndex
           <li
             key={`${index->Belt.Int.toString}-${suggestion}`}
-            className={index === selectedIndex ? "selected" : ""}
+            className={isSelected ? "selected" : ""}
             onMouseOver={_ => handleSuggestionHover(index)}
             onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
             onClick={_ => handleSuggestionClick(suggestion)}>
-            {switch index === selectedIndex {
+            {switch isSelected {
             | true => <strong> {suggestion->React.string} </strong>
             | false => suggestion->React.string
             }}
           </li>
-        )
+        })
         ->Belt.List.toArray
         ->React.array}
       </ul>
