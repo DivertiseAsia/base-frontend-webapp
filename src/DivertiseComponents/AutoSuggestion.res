@@ -96,7 +96,7 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
         {filteredOptions
         ->Belt.List.mapWithIndex((index, suggestion) =>
           <li
-            key={suggestion}
+            key={`${index->Belt.Int.toString}-${suggestion}`}
             className={index === selectedIndex ? "selected" : ""}
             onMouseOver={_ => handleSuggestionHover(index)}
             onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
