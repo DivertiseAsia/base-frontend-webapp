@@ -14,10 +14,9 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
         let prefix = inputValue->Js.String2.sliceToEnd(~from=atIndex + 1)
         setFilteredOptions(_ => {
           triggerOptions->Belt.List.keep(option => {
-            switch option->Js.Re.exec_(prefix->Js.Re.fromStringWithFlags(~flags="i"), _) {
-            | Some(_) => true
-            | None => false
-            }
+            option
+            ->Js.Re.exec_(prefix->Js.Re.fromStringWithFlags(~flags="i"), _)
+            ->Belt.Option.isSome
           })
         })
       }
