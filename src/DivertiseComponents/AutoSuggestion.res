@@ -14,9 +14,7 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
         let prefix = inputValue->Js.String2.sliceToEnd(~from=atIndex + 1)
         setFilteredOptions(_ => {
           triggerOptions->Belt.List.keep(option => {
-            option
-            ->Js.Re.exec_(prefix->Js.Re.fromStringWithFlags(~flags="i"), _)
-            ->Js.Option.isSome
+            option->Js.Re.exec_(prefix->Js.Re.fromStringWithFlags(~flags="i"), _)->Js.Option.isSome
           })
         })
         switch Js.List.length(filteredOptions) {
@@ -44,9 +42,7 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
 
   let handleInputKeyDown = event => {
     let key = ReactEvent.Keyboard.key(event)
-    switch Js.List.length(filteredOptions) {
-    | 0 => ()
-    | _ =>
+    if Js.List.length(filteredOptions) > 0 {
       switch key {
       | "ArrowUp" => {
           ReactEvent.Keyboard.preventDefault(event)
