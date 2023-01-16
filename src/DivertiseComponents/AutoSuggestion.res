@@ -59,7 +59,9 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
         }
       | "Enter" => {
           ReactEvent.Keyboard.preventDefault(event)
-          handleSuggestionClick(Belt.List.toArray(filteredOptions)[selectedIndex])
+          handleSuggestionClick(
+            filteredOptions->Belt.List.get(selectedIndex)->Js.Option.getWithDefault("", _),
+          )
         }
       | "Escape" => {
           ReactEvent.Keyboard.preventDefault(event)
