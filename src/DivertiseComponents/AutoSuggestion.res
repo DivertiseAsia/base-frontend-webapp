@@ -16,12 +16,15 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
           triggerOptions->Belt.List.keep(option => {
             option
             ->Js.Re.exec_(prefix->Js.Re.fromStringWithFlags(~flags="i"), _)
-            ->Belt.Option.isSome
+            ->Js.Option.isSome
           })
         })
+        switch Js.List.length(filteredOptions) {
+        | 0 => setShowOptions(_ => false)
+        | _ => setShowOptions(_ => true)
+        }
       }
     }
-    setShowOptions(_ => true)
     None
   }, (inputValue, triggerOptions))
 
