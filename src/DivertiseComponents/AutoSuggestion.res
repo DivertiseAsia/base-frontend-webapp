@@ -17,8 +17,8 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
             option->Js.Re.exec_(prefix->Js.Re.fromStringWithFlags(~flags="i"), _)->Js.Option.isSome
           })
         })
-        switch Js.List.length(filteredOptions) {
-        | 0 => setShowOptions(_ => false)
+        switch filteredOptions {
+        | list{} => setShowOptions(_ => false)
         | _ => setShowOptions(_ => true)
         }
       }
