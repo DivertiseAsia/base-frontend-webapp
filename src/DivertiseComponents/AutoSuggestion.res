@@ -17,14 +17,15 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
             option->Js.Re.exec_(prefix->Js.Re.fromStringWithFlags(~flags="i"), _)->Js.Option.isSome
           })
         })
-        switch filteredOptions {
-        | list{} => setShowOptions(_ => false)
-        | _ => setShowOptions(_ => true)
-        }
       }
     }
     None
   }, (inputValue, triggerOptions))
+
+  React.useEffect1(() => {
+    setShowOptions(_ => Js.List.length(filteredOptions) > 0)
+    None
+  }, [filteredOptions])
 
   let handleSuggestionHover = index => {
     setSelectedIndex(_ => index)
@@ -50,7 +51,8 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
     let key = ReactEvent.Keyboard.key(event)
     if Js.List.length(filteredOptions) > 0 {
       switch key {
-      | "ArrowUp" => handlePressKeyChangeHighlightOption(
+      | "ArrowUp" =>
+        handlePressKeyChangeHighlightOption(
           event,
           selectedIndex - 1 + Js.List.length(filteredOptions),
         )
