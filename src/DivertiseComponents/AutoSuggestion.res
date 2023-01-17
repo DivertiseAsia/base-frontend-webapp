@@ -7,17 +7,26 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
   let inputRef = React.useRef(Js.Nullable.null)
 
   React.useEffect2(() => {
-    let atIndex = inputValue->Js.String2.lastIndexOf(triggerSymbol)
-    switch atIndex {
-    | -1 => setFilteredOptions(_ => list{})
-    | _ => {
-        let prefix = inputValue->Js.String2.sliceToEnd(~from=atIndex + 1)
-        setFilteredOptions(_ => {
-          triggerOptions->Belt.List.keep(option => {
-            option->Js.Re.exec_(prefix->Js.Re.fromStringWithFlags(~flags="i"), _)->Js.Option.isSome
-          })
+    let matchtriggerSymbol =
+      inputValue->Js.Re.exec_((triggerSymbol ++ "(\S+)")->Js.Re.fromStringWithFlags(~flags="ig"), _)
+    switch matchtriggerSymbol {
+    | None => setFilteredOptions(_ => list{})
+    | Some(match) =>
+      setFilteredOptions(_ => {
+        triggerOptions->Belt.List.keep(option => {
+          option
+          ->Js.Re.exec_(
+            match
+            ->Js.Re.captures
+            ->Belt.Array.getExn(1)
+            ->Js.Nullable.toOption
+            ->Belt.Option.getExn
+            ->Js.Re.fromStringWithFlags(~flags="i"),
+            _,
+          )
+          ->Js.Option.isSome
         })
-      }
+      })
     }
     None
   }, (inputValue, triggerOptions))
