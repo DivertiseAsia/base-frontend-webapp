@@ -59,9 +59,9 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
       | "ArrowDown" => handlePressKeyChangeHighlightOption(event, selectedIndex + 1)
       | "Enter" => {
           ReactEvent.Keyboard.preventDefault(event)
-          handleSuggestionClick(
-            filteredOptions->Belt.List.get(selectedIndex)->Js.Option.getWithDefault("", _),
-          )
+          filteredOptions
+          ->Belt.List.get(selectedIndex)
+          ->Belt.Option.mapWithDefault((), handleSuggestionClick)
         }
       | "Escape" => {
           ReactEvent.Keyboard.preventDefault(event)
