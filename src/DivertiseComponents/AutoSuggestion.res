@@ -26,6 +26,10 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
     None
   }, (inputValue, triggerOptions))
 
+  let handleSuggestionHover = index => {
+    setSelectedIndex(_ => index)
+  }
+
   let handleSuggestionClick = suggestion => {
     setInputValue(_ =>
       inputValue->Js.String2.replaceByRe(
@@ -36,27 +40,21 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
     setShowOptions(_ => false)
   }
 
-  let handleSuggestionHover = index => {
-    setSelectedIndex(_ => index)
+  let handlePressKeyChangeHighlightOption = (event, i) => {
+    ReactEvent.Keyboard.preventDefault(event)
+    let nextIndex = mod(i, Js.List.length(filteredOptions))
+    setSelectedIndex(_ => nextIndex)
   }
 
   let handleInputKeyDown = event => {
     let key = ReactEvent.Keyboard.key(event)
     if Js.List.length(filteredOptions) > 0 {
       switch key {
-      | "ArrowUp" => {
-          ReactEvent.Keyboard.preventDefault(event)
-          let nextIndex = mod(
-            selectedIndex - 1 + Js.List.length(filteredOptions),
-            Js.List.length(filteredOptions),
-          )
-          setSelectedIndex(_ => nextIndex)
-        }
-      | "ArrowDown" => {
-          ReactEvent.Keyboard.preventDefault(event)
-          let nextIndex = mod(selectedIndex + 1, Js.List.length(filteredOptions))
-          setSelectedIndex(_ => nextIndex)
-        }
+      | "ArrowUp" => handlePressKeyChangeHighlightOption(
+          event,
+          selectedIndex - 1 + Js.List.length(filteredOptions),
+        )
+      | "ArrowDown" => handlePressKeyChangeHighlightOption(event, selectedIndex + 1)
       | "Enter" => {
           ReactEvent.Keyboard.preventDefault(event)
           handleSuggestionClick(
