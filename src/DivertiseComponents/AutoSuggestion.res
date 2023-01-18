@@ -3,7 +3,12 @@ type triggerType =
   | TriggerRegex(Js.Re.t)
 
 @react.component
-let make = (~trigger: triggerType, ~triggerOptions: list<string>, ~_triggerCallback=?) => {
+let make = (
+  ~trigger: triggerType,
+  ~triggerOptions: list<string>,
+  ~_triggerCallback=?,
+  ~syntaxHighlight=false,
+) => {
   let (inputValue, setInputValue) = React.useState(_ => "")
   let (filteredOptions, setFilteredOptions) = React.useState(_ => list{})
   let (showOptions, setShowOptions) = React.useState(_ => false)
@@ -95,14 +100,18 @@ let make = (~trigger: triggerType, ~triggerOptions: list<string>, ~_triggerCallb
   }
 
   <div className="auto-suggestion-container">
-    <input
-      type_="text"
-      ref={ReactDOM.Ref.domRef(inputRef)}
-      value={inputValue}
-      onBlur={_ => setShowOptions(_ => false)}
-      onKeyDown={handleInputKeyDown}
-      onChange={e => setInputValue(_ => Utils.valueFromEvent(e))}
-    />
+    {switch syntaxHighlight {
+    | true => React.null
+    | false =>
+      <input
+        type_="text"
+        ref={ReactDOM.Ref.domRef(inputRef)}
+        value={inputValue}
+        onBlur={_ => setShowOptions(_ => false)}
+        onKeyDown={handleInputKeyDown}
+        onChange={e => setInputValue(_ => Utils.valueFromEvent(e))}
+      />
+    }}
     {switch showOptions {
     | true =>
       <ul>
