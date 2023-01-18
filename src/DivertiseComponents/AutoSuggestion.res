@@ -23,7 +23,6 @@ let make = (~trigger: triggerType, ~triggerOptions: list<string>, ~_triggerCallb
     switch matchtriggerSymbol {
     | None => setFilteredOptions(_ => list{})
     | Some(match) =>
-      Js.log(match)
       setFilteredOptions(_ => {
         triggerOptions->Belt.List.keep(option => {
           option
@@ -95,7 +94,7 @@ let make = (~trigger: triggerType, ~triggerOptions: list<string>, ~_triggerCallb
     }
   }
 
-  <>
+  <div className="auto-suggestion-container">
     <input
       type_="text"
       ref={ReactDOM.Ref.domRef(inputRef)}
@@ -127,5 +126,5 @@ let make = (~trigger: triggerType, ~triggerOptions: list<string>, ~_triggerCallb
       </ul>
     | false => React.null
     }}
-  </>
+  </div>
 }

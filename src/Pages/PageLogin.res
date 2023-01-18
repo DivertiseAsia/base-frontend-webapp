@@ -8,7 +8,9 @@ let make = (~queryString: string) => {
     <Link href=Links.forgot> <IntlMessage message=Messages.Auth.forgotPassword /> </Link>
     <Link href=Links.register> <IntlMessage message=Messages.Auth.register /> </Link>
     <AutoSuggestion
+      // * : You can use either TriggerSymbol or TriggerRegex
       trigger=TriggerSymbol("@")
+      // trigger=TriggerRegex(("@" ++ "(\S+)" ++ `|@`)->Js.Re.fromStringWithFlags(~flags="ig"))
       triggerOptions=list{"Alice", "Bob", "Charlie", "Robert", "Robson"}
     />
   </div>
