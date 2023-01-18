@@ -16,12 +16,14 @@ let make = (
   let inputRef = React.useRef(Js.Nullable.null)
 
   React.useEffect2(() => {
+    Js.log(inputValue)
     let matchtriggerSymbol = switch trigger {
     | TriggerSymbol(symbol) =>
       inputValue->Js.Re.exec_(
         (symbol ++ "(\S+)" ++ `|${symbol}`)->Js.Re.fromStringWithFlags(~flags="ig"),
         _,
       )
+
     | TriggerRegex(regex) => inputValue->Js.Re.exec_(regex, _)
     }
 
@@ -76,6 +78,7 @@ let make = (
 
   let handleInputKeyDown = event => {
     let key = ReactEvent.Keyboard.key(event)
+    Js.log2("Press", key)
     if Js.List.length(filteredOptions) > 0 {
       switch key {
       | "ArrowUp" =>
@@ -101,7 +104,17 @@ let make = (
 
   <div className="auto-suggestion-container">
     {switch syntaxHighlight {
-    | true => React.null
+    | true =>
+      <div
+        className="input-field"
+        contentEditable=true
+        suppressContentEditableWarning=true
+        ref={ReactDOM.Ref.domRef(inputRef)}
+        onBlur={_ => setShowOptions(_ => false)}
+        onKeyDown={handleInputKeyDown}
+        onChange={e => setInputValue(_ => Utils.valueFromEvent(e))}>
+        {inputValue->React.string}
+      </div>
     | false =>
       <input
         type_="text"
