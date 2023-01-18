@@ -91,6 +91,8 @@ module MapOption = {
     }
 
   let mapOptStr = optStr => optStr |> mapOpt(~defaultValue="")
+  let mapOptOptStr = (optOptStr: option<option<string>>) =>
+    optOptStr |> mapOpt(~defaultValue=None) |> mapOptStr
   let mapOptInt = optInt => optInt |> mapOpt(~defaultValue=0)
   let mapOptFloat = optFloat => optFloat |> mapOpt(~defaultValue=0.)
   let mapOptList = optList => optList |> mapOpt(~defaultValue=[])
@@ -126,14 +128,20 @@ let matchOptionarrStrToStr = oparrStr =>
   | Some(arr) => MapOption.mapOptStr(Belt.Array.get(arr, 0))
   }
 
+let mapOptionarrOptStrToStr = (oparrOptStr: option<array<option<string>>>) => {
+  switch oparrOptStr {
+  | None => ""
+  | Some(arrOptStr) => MapOption.mapOptOptStr(Belt.Array.get(arrOptStr, 0))
+  }
+}
+
 let searchCaseInsensitive = (searchKeyword, fullText) => {
-  let onlyWord = matchOptionarrStrToStr(
+  let onlyWord = mapOptionarrOptStrToStr(
     Js.String.match_(Js.Re.fromStringWithFlags("[\\w\\s*]+", ~flags="g"), searchKeyword),
   )
   let searchKeyLower = Js.String.toLowerCase(onlyWord)
   let fullTextLower = Js.String.toLowerCase(fullText)
-
-  matchOptionarrStrToStr(
+  mapOptionarrOptStrToStr(
     Js.String.match_(Js.Re.fromStringWithFlags(searchKeyLower, ~flags="g"), fullTextLower),
   )
 }
