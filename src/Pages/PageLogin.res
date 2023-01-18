@@ -1,3 +1,5 @@
+open AutoSuggestion
+
 @react.component
 let make = (~queryString: string) => {
   let email = Js.Option.getWithDefault("", Utils.getSearchParameter("email", queryString))
@@ -5,6 +7,9 @@ let make = (~queryString: string) => {
     <LoginContainer defaultEmail=email />
     <Link href=Links.forgot> <IntlMessage message=Messages.Auth.forgotPassword /> </Link>
     <Link href=Links.register> <IntlMessage message=Messages.Auth.register /> </Link>
-    <AutoSuggestion triggerSymbol="@" triggerOptions=list{"Alice", "Bob", "Charlie", "Robert", "Robson"} />
+    <AutoSuggestion
+      trigger=TriggerSymbol("@")
+      triggerOptions=list{"Alice", "Bob", "Charlie", "Robert", "Robson"}
+    />
   </div>
 }

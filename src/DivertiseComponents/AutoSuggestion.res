@@ -1,5 +1,9 @@
+type triggerType =
+  | TriggerSymbol(string)
+  | TriggerRegex(Js.Re.t)
+
 @react.component
-let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCallback=?) => {
+let make = (~trigger: triggerType, ~triggerOptions: list<string>, ~_triggerCallback=?) => {
   let (inputValue, setInputValue) = React.useState(_ => "")
   let (filteredOptions, setFilteredOptions) = React.useState(_ => list{})
   let (showOptions, setShowOptions) = React.useState(_ => false)
@@ -7,8 +11,12 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
   let inputRef = React.useRef(Js.Nullable.null)
 
   React.useEffect2(() => {
-    let matchtriggerSymbol =
-      inputValue->Js.Re.exec_((triggerSymbol ++ "(\S+)")->Js.Re.fromStringWithFlags(~flags="ig"), _)
+    let matchtriggerSymbol = switch trigger {
+    | TriggerSymbol(symbol) =>
+      inputValue->Js.Re.exec_((symbol ++ "(\S+)")->Js.Re.fromStringWithFlags(~flags="ig"), _)
+    | TriggerRegex(regex) => inputValue->Js.Re.exec_(regex, _)
+    }
+
     switch matchtriggerSymbol {
     | None => setFilteredOptions(_ => list{})
     | Some(match) =>
@@ -37,12 +45,14 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
   }, [filteredOptions])
 
   let handleSuggestionClick = suggestion => {
-    setInputValue(_ =>
-      inputValue->Js.String2.replaceByRe(
-        `${triggerSymbol}[^${triggerSymbol}]*$`->Js.Re.fromString,
-        suggestion,
+    switch trigger {
+    | TriggerSymbol(symbol) =>
+      setInputValue(_ =>
+        inputValue->Js.String2.replaceByRe(`${symbol}[^${symbol}]*$`->Js.Re.fromString, suggestion)
       )
-    )
+    | TriggerRegex(regex) =>
+      setInputValue(_ => inputValue->Js.String2.replaceByRe(regex, suggestion))
+    }
     setShowOptions(_ => false)
   }
 
