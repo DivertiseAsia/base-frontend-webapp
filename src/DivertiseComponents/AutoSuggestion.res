@@ -36,10 +36,6 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
     None
   }, [filteredOptions])
 
-  let handleSuggestionHover = index => {
-    setSelectedIndex(_ => index)
-  }
-
   let handleSuggestionClick = suggestion => {
     setInputValue(_ =>
       inputValue->Js.String2.replaceByRe(
@@ -81,23 +77,14 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
     }
   }
 
-  let handleInputBlur = _event => {
-    setShowOptions(_ => false)
-  }
-
-  let handleInputChange = event => {
-    let value = ReactEvent.Form.currentTarget(event)["value"]
-    setInputValue(_ => value)
-  }
-
   <>
     <input
       type_="text"
       ref={ReactDOM.Ref.domRef(inputRef)}
       value={inputValue}
-      onBlur={handleInputBlur}
+      onBlur={_ => setShowOptions(_ => false)}
       onKeyDown={handleInputKeyDown}
-      onChange={handleInputChange}
+      onChange={e => setInputValue(_ => Utils.valueFromEvent(e))}
     />
     {switch showOptions {
     | true =>
@@ -108,7 +95,7 @@ let make = (~triggerSymbol: string, ~triggerOptions: list<string>, ~_triggerCall
           <li
             key={`${index->Belt.Int.toString}-${suggestion}`}
             className={isSelected ? "selected" : ""}
-            onMouseOver={_ => handleSuggestionHover(index)}
+            onMouseOver={_ => setSelectedIndex(_ => index)}
             onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
             onClick={_ => handleSuggestionClick(suggestion)}>
             {switch isSelected {
