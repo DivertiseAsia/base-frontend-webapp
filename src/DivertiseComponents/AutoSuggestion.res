@@ -13,22 +13,27 @@ let make = (~trigger: triggerType, ~triggerOptions: list<string>, ~_triggerCallb
   React.useEffect2(() => {
     let matchtriggerSymbol = switch trigger {
     | TriggerSymbol(symbol) =>
-      inputValue->Js.Re.exec_((symbol ++ "(\S+)")->Js.Re.fromStringWithFlags(~flags="ig"), _)
+      inputValue->Js.Re.exec_(
+        (symbol ++ "(\S+)" ++ `|${symbol}`)->Js.Re.fromStringWithFlags(~flags="ig"),
+        _,
+      )
     | TriggerRegex(regex) => inputValue->Js.Re.exec_(regex, _)
     }
 
     switch matchtriggerSymbol {
     | None => setFilteredOptions(_ => list{})
     | Some(match) =>
+      Js.log(match)
       setFilteredOptions(_ => {
         triggerOptions->Belt.List.keep(option => {
           option
           ->Js.Re.exec_(
             match
             ->Js.Re.captures
-            ->Belt.Array.getExn(1)
+            ->Belt.Array.get(1)
+            ->Belt.Option.getWithDefault(Js.Nullable.null)
             ->Js.Nullable.toOption
-            ->Belt.Option.getExn
+            ->Belt.Option.getWithDefault("")
             ->Js.Re.fromStringWithFlags(~flags="i"),
             _,
           )
@@ -48,7 +53,10 @@ let make = (~trigger: triggerType, ~triggerOptions: list<string>, ~_triggerCallb
     switch trigger {
     | TriggerSymbol(symbol) =>
       setInputValue(_ =>
-        inputValue->Js.String2.replaceByRe(`${symbol}[^${symbol}]*$`->Js.Re.fromString, suggestion)
+        inputValue->Js.String2.replaceByRe(
+          (symbol ++ "(\S+)" ++ `|${symbol}`)->Js.Re.fromStringWithFlags(~flags="ig"),
+          suggestion,
+        )
       )
     | TriggerRegex(regex) =>
       setInputValue(_ => inputValue->Js.String2.replaceByRe(regex, suggestion))
