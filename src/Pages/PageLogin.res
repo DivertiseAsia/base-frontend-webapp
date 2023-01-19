@@ -12,7 +12,7 @@ let make = (~queryString: string) => {
       trigger=TriggerSymbol("@")
       // trigger=TriggerRegex(("@" ++ "(\S+)" ++ `|@`)->Js.Re.fromStringWithFlags(~flags="ig"))
       triggerOptions=list{"Alice", "Bob", "Charlie", "Robert", "Robson"}
-      syntaxHighlight=true
+      // syntaxHighlight=true
     />
   </div>
 }

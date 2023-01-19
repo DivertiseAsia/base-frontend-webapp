@@ -15,17 +15,15 @@ let make = (
   let (selectedIndex, setSelectedIndex) = React.useState(_ => 0)
   let inputRef = React.useRef(Js.Nullable.null)
 
-  React.useEffect2(() => {
-    Js.log(inputValue)
-    let matchtriggerSymbol = switch trigger {
+  let funcFinalRegex = (trigger: triggerType) =>
+    switch trigger {
     | TriggerSymbol(symbol) =>
-      inputValue->Js.Re.exec_(
-        (symbol ++ "(\S+)" ++ `|${symbol}`)->Js.Re.fromStringWithFlags(~flags="ig"),
-        _,
-      )
-
-    | TriggerRegex(regex) => inputValue->Js.Re.exec_(regex, _)
+      (symbol ++ "(\S+)" ++ `|${symbol}`)->Js.Re.fromStringWithFlags(~flags="ig")
+    | TriggerRegex(regex) => regex
     }
+
+  React.useEffect2(() => {
+    let matchtriggerSymbol = Js.Re.exec_(funcFinalRegex(trigger), inputValue)
 
     switch matchtriggerSymbol {
     | None => setFilteredOptions(_ => list{})
@@ -56,17 +54,7 @@ let make = (
   }, [filteredOptions])
 
   let handleSuggestionClick = suggestion => {
-    switch trigger {
-    | TriggerSymbol(symbol) =>
-      setInputValue(_ =>
-        inputValue->Js.String2.replaceByRe(
-          (symbol ++ "(\S+)" ++ `|${symbol}`)->Js.Re.fromStringWithFlags(~flags="ig"),
-          suggestion,
-        )
-      )
-    | TriggerRegex(regex) =>
-      setInputValue(_ => inputValue->Js.String2.replaceByRe(regex, suggestion))
-    }
+    setInputValue(_ => inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), suggestion))
     setShowOptions(_ => false)
   }
 
@@ -78,7 +66,6 @@ let make = (
 
   let handleInputKeyDown = event => {
     let key = ReactEvent.Keyboard.key(event)
-    Js.log2("Press", key)
     if Js.List.length(filteredOptions) > 0 {
       switch key {
       | "ArrowUp" =>
