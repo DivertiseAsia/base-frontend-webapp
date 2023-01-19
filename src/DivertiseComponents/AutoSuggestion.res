@@ -99,7 +99,7 @@ let make = (
         ref={ReactDOM.Ref.domRef(inputRef)}
         onBlur={_ => setShowOptions(_ => false)}
         onKeyDown={handleInputKeyDown}
-        onChange={e => setInputValue(_ => Utils.valueFromEvent(e))}>
+        onInput={e => setInputValue(_ => ReactEvent.Form.currentTarget(e)["textContent"])}>
         {inputValue->React.string}
       </div>
     | false =>
