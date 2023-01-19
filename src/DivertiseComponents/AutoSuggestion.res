@@ -23,6 +23,7 @@ let make = (
     }
 
   React.useEffect2(() => {
+    Js.log(inputValue)
     let matchtriggerSymbol = Js.Re.exec_(funcFinalRegex(trigger), inputValue)
 
     switch matchtriggerSymbol {
@@ -55,6 +56,14 @@ let make = (
 
   let handleSuggestionClick = suggestion => {
     setInputValue(_ => inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), suggestion))
+    switch inputRef.current->Js.Nullable.toOption {
+    | Some(dom) =>
+      Webapi.Dom.Element.setInnerHTML(
+        dom,
+        inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), suggestion),
+      )
+    | None => ()
+    }
     setShowOptions(_ => false)
   }
 
@@ -95,17 +104,16 @@ let make = (
       <div
         className="input-field"
         contentEditable=true
+        value={inputValue}
         suppressContentEditableWarning=true
         ref={ReactDOM.Ref.domRef(inputRef)}
         onBlur={_ => setShowOptions(_ => false)}
         onKeyDown={handleInputKeyDown}
-        onInput={e => setInputValue(_ => ReactEvent.Form.currentTarget(e)["textContent"])}>
-        {inputValue->React.string}
-      </div>
+        onInput={e => setInputValue(_ => ReactEvent.Form.target(e)["textContent"])}
+      />
     | false =>
       <input
         type_="text"
-        ref={ReactDOM.Ref.domRef(inputRef)}
         value={inputValue}
         onBlur={_ => setShowOptions(_ => false)}
         onKeyDown={handleInputKeyDown}
