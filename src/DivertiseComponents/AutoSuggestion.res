@@ -56,13 +56,16 @@ let make = (
   }, [filteredOptions])
 
   let makeIntoSpan = text => {
-    `<span class="highlight" contentEditable=false> ${text} </span>`
+    `<span class="highlight" contentEditable=false>${text}</span>`
   }
 
   let handleSuggestionClick = suggestion => {
     setInputValue(_ => inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), suggestion))
     switch inputRef.current->Js.Nullable.toOption {
     | Some(dom) =>
+      let cursorX = Webapi.Dom.Element.getBoundingClientRect(dom)->Webapi.Dom.DomRect.left
+      let cursorY = Webapi.Dom.Element.getBoundingClientRect(dom)->Webapi.Dom.DomRect.top
+      
       Webapi.Dom.Element.setInnerHTML(
         dom,
         inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), makeIntoSpan(suggestion)),
