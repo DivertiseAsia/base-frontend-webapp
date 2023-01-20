@@ -17,8 +17,7 @@ let make = (
 
   let funcFinalRegex = (trigger: triggerType) =>
     switch trigger {
-    | TriggerSymbol(symbol) =>
-      `${symbol}(\S+)|${symbol}`->Js.Re.fromStringWithFlags(~flags="ig")
+    | TriggerSymbol(symbol) => `${symbol}(\S+)|${symbol}`->Js.Re.fromStringWithFlags(~flags="ig")
     | TriggerRegex(regex) => regex
     }
 
@@ -30,20 +29,22 @@ let make = (
     | None => setFilteredOptions(_ => list{})
     | Some(match) =>
       setFilteredOptions(_ => {
-        triggerOptions->Belt.List.keep(option => {
-          option
-          ->Js.Re.exec_(
-            match
-            ->Js.Re.captures
-            ->Belt.Array.get(1)
-            ->Belt.Option.getWithDefault(Js.Nullable.null)
-            ->Js.Nullable.toOption
-            ->Belt.Option.getWithDefault("")
-            ->Js.Re.fromStringWithFlags(~flags="i"),
-            _,
-          )
-          ->Js.Option.isSome
-        })
+        triggerOptions->Belt.List.keep(
+          option => {
+            option
+            ->Js.Re.exec_(
+              match
+              ->Js.Re.captures
+              ->Belt.Array.get(1)
+              ->Belt.Option.getWithDefault(Js.Nullable.null)
+              ->Js.Nullable.toOption
+              ->Belt.Option.getWithDefault("")
+              ->Js.Re.fromStringWithFlags(~flags="i"),
+              _,
+            )
+            ->Js.Option.isSome
+          },
+        )
       })
     }
     None
@@ -54,13 +55,17 @@ let make = (
     None
   }, [filteredOptions])
 
+  let makeIntoSpan = text => {
+    `<span class="highlight" contentEditable=false> ${text} </span>`
+  }
+
   let handleSuggestionClick = suggestion => {
     setInputValue(_ => inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), suggestion))
     switch inputRef.current->Js.Nullable.toOption {
     | Some(dom) =>
       Webapi.Dom.Element.setInnerHTML(
         dom,
-        inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), suggestion),
+        inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), makeIntoSpan(suggestion)),
       )
     | None => ()
     }
@@ -109,7 +114,13 @@ let make = (
         ref={ReactDOM.Ref.domRef(inputRef)}
         onBlur={_ => setShowOptions(_ => false)}
         onKeyDown={handleInputKeyDown}
-        onInput={e => setInputValue(_ => ReactEvent.Form.target(e)["textContent"])}
+        onInput={e =>
+          setInputValue(_ => {
+            switch inputRef.current->Js.Nullable.toOption {
+            | Some(dom) => Webapi.Dom.Element.innerHTML(dom)
+            | None => ""
+            }
+          })}
       />
     | false =>
       <input
