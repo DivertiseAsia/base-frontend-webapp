@@ -18,7 +18,7 @@ let make = (
   let funcFinalRegex = (trigger: triggerType) =>
     switch trigger {
     | TriggerSymbol(symbol) =>
-      (symbol ++ "(\S+)" ++ `|${symbol}`)->Js.Re.fromStringWithFlags(~flags="ig")
+      `${symbol}(\S+)|${symbol}`->Js.Re.fromStringWithFlags(~flags="ig")
     | TriggerRegex(regex) => regex
     }
 
