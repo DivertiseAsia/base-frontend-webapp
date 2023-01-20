@@ -17,19 +17,19 @@ let make = (
 
   let funcFinalRegex = (trigger: triggerType) =>
     switch trigger {
-    | TriggerSymbol(symbol) => `${symbol}(\S+)|${symbol}`->Js.Re.fromStringWithFlags(~flags="ig")
+    | TriggerSymbol(symbol) => `${symbol}(\\S+)|${symbol}`->Js.Re.fromStringWithFlags(~flags="ig")
     | TriggerRegex(regex) => regex
     }
 
   React.useEffect2(() => {
-    Js.log(inputValue)
     let matchtriggerSymbol = Js.Re.exec_(funcFinalRegex(trigger), inputValue)
 
     switch matchtriggerSymbol {
     | None => setFilteredOptions(_ => list{})
     | Some(match) =>
       setFilteredOptions(_ => {
-        triggerOptions->Belt.List.keep(
+        triggerOptions
+        ->Belt.List.keep(
           option => {
             option
             ->Js.Re.exec_(
@@ -39,10 +39,15 @@ let make = (
               ->Belt.Option.getWithDefault(Js.Nullable.null)
               ->Js.Nullable.toOption
               ->Belt.Option.getWithDefault("")
-              ->Js.Re.fromStringWithFlags(~flags="i"),
+              ->Js.Re.fromStringWithFlags(~flags="ig"),
               _,
             )
             ->Js.Option.isSome
+          },
+        )
+        ->Belt.List.sort(
+          (first, second) => {
+            Js.String2.localeCompare(first, second)->Belt.Float.toInt
           },
         )
       })
@@ -65,11 +70,13 @@ let make = (
     | Some(dom) =>
       let cursorX = Webapi.Dom.Element.getBoundingClientRect(dom)->Webapi.Dom.DomRect.left
       let cursorY = Webapi.Dom.Element.getBoundingClientRect(dom)->Webapi.Dom.DomRect.top
-      
+
       Webapi.Dom.Element.setInnerHTML(
         dom,
         inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), makeIntoSpan(suggestion)),
       )
+
+    // let range = Webapi.Dom.Document.createRange(dom->Webapi.Dom.Node.ownerDocument)
     | None => ()
     }
     setShowOptions(_ => false)

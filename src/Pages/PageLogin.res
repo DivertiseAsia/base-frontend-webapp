@@ -10,8 +10,8 @@ let make = (~queryString: string) => {
     <AutoSuggestion
       // * : You can use either TriggerSymbol or TriggerRegex
       trigger=TriggerSymbol("@")
-      // trigger=TriggerRegex("@(\S+)|@"->Js.Re.fromStringWithFlags(~flags="ig"))
-      triggerOptions=list{"Alice", "Bob", "Charlie", "Robert", "Robson"}
+      // trigger=TriggerRegex("@(\\S+)|@"->Js.Re.fromStringWithFlags(~flags="ig"))
+      triggerOptions=list{"Alice", "Tata", "Bob", "Charlie", "Alex", "Robert", "Robson"}
       syntaxHighlight=true
     />
   </div>
