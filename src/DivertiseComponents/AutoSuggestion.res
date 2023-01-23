@@ -1,3 +1,5 @@
+open Webapi.Dom
+
 type triggerType =
   | TriggerSymbol(string)
   | TriggerRegex(Js.Re.t)
@@ -68,15 +70,24 @@ let make = (
     setInputValue(_ => inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), suggestion))
     switch inputRef.current->Js.Nullable.toOption {
     | Some(dom) =>
-      let cursorX = Webapi.Dom.Element.getBoundingClientRect(dom)->Webapi.Dom.DomRect.left
-      let cursorY = Webapi.Dom.Element.getBoundingClientRect(dom)->Webapi.Dom.DomRect.top
+      let cursorX = Element.getBoundingClientRect(dom)->DomRect.left
+      let cursorY = Element.getBoundingClientRect(dom)->DomRect.top
 
-      Webapi.Dom.Element.setInnerHTML(
+      Element.setInnerHTML(
         dom,
         inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), makeIntoSpan(suggestion)),
       )
 
-    // let range = Webapi.Dom.Document.createRange(dom->Webapi.Dom.Node.ownerDocument)
+      Js.log2(cursorX, cursorY)
+
+      let _ =
+        document
+        ->Document.asHtmlDocument
+        ->Belt.Option.flatMap(document => document->HtmlDocument.body)
+        ->Belt.Option.map(body => {
+          body->Document.createRange->Range.setStart(dom, cursorX->Belt.Float.toInt)
+        })
+      Js.log3(cursorX, cursorY, range)
     | None => ()
     }
     setShowOptions(_ => false)
@@ -104,10 +115,12 @@ let make = (
           ->Belt.List.get(selectedIndex)
           ->Belt.Option.mapWithDefault((), handleSuggestionClick)
         }
+
       | "Escape" => {
           ReactEvent.Keyboard.preventDefault(event)
           setShowOptions(_ => false)
         }
+
       | _ => ()
       }
     }
