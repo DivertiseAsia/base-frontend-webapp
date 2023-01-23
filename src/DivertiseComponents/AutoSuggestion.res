@@ -11,7 +11,7 @@ module Trigger = {
 }
 
 @react.component
-let make = (~triggers: list<t>, ~syntaxHighlight=false) => {
+let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
   let (inputValue, setInputValue) = React.useState(_ => "")
   let (filteredOptions, setFilteredOptions) = React.useState(_ => list{})
   let (showOptions, setShowOptions) = React.useState(_ => false)
