@@ -1,16 +1,17 @@
-open Webapi.Dom
+module Trigger = {
+  type triggerType =
+    | TriggerSymbol(string)
+    | TriggerRegex(Js.Re.t)
 
-type triggerType =
-  | TriggerSymbol(string)
-  | TriggerRegex(Js.Re.t)
+  type t = {
+    trigger: triggerType,
+    triggerOptions: list<string>,
+    triggerCallback: unit => unit,
+  }
+}
 
 @react.component
-let make = (
-  ~trigger: triggerType,
-  ~triggerOptions: list<string>,
-  ~_triggerCallback=?,
-  ~syntaxHighlight=false,
-) => {
+let make = (~triggers: list<t>, ~syntaxHighlight=false) => {
   let (inputValue, setInputValue) = React.useState(_ => "")
   let (filteredOptions, setFilteredOptions) = React.useState(_ => list{})
   let (showOptions, setShowOptions) = React.useState(_ => false)
@@ -80,14 +81,15 @@ let make = (
 
       Js.log2(cursorX, cursorY)
 
-      let _ =
-        document
-        ->Document.asHtmlDocument
-        ->Belt.Option.flatMap(document => document->HtmlDocument.body)
-        ->Belt.Option.map(body => {
-          body->Document.createRange->Range.setStart(dom, cursorX->Belt.Float.toInt)
-        })
-      Js.log3(cursorX, cursorY, range)
+    // let _ =
+    //   document
+    //   ->Document.asHtmlDocument
+    //   ->Belt.Option.flatMap(document => document->HtmlDocument.body)
+    //   ->Belt.Option.map(body => {
+    //     body->Document.createRange->Range.setStart(dom, cursorX->Belt.Float.toInt)
+    //   })
+
+    // let _ = document->Document.createRange->Range.setStart(dom, cursorX->Belt.Float.toInt)
     | None => ()
     }
     setShowOptions(_ => false)
