@@ -18,45 +18,52 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
   let (selectedIndex, setSelectedIndex) = React.useState(_ => 0)
   let inputRef = React.useRef(Js.Nullable.null)
 
-  let funcFinalRegex = (trigger: triggerType) =>
+  let funcFinalRegex = (trigger: Trigger.triggerType) =>
     switch trigger {
     | TriggerSymbol(symbol) => `${symbol}(\\S+)|${symbol}`->Js.Re.fromStringWithFlags(~flags="ig")
     | TriggerRegex(regex) => regex
     }
 
-  React.useEffect2(() => {
-    let matchtriggerSymbol = Js.Re.exec_(funcFinalRegex(trigger), inputValue)
+  React.useEffect1(() => {
+    let test = triggers->Belt.List.map(trigger => {
+      let matchtriggerSymbol = Js.Re.exec_(funcFinalRegex(trigger.trigger), inputValue)
 
-    switch matchtriggerSymbol {
-    | None => setFilteredOptions(_ => list{})
-    | Some(match) =>
-      setFilteredOptions(_ => {
-        triggerOptions
-        ->Belt.List.keep(
-          option => {
-            option
-            ->Js.Re.exec_(
-              match
-              ->Js.Re.captures
-              ->Belt.Array.get(1)
-              ->Belt.Option.getWithDefault(Js.Nullable.null)
-              ->Js.Nullable.toOption
-              ->Belt.Option.getWithDefault("")
-              ->Js.Re.fromStringWithFlags(~flags="ig"),
-              _,
+      switch matchtriggerSymbol {
+      | None => setFilteredOptions(_ => list{})
+      | Some(match) =>
+        setFilteredOptions(
+          _ => {
+            trigger.triggerOptions
+            ->Belt.List.keep(
+              option => {
+                option
+                ->Js.Re.exec_(
+                  match
+                  ->Js.Re.captures
+                  ->Belt.Array.get(1)
+                  ->Belt.Option.getWithDefault(Js.Nullable.null)
+                  ->Js.Nullable.toOption
+                  ->Belt.Option.getWithDefault("")
+                  ->Js.Re.fromStringWithFlags(~flags="ig"),
+                  _,
+                )
+                ->Js.Option.isSome
+              },
             )
-            ->Js.Option.isSome
+            ->Belt.List.sort(
+              (first, second) => {
+                Js.String2.localeCompare(first, second)->Belt.Float.toInt
+              },
+            )
           },
         )
-        ->Belt.List.sort(
-          (first, second) => {
-            Js.String2.localeCompare(first, second)->Belt.Float.toInt
-          },
-        )
-      })
-    }
+      }
+    })
+
+    Js.log(test)
+
     None
-  }, (inputValue, triggerOptions))
+  }, [inputValue])
 
   React.useEffect1(() => {
     setShowOptions(_ => Js.List.length(filteredOptions) > 0)
