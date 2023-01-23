@@ -4,6 +4,8 @@ type triggerType =
   | TriggerSymbol(string)
   | TriggerRegex(Js.Re.t)
 
+let parentId = "test-div-contenteditable" //TODO: change parentID to prop or sth
+
 @react.component
 let make = (
   ~trigger: triggerType,
@@ -56,7 +58,6 @@ let make = (
     }
     None
   }, (inputValue, triggerOptions))
-
   React.useEffect1(() => {
     setShowOptions(_ => Js.List.length(filteredOptions) > 0)
     None
@@ -67,27 +68,27 @@ let make = (
   }
 
   let handleSuggestionClick = suggestion => {
-    setInputValue(_ => inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), suggestion))
+    let newInputValue =
+      inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), makeIntoSpan(suggestion))
+    Js.log2(">>> newInputValue: ", newInputValue)
+    // setInputValue(_ => newInputValue)
     switch inputRef.current->Js.Nullable.toOption {
     | Some(dom) =>
-      let cursorX = Element.getBoundingClientRect(dom)->DomRect.left
-      let cursorY = Element.getBoundingClientRect(dom)->DomRect.top
+      let beforeUpdateSel = Webapi.Dom.Window.getSelection(Webapi.Dom.window)
+      let beforeUpdateFocusNode =
+        beforeUpdateSel->Belt.Option.mapWithDefault(None, Webapi.Dom.Selection.focusNode)
+      Js.log2(">>> before update innerHTML selection!: ", beforeUpdateSel)
+      Js.log2(">>> before update innerHTML focusnode!: ", beforeUpdateFocusNode)
 
-      Element.setInnerHTML(
-        dom,
-        inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), makeIntoSpan(suggestion)),
-      )
+      // Js.log2(">>> dom: ", dom)
+      // Element.setInnerHTML(dom, newInputValue)
+      // let afterUpdateSel = Webapi.Dom.Window.getSelection(Webapi.Dom.window)
+      // let afterUpdateFocusNode = beforeUpdateSel->Belt.Option.map(Webapi.Dom.Selection.focusNode)
+      // Js.log2(">>> after update innerHTML selection!: ", afterUpdateSel)
+      // Js.log2(">>> after update innerHTML focusnode!: ", afterUpdateFocusNode)
 
-      Js.log2(cursorX, cursorY)
-
-      let _ =
-        document
-        ->Document.asHtmlDocument
-        ->Belt.Option.flatMap(document => document->HtmlDocument.body)
-        ->Belt.Option.map(body => {
-          body->Document.createRange->Range.setStart(dom, cursorX->Belt.Float.toInt)
-        })
-      Js.log3(cursorX, cursorY, range)
+      Utils.Dom.updateDivContenteditable(suggestion)->ignore
+      setInputValue(_ => newInputValue)
     | None => ()
     }
     setShowOptions(_ => false)
@@ -111,6 +112,7 @@ let make = (
       | "ArrowDown" => handlePressKeyChangeHighlightOption(event, selectedIndex + 1)
       | "Enter" => {
           ReactEvent.Keyboard.preventDefault(event)
+          ReactEvent.Keyboard.stopPropagation(event)
           filteredOptions
           ->Belt.List.get(selectedIndex)
           ->Belt.Option.mapWithDefault((), handleSuggestionClick)
@@ -123,16 +125,30 @@ let make = (
 
       | _ => ()
       }
+    } else {
+      switch key {
+      | "Escape" =>
+        Js.log2(">>> CURRENT selection!: ", Webapi.Dom.Window.getSelection(Webapi.Dom.window))
+        switch inputRef.current->Js.Nullable.toOption {
+        | Some(el) => Webapi.Dom.Element.childNodes(el)->Js.log2(" >>> nodeList: ", _)
+        | _ => Js.log(">>> no nodeList")
+        }
+      | _ => ()
+      }
     }
   }
 
   <div className="auto-suggestion-container">
+    <p className="asss">
+      <span className="header-text"> {React.string("TESTTTT")} </span>
+    </p>
     {switch syntaxHighlight {
     | true =>
       <div
+        id=parentId
         className="input-field"
         contentEditable=true
-        value={inputValue}
+        // value={inputValue}
         suppressContentEditableWarning=true
         ref={ReactDOM.Ref.domRef(inputRef)}
         onBlur={_ => setShowOptions(_ => false)}
