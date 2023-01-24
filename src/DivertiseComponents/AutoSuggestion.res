@@ -27,14 +27,17 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
     }
 
   React.useEffect1(() => {
-    setFilteredOptions(_ =>
-      triggers->Belt.List.map(
-        trigger => {
-          let matchtriggerSymbol = Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)
-
-          switch matchtriggerSymbol {
-          | None => list{}
-          | Some(match) =>
+    triggers
+    ->Belt.List.getBy(trigger => {
+      Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Js.Option.isSome
+    })
+    ->Belt.Option.mapWithDefault(setFilteredOptions(_ => list{}), trigger => {
+      let matchtriggerSymbol = Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)
+      switch matchtriggerSymbol {
+      | None => setFilteredOptions(_ => list{})
+      | Some(match) =>
+        setFilteredOptions(
+          _ =>
             trigger.triggerOptions
             ->Belt.List.keep(
               option => {
@@ -56,19 +59,18 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
               (first, second) => {
                 Js.String2.localeCompare(first, second)->Belt.Float.toInt
               },
-            )
-          }
-        },
-      )
-    )
-
-    Js.log2("filteredOptions", filteredOptions)
+            ),
+        )
+      }
+    })
+    ->ignore
 
     None
   }, [inputValue])
 
   React.useEffect1(() => {
-    // setShowOptions(_ => Js.List.length(filteredOptions) > 0)
+    setShowOptions(_ => Js.List.length(filteredOptions) > 0)
+
     None
   }, [filteredOptions])
 
@@ -76,8 +78,7 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
     `<span class="highlight" contentEditable=false>${text}</span>`
   }
 
-  let handleSuggestionClick = suggestion => {
-    // TODO : fix this error
+  let handleSuggestionClick = _suggestion => {
     setInputValue(_ => inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), suggestion))
     switch inputRef.current->Js.Nullable.toOption {
     | Some(dom) =>
@@ -89,17 +90,17 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
         inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), makeIntoSpan(suggestion)),
       )
 
-    //   Js.log2(cursorX, cursorY)
+      Js.log2(cursorX, cursorY)
 
-    // let _ =
-    //   document
-    //   ->Document.asHtmlDocument
-    //   ->Belt.Option.flatMap(document => document->HtmlDocument.body)
-    //   ->Belt.Option.map(body => {
-    //     body->Document.createRange->Range.setStart(dom, cursorX->Belt.Float.toInt)
-    //   })
+    let _ =
+      document
+      ->Document.asHtmlDocument
+      ->Belt.Option.flatMap(document => document->HtmlDocument.body)
+      ->Belt.Option.map(body => {
+        body->Document.createRange->Range.setStart(dom, cursorX->Belt.Float.toInt)
+      })
 
-    // let _ = document->Document.createRange->Range.setStart(dom, cursorX->Belt.Float.toInt)
+    let _ = document->Document.createRange->Range.setStart(dom, cursorX->Belt.Float.toInt)
     | None => ()
     }
     setShowOptions(_ => false)
@@ -127,12 +128,10 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
           ->Belt.List.get(selectedIndex)
           ->Belt.Option.mapWithDefault((), handleSuggestionClick)
         }
-
       | "Escape" => {
           ReactEvent.Keyboard.preventDefault(event)
           setShowOptions(_ => false)
         }
-
       | _ => ()
       }
     }
@@ -170,7 +169,6 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
     | true =>
       <ul>
         {filteredOptions
-        ->Belt.List.filter(suggestionList => suggestionList->Js.List.length > 0)
         ->Belt.List.mapWithIndex((index, suggestion) => {
           let isSelected = index === selectedIndex
           <li
@@ -188,7 +186,6 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
         ->Belt.List.toArray
         ->React.array}
       </ul>
-      React.null
     | false => React.null
     }}
   </div>
