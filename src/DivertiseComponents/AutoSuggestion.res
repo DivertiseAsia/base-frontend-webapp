@@ -8,8 +8,34 @@ module Trigger = {
     triggerOptions: list<string>,
     triggerCallback?: unit => unit,
   }
+
+  let makeIntoSpan = text => {
+    `<span class="highlight" contentEditable=false>${text}</span>`
+  }
+
+  let filterTriggerOptionsByAlphabet = (triggerOption: string) => {
+    triggerOption
+    ->Belt.List.keep(option => {
+      option
+      ->Js.Re.exec_(
+        match
+        ->Js.Re.captures
+        ->Belt.Array.get(1)
+        ->Belt.Option.getWithDefault(Js.Nullable.null)
+        ->Js.Nullable.toOption
+        ->Belt.Option.getWithDefault("")
+        ->Js.Re.fromStringWithFlags(~flags="ig"),
+        _,
+      )
+      ->Js.Option.isSome
+    })
+    ->Belt.List.sort((first, second) => {
+      Js.String2.localeCompare(first, second)->Belt.Float.toInt
+    })
+  }
 }
 
+open Trigger
 open Webapi.Dom
 
 @react.component
@@ -20,7 +46,7 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
   let (selectedIndex, setSelectedIndex) = React.useState(_ => 0)
   let inputRef = React.useRef(Js.Nullable.null)
 
-  let funcFinalRegex = (trigger: Trigger.triggerType) =>
+  let funcFinalRegex = (trigger: triggerType) =>
     switch trigger {
     | TriggerSymbol(symbol) => `${symbol}(\\S+)|${symbol}`->Js.Re.fromStringWithFlags(~flags="ig")
     | TriggerRegex(regex) => regex
@@ -36,31 +62,7 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
       switch matchtriggerSymbol {
       | None => setFilteredOptions(_ => list{})
       | Some(match) =>
-        setFilteredOptions(
-          _ =>
-            trigger.triggerOptions
-            ->Belt.List.keep(
-              option => {
-                option
-                ->Js.Re.exec_(
-                  match
-                  ->Js.Re.captures
-                  ->Belt.Array.get(1)
-                  ->Belt.Option.getWithDefault(Js.Nullable.null)
-                  ->Js.Nullable.toOption
-                  ->Belt.Option.getWithDefault("")
-                  ->Js.Re.fromStringWithFlags(~flags="ig"),
-                  _,
-                )
-                ->Js.Option.isSome
-              },
-            )
-            ->Belt.List.sort(
-              (first, second) => {
-                Js.String2.localeCompare(first, second)->Belt.Float.toInt
-              },
-            ),
-        )
+        setFilteredOptions(_ => trigger.triggerOptions->filterTriggerOptionsByAlphabet)
       }
     })
     ->ignore
@@ -74,36 +76,33 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
     None
   }, [filteredOptions])
 
-  let makeIntoSpan = text => {
-    `<span class="highlight" contentEditable=false>${text}</span>`
-  }
-
   let handleSuggestionClick = _suggestion => {
-    setInputValue(_ => inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), suggestion))
-    switch inputRef.current->Js.Nullable.toOption {
-    | Some(dom) =>
-      let cursorX = Element.getBoundingClientRect(dom)->DomRect.left
-      let cursorY = Element.getBoundingClientRect(dom)->DomRect.top
+    // setInputValue(_ => inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), suggestion))
+    // switch inputRef.current->Js.Nullable.toOption {
+    // | Some(dom) =>
+    //   let cursorX = Element.getBoundingClientRect(dom)->DomRect.left
+    //   let cursorY = Element.getBoundingClientRect(dom)->DomRect.top
 
-      Element.setInnerHTML(
-        dom,
-        inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), makeIntoSpan(suggestion)),
-      )
+    //   Element.setInnerHTML(
+    //     dom,
+    //     inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), makeIntoSpan(suggestion)),
+    //   )
 
-      Js.log2(cursorX, cursorY)
+    //   Js.log2(cursorX, cursorY)
 
-    let _ =
-      document
-      ->Document.asHtmlDocument
-      ->Belt.Option.flatMap(document => document->HtmlDocument.body)
-      ->Belt.Option.map(body => {
-        body->Document.createRange->Range.setStart(dom, cursorX->Belt.Float.toInt)
-      })
+    // let _ =
+    //   document
+    //   ->Document.asHtmlDocument
+    //   ->Belt.Option.flatMap(document => document->HtmlDocument.body)
+    //   ->Belt.Option.map(body => {
+    //     body->Document.createRange->Range.setStart(dom, cursorX->Belt.Float.toInt)
+    //   })
 
-    let _ = document->Document.createRange->Range.setStart(dom, cursorX->Belt.Float.toInt)
-    | None => ()
-    }
-    setShowOptions(_ => false)
+    // let _ = document->Document.createRange->Range.setStart(dom, cursorX->Belt.Float.toInt)
+    // | None => ()
+    // }
+    // setShowOptions(_ => false)
+    ()
   }
 
   let handlePressKeyChangeHighlightOption = (event, i) => {
@@ -128,10 +127,12 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
           ->Belt.List.get(selectedIndex)
           ->Belt.Option.mapWithDefault((), handleSuggestionClick)
         }
+
       | "Escape" => {
           ReactEvent.Keyboard.preventDefault(event)
           setShowOptions(_ => false)
         }
+
       | _ => ()
       }
     }
