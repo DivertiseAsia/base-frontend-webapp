@@ -63,32 +63,33 @@ let make = (
     None
   }, [filteredOptions])
 
-  let makeIntoSpan = text => {
-    `<span class="highlight" contentEditable=false>${text}</span>`
+  let makeIntoSpan = (text, extraId) => {
+    `<span class="highlight" contentEditable=false data-extra-id="${extraId}" >${text}</span>`
   }
 
   let handleSuggestionClick = suggestion => {
-    let newInputValue =
-      inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), makeIntoSpan(suggestion))
-    Js.log2(">>> newInputValue: ", newInputValue)
-    // setInputValue(_ => newInputValue)
+    // let newInputValue =
+    //   inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), makeIntoSpan(suggestion, "1"))
+    Js.log2(">>> funcFinalRegex(trigger): ", funcFinalRegex(trigger))
     switch inputRef.current->Js.Nullable.toOption {
     | Some(dom) =>
-      let beforeUpdateSel = Webapi.Dom.Window.getSelection(Webapi.Dom.window)
-      let beforeUpdateFocusNode =
-        beforeUpdateSel->Belt.Option.mapWithDefault(None, Webapi.Dom.Selection.focusNode)
-      Js.log2(">>> before update innerHTML selection!: ", beforeUpdateSel)
-      Js.log2(">>> before update innerHTML focusnode!: ", beforeUpdateFocusNode)
-
+      //  ---- For debug will remove
+      // let beforeUpdateSel = Webapi.Dom.Window.getSelection(Webapi.Dom.window)
+      // let beforeUpdateFocusNode =
+      //   beforeUpdateSel->Belt.Option.mapWithDefault(None, Webapi.Dom.Selection.focusNode)
+      // Js.log2(">>> before update innerHTML selection!: ", beforeUpdateSel)
+      // Js.log2(">>> before update innerHTML focusnode!: ", beforeUpdateFocusNode)
       // Js.log2(">>> dom: ", dom)
       // Element.setInnerHTML(dom, newInputValue)
       // let afterUpdateSel = Webapi.Dom.Window.getSelection(Webapi.Dom.window)
       // let afterUpdateFocusNode = beforeUpdateSel->Belt.Option.map(Webapi.Dom.Selection.focusNode)
       // Js.log2(">>> after update innerHTML selection!: ", afterUpdateSel)
       // Js.log2(">>> after update innerHTML focusnode!: ", afterUpdateFocusNode)
+      //  ---- For debug will remove
 
-      Utils.Dom.updateDivContenteditable(suggestion)->ignore
-      setInputValue(_ => newInputValue)
+      Utils.ContentEditable.updateValue(~divId=parentId, suggestion, funcFinalRegex(trigger))
+      setInputValue(_ => dom->Element.innerHTML)
+
     | None => ()
     }
     setShowOptions(_ => false)
@@ -137,7 +138,7 @@ let make = (
       }
     }
   }
-
+  // Js.log2(">>> inputValue: ", inputValue)
   <div className="auto-suggestion-container">
     <p className="asss">
       <span className="header-text"> {React.string("TESTTTT")} </span>
