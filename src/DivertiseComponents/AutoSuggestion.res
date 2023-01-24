@@ -87,7 +87,7 @@ let make = (
       // Js.log2(">>> after update innerHTML focusnode!: ", afterUpdateFocusNode)
       //  ---- For debug will remove
 
-      Utils.ContentEditable.updateValue(~divId=parentId, suggestion, funcFinalRegex(trigger))
+      Utils.ContentEditable.updateValue(~divEl=dom, suggestion, funcFinalRegex(trigger))
       setInputValue(_ => dom->Element.innerHTML)
 
     | None => ()

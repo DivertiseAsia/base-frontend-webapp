@@ -279,7 +279,7 @@ module ContentEditable = {
 
   let spanIdKey = "data-autosuggest-span-id"
 
-  let getChildNodesAsArray = selection => {
+  let getChildNodesFromSelectionAsArray = selection => {
     selection
     ->Selection.anchorNode
     ->Belt.Option.mapWithDefault([], anchorNode => {
@@ -287,8 +287,11 @@ module ContentEditable = {
     })
   }
 
-  let getSpanChildNodes = selection => {
-    selection
+  let getChildNodesAsArray = element => {
+    element->Element.childNodes->NodeList.toArray
+  }
+  let getSpanChildNodes = element => {
+    element
     ->getChildNodesAsArray
     ->Belt.Array.keepMap(childNode => {
       if childNode->Node.nodeType == Webapi__Dom__Types.Element {
@@ -349,15 +352,13 @@ module ContentEditable = {
     currentSelection->Selection.addRange(highlightRange)
   }
 
-  let updateValue = (~divId as _, newText, triggerRegex) => {
+  let updateValue = (~divEl, newText, triggerRegex) => {
     window
     ->Window.getSelection
     ->Belt.Option.map(selection => {
       let selectionRange = selection->Selection.getRangeAt(0)
-      let spanChildNodes = getSpanChildNodes(selection)
+      let spanChildNodes = getSpanChildNodes(divEl)
       let newSpanId = spanChildNodes->Belt.Array.length
-      Js.log2("!!! spanChildNodes: ", spanChildNodes)
-      Js.log2("!!! newSpanId: ", newSpanId)
 
       // Create new paragraph element to be able to highlight the "newText"
       // We will remove it at the last step
@@ -372,19 +373,23 @@ module ContentEditable = {
         // Highlight new text
         newTextNode->highlightNewText(~selection, ~selectionRange, ~spanId=newSpanId)
 
-        let latestSpan = getChildNodesAsArray(selection)->Belt.Array.getBy(
-          childNode => {
-            if childNode->Node.nodeType == Webapi__Dom__Types.Element {
-              switch childNode->Element.ofNode {
-              | None => false
-              | Some(childEl) =>
-                childEl->Element.getAttribute(spanIdKey) == Some(newSpanId->Belt.Int.toString)
+        // Get latest span to update cursor and remove trigger string
+        let latestSpan =
+          divEl
+          ->getChildNodesAsArray
+          ->Belt.Array.getBy(
+            childNode => {
+              if childNode->Node.nodeType == Webapi__Dom__Types.Element {
+                switch childNode->Element.ofNode {
+                | None => false
+                | Some(childEl) =>
+                  childEl->Element.getAttribute(spanIdKey) == Some(newSpanId->Belt.Int.toString)
+                }
+              } else {
+                false
               }
-            } else {
-              false
-            }
-          },
-        )
+            },
+          )
 
         Js.log2("!! latestSpan: ", latestSpan)
 
