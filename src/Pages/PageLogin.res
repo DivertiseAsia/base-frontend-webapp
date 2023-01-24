@@ -1,5 +1,3 @@
-open AutoSuggestion
-
 @react.component
 let make = (~queryString: string) => {
   let email = Js.Option.getWithDefault("", Utils.getSearchParameter("email", queryString))
@@ -15,13 +13,12 @@ let make = (~queryString: string) => {
     // * : You can use either TriggerSymbol or TriggerRegex
       triggers=list{
         {
-          trigger: TriggerSymbol("@"),
+          triggerBy: TriggerSymbol("@"),
           // trigger: TriggerRegex("@(\\S+)|@"->Js.Re.fromStringWithFlags(~flags="ig"))
           triggerOptions: list{"Alice", "Tata", "Bob", "Charlie", "Alex", "Robert", "Robson"},
         },
         {
-          trigger: TriggerSymbol("@"),
-          // trigger: TriggerRegex("@(\\S+)|@"->Js.Re.fromStringWithFlags(~flags="ig"))
+          triggerBy: TriggerSymbol("#"),
           triggerOptions: list{
             "alice@gmail.com",
             "tata@gmail.com",

@@ -4,11 +4,13 @@ module Trigger = {
     | TriggerRegex(Js.Re.t)
 
   type t = {
-    trigger: triggerType,
+    triggerBy: triggerType,
     triggerOptions: list<string>,
-    triggerCallback: unit => unit,
+    triggerCallback?: unit => unit,
   }
 }
+
+open Webapi.Dom
 
 @react.component
 let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
@@ -25,14 +27,14 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
     }
 
   React.useEffect1(() => {
-    let test = triggers->Belt.List.map(trigger => {
-      let matchtriggerSymbol = Js.Re.exec_(funcFinalRegex(trigger.trigger), inputValue)
+    setFilteredOptions(_ =>
+      triggers->Belt.List.map(
+        trigger => {
+          let matchtriggerSymbol = Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)
 
-      switch matchtriggerSymbol {
-      | None => setFilteredOptions(_ => list{})
-      | Some(match) =>
-        setFilteredOptions(
-          _ => {
+          switch matchtriggerSymbol {
+          | None => list{}
+          | Some(match) =>
             trigger.triggerOptions
             ->Belt.List.keep(
               option => {
@@ -55,18 +57,18 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
                 Js.String2.localeCompare(first, second)->Belt.Float.toInt
               },
             )
-          },
-        )
-      }
-    })
+          }
+        },
+      )
+    )
 
-    Js.log(test)
+    Js.log2("filteredOptions", filteredOptions)
 
     None
   }, [inputValue])
 
   React.useEffect1(() => {
-    setShowOptions(_ => Js.List.length(filteredOptions) > 0)
+    // setShowOptions(_ => Js.List.length(filteredOptions) > 0)
     None
   }, [filteredOptions])
 
@@ -75,6 +77,7 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
   }
 
   let handleSuggestionClick = suggestion => {
+    // TODO : fix this error
     setInputValue(_ => inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), suggestion))
     switch inputRef.current->Js.Nullable.toOption {
     | Some(dom) =>
@@ -86,7 +89,7 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
         inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), makeIntoSpan(suggestion)),
       )
 
-      Js.log2(cursorX, cursorY)
+    //   Js.log2(cursorX, cursorY)
 
     // let _ =
     //   document
@@ -167,6 +170,7 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
     | true =>
       <ul>
         {filteredOptions
+        ->Belt.List.filter(suggestionList => suggestionList->Js.List.length > 0)
         ->Belt.List.mapWithIndex((index, suggestion) => {
           let isSelected = index === selectedIndex
           <li
@@ -184,6 +188,7 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
         ->Belt.List.toArray
         ->React.array}
       </ul>
+      React.null
     | false => React.null
     }}
   </div>
