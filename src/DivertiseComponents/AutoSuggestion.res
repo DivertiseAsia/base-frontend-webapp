@@ -13,7 +13,7 @@ module Trigger = {
     `<span class="highlight" contentEditable=false>${text}</span>`
   }
 
-  let filterTriggerOptionsByAlphabet = (triggerOption: string) => {
+  let filterTriggerOptionsByAlphabet = (triggerOption: list<string>, match: Js.Re.result) => {
     triggerOption
     ->Belt.List.keep(option => {
       option
@@ -62,7 +62,7 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
       switch matchtriggerSymbol {
       | None => setFilteredOptions(_ => list{})
       | Some(match) =>
-        setFilteredOptions(_ => trigger.triggerOptions->filterTriggerOptionsByAlphabet)
+        setFilteredOptions(_ => trigger.triggerOptions->filterTriggerOptionsByAlphabet(match))
       }
     })
     ->ignore
