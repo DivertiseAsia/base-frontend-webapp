@@ -76,33 +76,29 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
     None
   }, [filteredOptions])
 
-  let handleSuggestionClick = _suggestion => {
-    // setInputValue(_ => inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), suggestion))
-    // switch inputRef.current->Js.Nullable.toOption {
-    // | Some(dom) =>
-    //   let cursorX = Element.getBoundingClientRect(dom)->DomRect.left
-    //   let cursorY = Element.getBoundingClientRect(dom)->DomRect.top
-
-    //   Element.setInnerHTML(
-    //     dom,
-    //     inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), makeIntoSpan(suggestion)),
-    //   )
-
-    //   Js.log2(cursorX, cursorY)
-
-    // let _ =
-    //   document
-    //   ->Document.asHtmlDocument
-    //   ->Belt.Option.flatMap(document => document->HtmlDocument.body)
-    //   ->Belt.Option.map(body => {
-    //     body->Document.createRange->Range.setStart(dom, cursorX->Belt.Float.toInt)
-    //   })
-
-    // let _ = document->Document.createRange->Range.setStart(dom, cursorX->Belt.Float.toInt)
-    // | None => ()
-    // }
-    // setShowOptions(_ => false)
-    ()
+  let handleSuggestionClick = suggestion => {
+    triggers
+    ->Belt.List.getBy(trigger => {
+      Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Js.Option.isSome
+    })
+    ->Belt.Option.mapWithDefault((), trigger => {
+      setInputValue(_ =>
+        inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger.triggerBy), suggestion)
+      )
+      switch inputRef.current->Js.Nullable.toOption {
+      | Some(dom) =>
+        Element.setInnerHTML(
+          dom,
+          inputValue->Js.String2.replaceByRe(
+            funcFinalRegex(trigger.triggerBy),
+            makeIntoSpan(suggestion),
+          ),
+        )
+      | None => ()
+      }
+      setShowOptions(_ => false)
+    })
+    ->ignore
   }
 
   let handlePressKeyChangeHighlightOption = (event, i) => {
@@ -127,12 +123,10 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
           ->Belt.List.get(selectedIndex)
           ->Belt.Option.mapWithDefault((), handleSuggestionClick)
         }
-
       | "Escape" => {
           ReactEvent.Keyboard.preventDefault(event)
           setShowOptions(_ => false)
         }
-
       | _ => ()
       }
     }
