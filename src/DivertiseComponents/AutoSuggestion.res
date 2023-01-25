@@ -7,10 +7,15 @@ module Trigger = {
     triggerBy: triggerType,
     triggerOptions: list<string>,
     triggerCallback?: unit => unit,
+    highlightStyle: option<string>,
   }
 
-  let makeIntoSpan = text => {
-    `<span class="highlight" contentEditable=false>${text}</span>`
+  let makeIntoSpan = (trigger: t, text: string) => {
+    Js.log(trigger.highlightStyle)
+    switch trigger.highlightStyle {
+    | Some(style) => `<span style=${style} contentEditable=false>${text}</span>`
+    | None => `<span class=highlight contentEditable=false>${text}</span>`
+    }
   }
 
   let filterTriggerOptionsByAlphabet = (triggerOption: list<string>, match: Js.Re.result) => {
@@ -39,7 +44,7 @@ open Trigger
 open Webapi.Dom
 
 @react.component
-let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
+let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
   let (inputValue, setInputValue) = React.useState(_ => "")
   let (filteredOptions, setFilteredOptions) = React.useState(_ => list{})
   let (showOptions, setShowOptions) = React.useState(_ => false)
@@ -91,7 +96,7 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
           dom,
           inputValue->Js.String2.replaceByRe(
             funcFinalRegex(trigger.triggerBy),
-            makeIntoSpan(suggestion),
+            makeIntoSpan(trigger, suggestion),
           ),
         )
       | None => ()
@@ -133,7 +138,7 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
   }
 
   <div className="auto-suggestion-container">
-    {switch syntaxHighlight {
+    {switch isSyntaxHighlight {
     | true =>
       <div
         className="input-field"
@@ -146,7 +151,7 @@ let make = (~triggers: list<Trigger.t>, ~syntaxHighlight=false) => {
         onInput={e =>
           setInputValue(_ => {
             switch inputRef.current->Js.Nullable.toOption {
-            | Some(dom) => Webapi.Dom.Element.innerHTML(dom)
+            | Some(dom) => Webapi.Dom.Element.innerText(dom)
             | None => ""
             }
           })}

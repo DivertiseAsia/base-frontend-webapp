@@ -10,15 +10,16 @@ let make = (~queryString: string) => {
       <IntlMessage message=Messages.Auth.register />
     </Link>
     <AutoSuggestion
-    // * : You can use either TriggerSymbol or TriggerRegex
       triggers=list{
         {
+          // * : You can use either TriggerSymbol or TriggerRegex
           triggerBy: TriggerSymbol("@"),
           // trigger: TriggerRegex("@(\\S+)|@"->Js.Re.fromStringWithFlags(~flags="ig"))
           triggerOptions: list{"Alice", "Tata", "Bob", "Charlie", "Alex", "Robert", "Robson"},
+          highlightStyle: Some("color:#986BEB;font-weight:bold;font-style:italic;"),
         },
         {
-          triggerBy: TriggerSymbol("#"),
+          triggerBy: TriggerSymbol("!"),
           triggerOptions: list{
             "alice@gmail.com",
             "tata@gmail.com",
@@ -28,9 +29,13 @@ let make = (~queryString: string) => {
             "robert@hotmail.com",
             "robson@gmail.com",
           },
+          highlightStyle: Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
         },
       }
-      syntaxHighlight=true
+      /* If isSyntaxHighlight is *true*, it will use <input />
+         but if isSyntaxHighlight is *false*, it will use <div contentEditable=true />
+      */
+      isSyntaxHighlight=true
     />
   </div>
 }
