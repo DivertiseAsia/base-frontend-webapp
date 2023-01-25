@@ -53,24 +53,33 @@ let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
 
   let funcFinalRegex = (trigger: triggerType) =>
     switch trigger {
-    | TriggerSymbol(symbol) => `${symbol}(\\S+)|${symbol}`->Js.Re.fromStringWithFlags(~flags="ig")
+    | TriggerSymbol(symbol) => `${symbol}([a-zA-Z0-9_]+)|${symbol}`->Js.Re.fromStringWithFlags(~flags="ig")
     | TriggerRegex(regex) => regex
     }
 
   React.useEffect1(() => {
-    triggers
-    ->Belt.List.getBy(trigger => {
-      Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Js.Option.isSome
-    })
-    ->Belt.Option.mapWithDefault(setFilteredOptions(_ => list{}), trigger => {
-      let matchtriggerSymbol = Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)
-      switch matchtriggerSymbol {
-      | None => setFilteredOptions(_ => list{})
-      | Some(match) =>
-        setFilteredOptions(_ => trigger.triggerOptions->filterTriggerOptionsByAlphabet(match))
+    try {
+      triggers
+      ->Belt.List.getBy(trigger => {
+        Js.log2("Regex", funcFinalRegex(trigger.triggerBy))
+        Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Js.Option.isSome
+      })
+      ->Belt.Option.mapWithDefault(setFilteredOptions(_ => list{}), trigger => {
+        let matchtriggerSymbol = Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)
+        switch matchtriggerSymbol {
+        | None => setFilteredOptions(_ => list{})
+        | Some(match) =>
+          setFilteredOptions(_ => trigger.triggerOptions->filterTriggerOptionsByAlphabet(match))
+        }
+      })
+      ->ignore
+    } catch {
+    | Js.Exn.Error(obj) =>
+      switch Js.Exn.message(obj) {
+      | Some(m) => Js.log("Error Message: " ++ m)
+      | None => ()
       }
-    })
-    ->ignore
+    }
 
     None
   }, [inputValue])
@@ -87,11 +96,13 @@ let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
       Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Js.Option.isSome
     })
     ->Belt.Option.mapWithDefault((), trigger => {
+      // Set value in <input />
       setInputValue(_ =>
         inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger.triggerBy), suggestion)
       )
       switch inputRef.current->Js.Nullable.toOption {
       | Some(dom) =>
+        // Set value in <div contentEditable=true />
         Element.setInnerHTML(
           dom,
           inputValue->Js.String2.replaceByRe(
@@ -151,7 +162,7 @@ let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
         onInput={e =>
           setInputValue(_ => {
             switch inputRef.current->Js.Nullable.toOption {
-            | Some(dom) => Webapi.Dom.Element.innerText(dom)
+            | Some(dom) => Webapi.Dom.Element.innerHTML(dom)
             | None => ""
             }
           })}

@@ -14,7 +14,7 @@ let make = (~queryString: string) => {
         {
           // * : You can use either TriggerSymbol or TriggerRegex
           triggerBy: TriggerSymbol("@"),
-          // trigger: TriggerRegex("@(\\S+)|@"->Js.Re.fromStringWithFlags(~flags="ig"))
+          // trigger: TriggerRegex("@([a-zA-Z0-9_]+)|@"->Js.Re.fromStringWithFlags(~flags="ig"))
           triggerOptions: list{"Alice", "Tata", "Bob", "Charlie", "Alex", "Robert", "Robson"},
           highlightStyle: Some("color:#986BEB;font-weight:bold;font-style:italic;"),
         },
