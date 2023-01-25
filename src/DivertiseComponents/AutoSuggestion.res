@@ -4,6 +4,15 @@ type triggerType =
   | TriggerSymbol(string)
   | TriggerRegex(Js.Re.t)
 
+let createSuggestionEl = (~contentEditable=false, suggestionText): Dom.element => {
+  let span = document->Document.createElement("span")
+  span->Element.setClassName("highlight")
+  span->Element.setTextContent(suggestionText)
+  span->Element.setAttribute("contentEditable", contentEditable->string_of_bool)
+
+  span
+}
+
 @react.component
 let make = (
   ~trigger: triggerType,
@@ -65,7 +74,11 @@ let make = (
   let handleSuggestionClick = suggestion => {
     switch inputRef.current->Js.Nullable.toOption {
     | Some(dom) =>
-      Utils.ContentEditable.updateValue(~divEl=dom, suggestion, funcFinalRegex(trigger))
+      Utils.ContentEditable.updateValue(
+        ~triggerRegex=funcFinalRegex(trigger),
+        ~divEl=dom,
+        createSuggestionEl(suggestion)
+      )
       setInputValue(_ => dom->Element.innerHTML)
 
     | None => ()
