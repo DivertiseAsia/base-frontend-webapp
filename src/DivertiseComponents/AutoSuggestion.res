@@ -1,3 +1,5 @@
+open Webapi.Dom
+
 module Trigger = {
   type triggerType =
     | TriggerSymbol(string)
@@ -8,14 +10,6 @@ module Trigger = {
     triggerOptions: list<string>,
     triggerCallback?: unit => unit,
     highlightStyle: option<string>,
-  }
-
-  let makeIntoSpan = (trigger: t, text: string) => {
-    Js.log(trigger.highlightStyle)
-    switch trigger.highlightStyle {
-    | Some(style) => `<span style=${style} contentEditable=false>${text}</span>`
-    | None => `<span class=highlight contentEditable=false>${text}</span>`
-    }
   }
 
   let filterTriggerOptionsByAlphabet = (triggerOption: list<string>, match: Js.Re.result) => {
@@ -50,7 +44,6 @@ module Trigger = {
 }
 
 open Trigger
-open Webapi.Dom
 
 @react.component
 let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
@@ -62,7 +55,8 @@ let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
 
   let funcFinalRegex = (trigger: triggerType) =>
     switch trigger {
-    | TriggerSymbol(symbol) => `${symbol}([a-zA-Z0-9_]+)|${symbol}`->Js.Re.fromStringWithFlags(~flags="ig")
+    | TriggerSymbol(symbol) =>
+      `${symbol}([a-zA-Z0-9_]+)|${symbol}`->Js.Re.fromStringWithFlags(~flags="ig")
     | TriggerRegex(regex) => regex
     }
 
@@ -111,13 +105,14 @@ let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
       )
       switch inputRef.current->Js.Nullable.toOption {
       | Some(dom) =>
+        // Set value in <div contentEditable=true />
         Utils.ContentEditable.updateValue(
-          ~triggerRegex=funcFinalRegex(trigger),
+          ~triggerRegex=funcFinalRegex(trigger.triggerBy),
           ~divEl=dom,
-          createSuggestionEl(suggestion)
+          createSuggestionEl(suggestion),
         )
         setInputValue(_ => dom->Element.innerHTML)
-        | None => ()
+      | None => ()
       }
       setShowOptions(_ => false)
     })
