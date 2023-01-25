@@ -279,17 +279,10 @@ module ContentEditable = {
 
   let spanIdKey = "data-autosuggest-span-id"
 
-  let getChildNodesFromSelectionAsArray = selection => {
-    selection
-    ->Selection.anchorNode
-    ->Belt.Option.mapWithDefault([], anchorNode => {
-      anchorNode->Node.childNodes->NodeList.toArray
-    })
-  }
-
   let getChildNodesAsArray = element => {
     element->Element.childNodes->NodeList.toArray
   }
+
   let getSpanChildNodes = element => {
     element
     ->getChildNodesAsArray
@@ -305,7 +298,7 @@ module ContentEditable = {
   let moveCursorToNextSibling = (nextSibling, ~selection) => {
     // Add extra whitespace to next latest span
     if nextSibling->Node.textContent->Js.String2.length <= 0 {
-      nextSibling->Node.setTextContent("\u00A0" ++ nextSibling->Node.textContent)
+      nextSibling->Node.setTextContent("\u00A0")
     }
 
     let newRange = Document.createRange(document)
@@ -327,29 +320,15 @@ module ContentEditable = {
     ->Node.setTextContent(previousSibling, _)
   }
 
-  let highlightNewText = (
-    newTextNode,
-    ~spanId,
-    ~selectionRange as currentRange,
-    ~selection as currentSelection,
-  ) => {
-    // Insert new text Node to selectionRange
-    currentRange->Range.insertNode(newTextNode)
-    currentRange->Range.setStart(newTextNode, newTextNode->Node.textContent->Js.String2.length)
-
+  let insertNewTextNode = (newText, ~spanId, ~selectionRange as currentRange) => {
     // Create new highlight Range to move newText Node to a span
-    let highlightRange = Document.createRange(document) // TODO: rename HighlightRange
     let span = document->Document.createElement("span")
     span->Element.setClassName("highlight")
-    span->Element.setAttribute(spanIdKey, spanId->Belt.Int.toString)
+    span->Element.setAttribute(spanIdKey, spanId)
+    span->Element.setTextContent(newText)
 
-    highlightRange->Range.selectNode(newTextNode)
-    highlightRange->Range.surroundContents(span)
-
-    // Set cursor position to end of the end of highlight text
-    highlightRange->Range.collapse
-    currentSelection->Selection.removeAllRanges
-    currentSelection->Selection.addRange(highlightRange)
+    // Insert new text Node to selectionRange
+    currentRange->Range.insertNode(span)
   }
 
   let updateValue = (~divEl, newText, triggerRegex) => {
@@ -357,58 +336,38 @@ module ContentEditable = {
     ->Window.getSelection
     ->Belt.Option.map(selection => {
       let selectionRange = selection->Selection.getRangeAt(0)
-      let spanChildNodes = getSpanChildNodes(divEl)
-      let newSpanId = spanChildNodes->Belt.Array.length
+      let newSpanId = divEl->getSpanChildNodes->Belt.Array.length->Belt.Int.toString
 
-      // Create new paragraph element to be able to highlight the "newText"
-      // We will remove it at the last step
-      let newParagraphEl = document->Document.createElement("p")
-      newParagraphEl->Element.setInnerText(newText)
+      // Insert new text with style
+      // We're not use `setInnerText` because `insertNode` will insert empty text node automatically
+      newText->insertNewTextNode(~selectionRange, ~spanId=newSpanId)
 
-      // Update paragraph text node and move it to div[contenteditable]
-      newParagraphEl
-      ->Element.childNodes
-      ->NodeList.item(0)
-      ->Belt.Option.map(newTextNode => {
-        // Highlight new text
-        newTextNode->highlightNewText(~selection, ~selectionRange, ~spanId=newSpanId)
+      // Get latest span to update cursor and remove trigger string
+      let latestSpan =
+        divEl
+        ->getChildNodesAsArray
+        ->Belt.Array.getBy(childNode => {
+          if childNode->Node.nodeType == Webapi__Dom__Types.Element {
+            switch childNode->Element.ofNode {
+            | None => false
+            | Some(childEl) => childEl->Element.getAttribute(spanIdKey) == Some(newSpanId)
+            }
+          } else {
+            false
+          }
+        })
 
-        // Get latest span to update cursor and remove trigger string
-        let latestSpan =
-          divEl
-          ->getChildNodesAsArray
-          ->Belt.Array.getBy(
-            childNode => {
-              if childNode->Node.nodeType == Webapi__Dom__Types.Element {
-                switch childNode->Element.ofNode {
-                | None => false
-                | Some(childEl) =>
-                  childEl->Element.getAttribute(spanIdKey) == Some(newSpanId->Belt.Int.toString)
-                }
-              } else {
-                false
-              }
-            },
-          )
-
-        Js.log2("!! latestSpan: ", latestSpan)
-
-        // Move cursor to next sibling of latest span
-        latestSpan
-        ->Belt.Option.mapWithDefault(None, Node.nextSibling)
-        ->Belt.Option.map(moveCursorToNextSibling(~selection))
-        ->ignore
-
-        // Remove trigger string from previous sibling of latest span
-        latestSpan
-        ->Belt.Option.mapWithDefault(None, Node.previousSibling)
-        ->Belt.Option.map(replaceTriggerStringFromPreviousSibling(_, triggerRegex))
-        ->ignore
-      })
+      // Move cursor to next sibling of latest span
+      latestSpan
+      ->Belt.Option.mapWithDefault(None, Node.nextSibling)
+      ->Belt.Option.map(moveCursorToNextSibling(~selection))
       ->ignore
 
-      //Clean orpan element
-      newParagraphEl->Element.remove
+      // Remove trigger string from previous sibling of latest span
+      latestSpan
+      ->Belt.Option.mapWithDefault(None, Node.previousSibling)
+      ->Belt.Option.map(replaceTriggerStringFromPreviousSibling(_, triggerRegex))
+      ->ignore
     })
     ->ignore
   }

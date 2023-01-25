@@ -4,8 +4,6 @@ type triggerType =
   | TriggerSymbol(string)
   | TriggerRegex(Js.Re.t)
 
-let parentId = "test-div-contenteditable" //TODO: change parentID to prop or sth
-
 @react.component
 let make = (
   ~trigger: triggerType,
@@ -58,40 +56,21 @@ let make = (
     }
     None
   }, (inputValue, triggerOptions))
+
   React.useEffect1(() => {
     setShowOptions(_ => Js.List.length(filteredOptions) > 0)
     None
   }, [filteredOptions])
 
-  let makeIntoSpan = (text, extraId) => {
-    `<span class="highlight" contentEditable=false data-extra-id="${extraId}" >${text}</span>`
-  }
-
   let handleSuggestionClick = suggestion => {
-    // let newInputValue =
-    //   inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger), makeIntoSpan(suggestion, "1"))
-    Js.log2(">>> funcFinalRegex(trigger): ", funcFinalRegex(trigger))
     switch inputRef.current->Js.Nullable.toOption {
     | Some(dom) =>
-      //  ---- For debug will remove
-      // let beforeUpdateSel = Webapi.Dom.Window.getSelection(Webapi.Dom.window)
-      // let beforeUpdateFocusNode =
-      //   beforeUpdateSel->Belt.Option.mapWithDefault(None, Webapi.Dom.Selection.focusNode)
-      // Js.log2(">>> before update innerHTML selection!: ", beforeUpdateSel)
-      // Js.log2(">>> before update innerHTML focusnode!: ", beforeUpdateFocusNode)
-      // Js.log2(">>> dom: ", dom)
-      // Element.setInnerHTML(dom, newInputValue)
-      // let afterUpdateSel = Webapi.Dom.Window.getSelection(Webapi.Dom.window)
-      // let afterUpdateFocusNode = beforeUpdateSel->Belt.Option.map(Webapi.Dom.Selection.focusNode)
-      // Js.log2(">>> after update innerHTML selection!: ", afterUpdateSel)
-      // Js.log2(">>> after update innerHTML focusnode!: ", afterUpdateFocusNode)
-      //  ---- For debug will remove
-
       Utils.ContentEditable.updateValue(~divEl=dom, suggestion, funcFinalRegex(trigger))
       setInputValue(_ => dom->Element.innerHTML)
 
     | None => ()
     }
+
     setShowOptions(_ => false)
   }
 
@@ -126,30 +105,15 @@ let make = (
 
       | _ => ()
       }
-    } else {
-      switch key {
-      | "Escape" =>
-        Js.log2(">>> CURRENT selection!: ", Webapi.Dom.Window.getSelection(Webapi.Dom.window))
-        switch inputRef.current->Js.Nullable.toOption {
-        | Some(el) => Webapi.Dom.Element.childNodes(el)->Js.log2(" >>> nodeList: ", _)
-        | _ => Js.log(">>> no nodeList")
-        }
-      | _ => ()
-      }
     }
   }
-  // Js.log2(">>> inputValue: ", inputValue)
+
   <div className="auto-suggestion-container">
-    <p className="asss">
-      <span className="header-text"> {React.string("TESTTTT")} </span>
-    </p>
     {switch syntaxHighlight {
     | true =>
       <div
-        id=parentId
         className="input-field"
         contentEditable=true
-        // value={inputValue}
         suppressContentEditableWarning=true
         ref={ReactDOM.Ref.domRef(inputRef)}
         onBlur={_ => setShowOptions(_ => false)}
