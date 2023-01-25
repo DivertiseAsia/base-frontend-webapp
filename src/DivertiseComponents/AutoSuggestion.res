@@ -38,6 +38,15 @@ module Trigger = {
       Js.String2.localeCompare(first, second)->Belt.Float.toInt
     })
   }
+
+  let createSuggestionEl = (~contentEditable=false, suggestionText): Dom.element => {
+    let span = document->Document.createElement("span")
+    span->Element.setClassName("highlight")
+    span->Element.setTextContent(suggestionText)
+    span->Element.setAttribute("contentEditable", contentEditable->string_of_bool)
+
+    span
+  }
 }
 
 open Trigger
@@ -102,15 +111,13 @@ let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
       )
       switch inputRef.current->Js.Nullable.toOption {
       | Some(dom) =>
-        // Set value in <div contentEditable=true />
-        Element.setInnerHTML(
-          dom,
-          inputValue->Js.String2.replaceByRe(
-            funcFinalRegex(trigger.triggerBy),
-            makeIntoSpan(trigger, suggestion),
-          ),
+        Utils.ContentEditable.updateValue(
+          ~triggerRegex=funcFinalRegex(trigger),
+          ~divEl=dom,
+          createSuggestionEl(suggestion)
         )
-      | None => ()
+        setInputValue(_ => dom->Element.innerHTML)
+        | None => ()
       }
       setShowOptions(_ => false)
     })
@@ -135,6 +142,7 @@ let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
       | "ArrowDown" => handlePressKeyChangeHighlightOption(event, selectedIndex + 1)
       | "Enter" => {
           ReactEvent.Keyboard.preventDefault(event)
+          ReactEvent.Keyboard.stopPropagation(event)
           filteredOptions
           ->Belt.List.get(selectedIndex)
           ->Belt.Option.mapWithDefault((), handleSuggestionClick)
@@ -154,7 +162,6 @@ let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
       <div
         className="input-field"
         contentEditable=true
-        value={inputValue}
         suppressContentEditableWarning=true
         ref={ReactDOM.Ref.domRef(inputRef)}
         onBlur={_ => setShowOptions(_ => false)}

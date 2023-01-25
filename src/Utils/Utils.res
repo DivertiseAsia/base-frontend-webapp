@@ -192,3 +192,191 @@ let getSearchParameter = (parameter: string, queryString: string): option<string
     }
   }
 }
+
+module Dom = {
+  let setCursorPos = %raw(`
+  function setCursorPos(text) {
+    let selection = window.getSelection();
+    let selectionRange = selection.getRangeAt(0);
+
+    let newEl = document.createElement("p")
+    newEl.innerText = text;
+    let nodeTextNewEl = newEl.childNodes[0]
+    console.log("type newEl, ", typeof(newEl))
+    console.log(" nodeTextNewEl, ", nodeTextNewEl)
+    console.log(">> nodeTextNewEl.textContent: ", nodeTextNewEl.textContent,"end")
+
+    selectionRange.insertNode(nodeTextNewEl);
+    selectionRange.setStart(nodeTextNewEl, nodeTextNewEl.textContent.length);
+
+    // let nextSibling = nodeTextNewEl.nextSibling
+    // console.log(">>> nextSibling: ",  nextSibling)
+    // selectionRange.selectNode(nextSibling)
+    // selectionRange.setStart(nextSibling, 0);
+    // selectionRange.setEnd(nextSibling, 0);
+
+    /*
+    The Range.surroundContents() method moves content of the Range into a new node, placing the new node at the start of the specified range.
+    */
+    let rangeHighlight = document.createRange()
+    let newParent = document.createElement("span");
+    newParent.style.color = "red"
+    newParent.class = "highlight"
+    newParent.setAttribute("data-autosuggest-span-id", "1")
+    rangeHighlight.selectNode(nodeTextNewEl)
+    // rangeHighlight.setStart(nodeTextNewEl, 0);
+    rangeHighlight.surroundContents(newParent)
+
+
+    // Set cursor post to end of range highlight
+    // rangeHighlight.setStart(nodeTextNewEl, nodeTextNewEl.textContent.length);
+    // rangeHighlight.setEnd(nodeTextNewEl, nodeTextNewEl.textContent.length);
+    rangeHighlight.collapse(false);
+    selection.removeAllRanges()
+    selection.addRange(rangeHighlight)
+    // let newAddedSpan = document.querySelector("[data-autosuggest-span-id=1]")
+
+
+  console.log(">>>)) newEl.childNodes: ", newEl.childNodes)
+  console.log(">>>)) nodeTextNewEl: ", nodeTextNewEl)
+  console.log(">>>)) rangeHighlight: ", rangeHighlight)
+  // console.log(">>>)) newAddedSpan.nextSibling: ", newAddedSpan.nextSibling)
+  console.log(">>>)) selection.anchorNode: ", selection.anchorNode)
+  console.log(">>>)) selection.anchorNode: ", selection.anchorNode.childNodes)
+    // for (nextNode in selection.anchorNode.childNodes) {
+
+    // }
+    // rangeHighlight.insertNode(nextSibling)
+    // rangeHighlight.selectNode(nextSibling)
+    // rangeHighlight.collapse(false)
+
+  }
+  `)
+
+  let testInsertNode = %raw(`
+  function testInsertNode(){
+    let range = document.createRange();
+    let newNode = document.createElement("p");
+    newNode.appendChild(document.createTextNode("New Node Inserted Here"));
+    range.selectNode(document.getElementsByTagName("div").item(0));
+    range.insertNode(newNode);
+
+    }
+    `)
+
+  let spanToH1 = %raw(`
+    function spanToH1(){
+      const range = document.createRange();
+      const newParent = document.createElement('h1');
+
+      range.selectNode(document.querySelector('.header-text'));
+      range.surroundContents(newParent);
+    }`)
+}
+
+module ContentEditable = {
+  open! Webapi.Dom
+
+  let spanIdKey = "data-autosuggest-span-id"
+
+  let getChildNodesAsArray = element => {
+    element->Element.childNodes->NodeList.toArray
+  }
+
+  let getSpanChildNodes = element => {
+    element
+    ->getChildNodesAsArray
+    ->Belt.Array.keepMap(childNode => {
+      if childNode->Node.nodeType == Webapi__Dom__Types.Element {
+        Some(childNode)
+      } else {
+        None
+      }
+    })
+  }
+
+  let moveCursorToNextSibling = (nextSibling, ~selection) => {
+    // Add extra whitespace to next latest span
+    if nextSibling->Node.textContent->Js.String2.length <= 0 {
+      nextSibling->Node.setTextContent("\u00A0")
+    }
+
+    let newRange = Document.createRange(document)
+    newRange->Range.setStart(nextSibling, 1)
+    newRange->Range.setEnd(nextSibling, 1)
+
+    selection->Selection.removeAllRanges
+    selection->Selection.addRange(newRange)
+  }
+
+  let replaceTriggerStringFromPreviousSibling = (
+    ~replaceWith="",
+    previousSibling,
+    triggerRegex,
+  ) => {
+    previousSibling
+    ->Node.textContent
+    ->Js.String2.replaceByRe(triggerRegex, replaceWith)
+    ->Node.setTextContent(previousSibling, _)
+  }
+
+  let insertNewSpanTextNode = (newText, ~spanId, ~selectionRange as currentRange) => {
+    // Create new highlight Range to move newText Node to a span
+    let span = document->Document.createElement("span")
+    span->Element.setClassName("highlight")
+    span->Element.setAttribute(spanIdKey, spanId)
+    span->Element.setTextContent(newText)
+
+    // Insert new text Node to selectionRange
+    currentRange->Range.insertNode(span)
+  }
+
+  let insertNewTextElement = (insertEl, ~spanId, ~selectionRange as currentRange) => {
+    // Add attribute extra span id key
+    insertEl->Element.setAttribute(spanIdKey, spanId)
+
+    // Insert new text Node to selectionRange
+    currentRange->Range.insertNode(insertEl)
+  }
+
+  let updateValue = (~divEl, ~triggerRegex, insertEl) => {
+    window
+    ->Window.getSelection
+    ->Belt.Option.map(selection => {
+      let selectionRange = selection->Selection.getRangeAt(0)
+      let newSpanId = divEl->getSpanChildNodes->Belt.Array.length->Belt.Int.toString
+
+      // Insert new text with style
+      // We're not use `setInnerText` because `insertNode` will insert empty text node automatically
+      insertEl->insertNewTextElement(~selectionRange, ~spanId=newSpanId)
+
+      // Get latest span to update cursor and remove trigger string
+      let latestSpan =
+        divEl
+        ->getChildNodesAsArray
+        ->Belt.Array.getBy(childNode => {
+          if childNode->Node.nodeType == Webapi__Dom__Types.Element {
+            switch childNode->Element.ofNode {
+            | None => false
+            | Some(childEl) => childEl->Element.getAttribute(spanIdKey) == Some(newSpanId)
+            }
+          } else {
+            false
+          }
+        })
+
+      // Move cursor to next sibling of latest span
+      latestSpan
+      ->Belt.Option.mapWithDefault(None, Node.nextSibling)
+      ->Belt.Option.map(moveCursorToNextSibling(~selection))
+      ->ignore
+
+      // Remove trigger string from previous sibling of latest span
+      latestSpan
+      ->Belt.Option.mapWithDefault(None, Node.previousSibling)
+      ->Belt.Option.map(replaceTriggerStringFromPreviousSibling(_, triggerRegex))
+      ->ignore
+    })
+    ->ignore
+  }
+}
