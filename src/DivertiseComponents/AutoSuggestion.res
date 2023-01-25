@@ -33,11 +33,16 @@ module Trigger = {
     })
   }
 
-  let createSuggestionEl = (~contentEditable=false, suggestionText): Dom.element => {
+  let createSuggestionEl = (
+    ~contentEditable=false,
+    ~suggestionText: string,
+    ~style: option<string>,
+  ): Dom.element => {
     let span = document->Document.createElement("span")
     span->Element.setClassName("highlight")
     span->Element.setTextContent(suggestionText)
     span->Element.setAttribute("contentEditable", contentEditable->string_of_bool)
+    span->Element.setAttribute("style", style->Belt.Option.getWithDefault(""))
 
     span
   }
@@ -64,7 +69,6 @@ let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
     try {
       triggers
       ->Belt.List.getBy(trigger => {
-        Js.log2("Regex", funcFinalRegex(trigger.triggerBy))
         Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Js.Option.isSome
       })
       ->Belt.Option.mapWithDefault(setFilteredOptions(_ => list{}), trigger => {
@@ -109,7 +113,11 @@ let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
         Utils.ContentEditable.updateValue(
           ~triggerRegex=funcFinalRegex(trigger.triggerBy),
           ~divEl=dom,
-          createSuggestionEl(suggestion),
+          createSuggestionEl(
+            ~contentEditable=false,
+            ~suggestionText=suggestion,
+            ~style=trigger.highlightStyle,
+          ),
         )
         setInputValue(_ => dom->Element.innerHTML)
       | None => ()
