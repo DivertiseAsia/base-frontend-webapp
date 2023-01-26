@@ -295,7 +295,7 @@ module ContentEditable = {
     })
   }
 
-  let getSpansValueAs = element => {
+  let getSpansValueAsList = element => {
     element
     ->getSpanChildNodes
     ->Belt.Array.map(span => {
@@ -349,14 +349,6 @@ module ContentEditable = {
 
     // Insert new text Node to selectionRange
     currentRange->Range.insertNode(insertEl)
-  }
-
-  let regexInTextNode = (~element, ~triggerRegex) => {
-    element
-    ->getChildNodesAsArray
-    ->Belt.Array.map(node => {
-      Js.log(node)
-    })
   }
 
   let updateValue = (~divEl, ~triggerRegex, insertEl) => {
