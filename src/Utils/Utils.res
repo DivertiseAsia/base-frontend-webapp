@@ -295,6 +295,18 @@ module ContentEditable = {
     })
   }
 
+  let getSpansValueAs = element => {
+    element
+    ->getSpanChildNodes
+    ->Belt.Array.map(span => {
+      span
+      ->Element.ofNode
+      ->Belt.Option.mapWithDefault("", element => {
+        element->Element.outerHTML
+      })
+    })
+  }
+
   let moveCursorToNextSibling = (nextSibling, ~selection) => {
     // Add extra whitespace to next latest span
     if nextSibling->Node.textContent->Js.String2.length <= 0 {
@@ -337,6 +349,14 @@ module ContentEditable = {
 
     // Insert new text Node to selectionRange
     currentRange->Range.insertNode(insertEl)
+  }
+
+  let regexInTextNode = (~element, ~triggerRegex) => {
+    element
+    ->getChildNodesAsArray
+    ->Belt.Array.map(node => {
+      Js.log(node)
+    })
   }
 
   let updateValue = (~divEl, ~triggerRegex, insertEl) => {
