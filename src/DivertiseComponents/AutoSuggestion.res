@@ -71,8 +71,6 @@ let make = (~triggers: list<Trigger.t>) => {
       })
       ->Belt.Option.mapWithDefault(setFilteredOptions(_ => list{}), trigger => {
         let matchtriggerSymbol = Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)
-        Js.log2("TriggerSymbol", `\\s+@(\\w*)`->Js.Re.fromStringWithFlags(~flags="ig"))
-        Js.log2("matchtriggerSymbol", matchtriggerSymbol)
         switch matchtriggerSymbol {
         | None => setFilteredOptions(_ => list{})
         | Some(match) =>
@@ -114,7 +112,6 @@ let make = (~triggers: list<Trigger.t>) => {
             ~styles=trigger.highlightStyle,
           ),
         )
-        setInputValue(_ => dom->Element.innerHTML)
       | None => ()
       }
       setShowOptions(_ => false)
