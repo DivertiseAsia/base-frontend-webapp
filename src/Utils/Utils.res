@@ -214,6 +214,18 @@ module ContentEditable = {
     })
   }
 
+  let getSpansValueAsList = element => {
+    element
+    ->getSpanChildNodes
+    ->Belt.Array.map(span => {
+      span
+      ->Element.ofNode
+      ->Belt.Option.mapWithDefault("", element => {
+        element->Element.outerHTML
+      })
+    })
+  }
+
   let moveCursorToNextSibling = (nextSibling, ~selection) => {
     // Add extra whitespace to next latest span
     if nextSibling->Node.textContent->Js.String2.length <= 0 {

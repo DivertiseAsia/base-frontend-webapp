@@ -1,25 +1,56 @@
 open Webapi.Dom
 
-type triggerType =
-  | TriggerSymbol(string)
-  | TriggerRegex(Js.Re.t)
+module Trigger = {
+  type triggerType =
+    | TriggerSymbol(string)
+    | TriggerRegex(Js.Re.t)
 
-let createSuggestionEl = (~contentEditable=false, suggestionText): Dom.element => {
-  let span = document->Document.createElement("span")
-  span->Element.setClassName("highlight")
-  span->Element.setTextContent(suggestionText)
-  span->Element.setAttribute("contentEditable", contentEditable->string_of_bool)
+  type t = {
+    triggerBy: triggerType,
+    triggerOptions: list<string>,
+    triggerCallback?: unit => unit,
+    highlightStyle: option<string>,
+  }
 
-  span
+  let filterTriggerOptionsByAlphabet = (triggerOption: list<string>, match: Js.Re.result) => {
+    triggerOption
+    ->Belt.List.keep(option => {
+      option
+      ->Js.Re.exec_(
+        match
+        ->Js.Re.captures
+        ->Belt.Array.get(1)
+        ->Belt.Option.getWithDefault(Js.Nullable.null)
+        ->Js.Nullable.toOption
+        ->Belt.Option.getWithDefault("")
+        ->Js.Re.fromStringWithFlags(~flags="ig"),
+        _,
+      )
+      ->Js.Option.isSome
+    })
+    ->Belt.List.sort((first, second) => {
+      Js.String2.localeCompare(first, second)->Belt.Float.toInt
+    })
+  }
+
+  let createSuggestionEl = (
+    ~contentEditable=false,
+    ~suggestionText: string,
+    ~styles: option<string>,
+  ): Dom.element => {
+    let span = document->Document.createElement("span")
+    span->Element.setTextContent(suggestionText)
+    span->Element.setAttribute("contentEditable", contentEditable->string_of_bool)
+    styles->Belt.Option.mapWithDefault((), style => span->Element.setAttribute("style", style))
+
+    span
+  }
 }
 
+open Trigger
+
 @react.component
-let make = (
-  ~trigger: triggerType,
-  ~triggerOptions: list<string>,
-  ~_triggerCallback=?,
-  ~syntaxHighlight=false,
-) => {
+let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
   let (inputValue, setInputValue) = React.useState(_ => "")
   let (filteredOptions, setFilteredOptions) = React.useState(_ => list{})
   let (showOptions, setShowOptions) = React.useState(_ => false)
@@ -28,63 +59,72 @@ let make = (
 
   let funcFinalRegex = (trigger: triggerType) =>
     switch trigger {
-    | TriggerSymbol(symbol) => `${symbol}(\\S+)|${symbol}`->Js.Re.fromStringWithFlags(~flags="ig")
+    | TriggerSymbol(symbol) => `\\s${symbol}(\\w*)`->Js.Re.fromStringWithFlags(~flags="ig")
     | TriggerRegex(regex) => regex
     }
 
-  React.useEffect2(() => {
-    let matchtriggerSymbol = Js.Re.exec_(funcFinalRegex(trigger), inputValue)
-
-    switch matchtriggerSymbol {
-    | None => setFilteredOptions(_ => list{})
-    | Some(match) =>
-      setFilteredOptions(_ => {
-        triggerOptions
-        ->Belt.List.keep(
-          option => {
-            option
-            ->Js.Re.exec_(
-              match
-              ->Js.Re.captures
-              ->Belt.Array.get(1)
-              ->Belt.Option.getWithDefault(Js.Nullable.null)
-              ->Js.Nullable.toOption
-              ->Belt.Option.getWithDefault("")
-              ->Js.Re.fromStringWithFlags(~flags="ig"),
-              _,
-            )
-            ->Js.Option.isSome
-          },
-        )
-        ->Belt.List.sort(
-          (first, second) => {
-            Js.String2.localeCompare(first, second)->Belt.Float.toInt
-          },
-        )
+  React.useEffect1(() => {
+    try {
+      triggers
+      ->Belt.List.getBy(trigger => {
+        Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Js.Option.isSome
       })
+      ->Belt.Option.mapWithDefault(setFilteredOptions(_ => list{}), trigger => {
+        let matchtriggerSymbol = Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)
+        Js.log2("TriggerSymbol", `\\s+@(\\w*)`->Js.Re.fromStringWithFlags(~flags="ig"))
+        Js.log2("matchtriggerSymbol", matchtriggerSymbol)
+        switch matchtriggerSymbol {
+        | None => setFilteredOptions(_ => list{})
+        | Some(match) =>
+          setFilteredOptions(_ => trigger.triggerOptions->filterTriggerOptionsByAlphabet(match))
+        }
+      })
+      ->ignore
+    } catch {
+    | Js.Exn.Error(obj) =>
+      switch Js.Exn.message(obj) {
+      | Some(m) => Js.log("Error Message: " ++ m)
+      | None => ()
+      }
     }
+
     None
-  }, (inputValue, triggerOptions))
+  }, [inputValue])
 
   React.useEffect1(() => {
     setShowOptions(_ => Js.List.length(filteredOptions) > 0)
+
     None
   }, [filteredOptions])
 
   let handleSuggestionClick = suggestion => {
-    switch inputRef.current->Js.Nullable.toOption {
-    | Some(dom) =>
-      Utils.ContentEditable.updateValue(
-        ~triggerRegex=funcFinalRegex(trigger),
-        ~divEl=dom,
-        createSuggestionEl(suggestion)
+    triggers
+    ->Belt.List.getBy(trigger => {
+      Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Js.Option.isSome
+    })
+    ->Belt.Option.mapWithDefault((), trigger => {
+      // Set value in <input />
+      setInputValue(_ =>
+        inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger.triggerBy), suggestion)
       )
-      setInputValue(_ => dom->Element.innerHTML)
-
-    | None => ()
-    }
-
-    setShowOptions(_ => false)
+      switch inputRef.current->Js.Nullable.toOption {
+      | Some(dom) =>
+        // Set value in <div contentEditable=true />
+        Utils.ContentEditable.updateValue(
+          ~triggerRegex=funcFinalRegex(trigger.triggerBy),
+          ~divEl=dom,
+          createSuggestionEl(
+            ~contentEditable=false,
+            ~suggestionText=suggestion,
+            ~styles=trigger.highlightStyle,
+          ),
+        )
+        setInputValue(_ => dom->Element.innerHTML)
+      | None => ()
+      }
+      setShowOptions(_ => false)
+    })
+    ->ignore
   }
 
   let handlePressKeyChangeHighlightOption = (event, i) => {
@@ -110,19 +150,17 @@ let make = (
           ->Belt.List.get(selectedIndex)
           ->Belt.Option.mapWithDefault((), handleSuggestionClick)
         }
-
       | "Escape" => {
           ReactEvent.Keyboard.preventDefault(event)
           setShowOptions(_ => false)
         }
-
       | _ => ()
       }
     }
   }
 
   <div className="auto-suggestion-container">
-    {switch syntaxHighlight {
+    {switch isSyntaxHighlight {
     | true =>
       <div
         className="input-field"
