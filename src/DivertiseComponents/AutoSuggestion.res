@@ -36,13 +36,12 @@ module Trigger = {
   let createSuggestionEl = (
     ~contentEditable=false,
     ~suggestionText: string,
-    ~style: option<string>,
+    ~styles: option<string>,
   ): Dom.element => {
     let span = document->Document.createElement("span")
-    span->Element.setClassName("highlight")
     span->Element.setTextContent(suggestionText)
     span->Element.setAttribute("contentEditable", contentEditable->string_of_bool)
-    span->Element.setAttribute("style", style->Belt.Option.getWithDefault(""))
+    styles->Belt.Option.mapWithDefault((), style => span->Element.setAttribute("style", style))
 
     span
   }
@@ -60,8 +59,7 @@ let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
 
   let funcFinalRegex = (trigger: triggerType) =>
     switch trigger {
-    | TriggerSymbol(symbol) =>
-      `${symbol}([a-zA-Z0-9_]+)|${symbol}`->Js.Re.fromStringWithFlags(~flags="ig")
+    | TriggerSymbol(symbol) => `\\s${symbol}(\\w*)`->Js.Re.fromStringWithFlags(~flags="ig")
     | TriggerRegex(regex) => regex
     }
 
@@ -73,6 +71,8 @@ let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
       })
       ->Belt.Option.mapWithDefault(setFilteredOptions(_ => list{}), trigger => {
         let matchtriggerSymbol = Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)
+        Js.log2("TriggerSymbol", `\\s+@(\\w*)`->Js.Re.fromStringWithFlags(~flags="ig"))
+        Js.log2("matchtriggerSymbol", matchtriggerSymbol)
         switch matchtriggerSymbol {
         | None => setFilteredOptions(_ => list{})
         | Some(match) =>
@@ -116,7 +116,7 @@ let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
           createSuggestionEl(
             ~contentEditable=false,
             ~suggestionText=suggestion,
-            ~style=trigger.highlightStyle,
+            ~styles=trigger.highlightStyle,
           ),
         )
         setInputValue(_ => dom->Element.innerHTML)

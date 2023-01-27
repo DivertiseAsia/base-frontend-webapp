@@ -29,11 +29,12 @@ let make = (~queryString: string) => {
             "robert@hotmail.com",
             "robson@gmail.com",
           },
-          highlightStyle: Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
+          // highlightStyle: Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
+          highlightStyle: None,
         },
       }
-      /* If isSyntaxHighlight is *true*, it will use <input />
-         but if isSyntaxHighlight is *false*, it will use <div contentEditable=true />
+      /* If isSyntaxHighlight is *false*, it will use <input />
+         but if isSyntaxHighlight is *true*, it will use <div contentEditable=true />
       */
       isSyntaxHighlight=true
     />
