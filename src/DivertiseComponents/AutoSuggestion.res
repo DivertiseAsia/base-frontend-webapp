@@ -50,7 +50,7 @@ module Trigger = {
 open Trigger
 
 @react.component
-let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
+let make = (~triggers: list<Trigger.t>) => {
   let (inputValue, setInputValue) = React.useState(_ => "")
   let (filteredOptions, setFilteredOptions) = React.useState(_ => list{})
   let (showOptions, setShowOptions) = React.useState(_ => false)
@@ -103,13 +103,8 @@ let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
       Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Js.Option.isSome
     })
     ->Belt.Option.mapWithDefault((), trigger => {
-      // Set value in <input />
-      setInputValue(_ =>
-        inputValue->Js.String2.replaceByRe(funcFinalRegex(trigger.triggerBy), suggestion)
-      )
       switch inputRef.current->Js.Nullable.toOption {
       | Some(dom) =>
-        // Set value in <div contentEditable=true />
         Utils.ContentEditable.updateValue(
           ~triggerRegex=funcFinalRegex(trigger.triggerBy),
           ~divEl=dom,
@@ -160,32 +155,21 @@ let make = (~triggers: list<Trigger.t>, ~isSyntaxHighlight=false) => {
   }
 
   <div className="auto-suggestion-container">
-    {switch isSyntaxHighlight {
-    | true =>
-      <div
-        className="input-field"
-        contentEditable=true
-        suppressContentEditableWarning=true
-        ref={ReactDOM.Ref.domRef(inputRef)}
-        onBlur={_ => setShowOptions(_ => false)}
-        onKeyDown={handleInputKeyDown}
-        onInput={e =>
-          setInputValue(_ => {
-            switch inputRef.current->Js.Nullable.toOption {
-            | Some(dom) => Webapi.Dom.Element.innerHTML(dom)
-            | None => ""
-            }
-          })}
-      />
-    | false =>
-      <input
-        type_="text"
-        value={inputValue}
-        onBlur={_ => setShowOptions(_ => false)}
-        onKeyDown={handleInputKeyDown}
-        onChange={e => setInputValue(_ => Utils.valueFromEvent(e))}
-      />
-    }}
+    <div
+      className="input-field"
+      contentEditable=true
+      suppressContentEditableWarning=true
+      ref={ReactDOM.Ref.domRef(inputRef)}
+      onBlur={_ => setShowOptions(_ => false)}
+      onKeyDown={handleInputKeyDown}
+      onInput={e =>
+        setInputValue(_ => {
+          switch inputRef.current->Js.Nullable.toOption {
+          | Some(dom) => Webapi.Dom.Element.innerHTML(dom)
+          | None => ""
+          }
+        })}
+    />
     {switch showOptions {
     | true =>
       <ul>
