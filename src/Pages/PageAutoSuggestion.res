@@ -61,30 +61,44 @@ let make = () => {
         </ul>
       </ul>
     </div>
-    <AutoSuggestion
-      triggers=list{
-        {
-          // * : You can use either TriggerSymbol or TriggerRegex
-          triggerBy: TriggerSymbol("@"),
-          // triggerBy: TriggerRegex("@([a-zA-Z0-9_]+)|@"->Js.Re.fromStringWithFlags(~flags="ig"))
-          triggerOptions: list{"Alice", "Tata", "Bob", "Charlie", "Alex", "Robert", "Robson"},
-          highlightStyle: Some("color:#986BEB;font-weight:bold;font-style:italic;"),
-        },
-        {
-          triggerBy: TriggerSymbol("!"),
-          triggerOptions: list{
-            "alice@gmail.com",
-            "tata@gmail.com",
-            "bob@gmail.com",
-            "charlie@yahoo.com",
-            "alex@gmail.com",
-            "robert@hotmail.com",
-            "robson@gmail.com",
-          },
-          // highlightStyle: Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
-          highlightStyle: None,
-        },
-      }
-    />
+    <div className="showcase">
+      <h2> {"Showcase of component"->React.string} </h2>
+      <ul>
+        <li>
+          <p> {"Auto-suggestion component with no style and trigger with '@'"->React.string} </p>
+          <AutoSuggestion
+            triggers=list{
+              {
+                triggerBy: TriggerSymbol("@"),
+                triggerOptions: list{"Alice", "Tata", "Bob", "Charlie", "Alex", "Robert", "Robson"},
+                highlightStyle: None,
+              },
+            }
+          />
+        </li>
+        <li>
+          <p>
+            {"Auto-suggestion component with style and trigger with 'Regex(@)'"->React.string}
+          </p>
+          <AutoSuggestion
+            triggers=list{
+              {
+                triggerBy: TriggerRegex("\\s@(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig")),
+                triggerOptions: list{
+                  "alice@gmail.com",
+                  "tata@gmail.com",
+                  "bob@gmail.com",
+                  "charlie@yahoo.com",
+                  "alex@gmail.com",
+                  "robert@hotmail.com",
+                  "robson@gmail.com",
+                },
+                highlightStyle: Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
+              },
+            }
+          />
+        </li>
+      </ul>
+    </div>
   </div>
 }
