@@ -251,7 +251,7 @@ module ContentEditable = {
     ->Node.setTextContent(previousSibling, _)
   }
 
-  let insertNewSpanTextNode = (newText, ~spanId, ~selectionRange as currentRange) => {
+  let insertSpanNode = (newText, ~spanId, ~selectionRange as currentRange) => {
     // Create new highlight Range to move newText Node to a span
     let span = document->Document.createElement("span")
     span->Element.setClassName("highlight")
@@ -262,7 +262,7 @@ module ContentEditable = {
     currentRange->Range.insertNode(span)
   }
 
-  let insertNewTextElement = (insertEl, ~spanId, ~selectionRange as currentRange) => {
+  let insertNodeElement = (insertEl, ~spanId, ~selectionRange as currentRange) => {
     // Add attribute extra span id key
     insertEl->Element.setAttribute(spanIdKey, spanId)
 
@@ -279,7 +279,7 @@ module ContentEditable = {
 
       // Insert new text with style
       // We're not use `setInnerText` because `insertNode` will insert empty text node automatically
-      insertEl->insertNewTextElement(~selectionRange, ~spanId=newSpanId)
+      insertEl->insertNodeElement(~selectionRange, ~spanId=newSpanId)
 
       // Get latest span to update cursor and remove trigger string
       let latestSpan =

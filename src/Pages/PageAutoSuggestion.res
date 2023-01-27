@@ -2,6 +2,31 @@
 let make = () => {
   <div>
     <h1> {"Auto Suggestion Component"->React.string} </h1>
+    <p>
+      {"make an auto-suggestion with trigger to suggest with 'symbol' or 'regex'."->React.string}
+    </p>
+    <ul>
+      <li> {"isSyntaxHighlight = false : normal <input /> tag"->React.string} </li>
+      <AutoSuggestion
+        triggers=list{
+          {
+            triggerBy: TriggerSymbol("@"),
+            triggerOptions: list{"Alice", "Tata", "Bob", "Charlie", "Alex", "Robert", "Robson"},
+            highlightStyle: None,
+          },
+        }
+      />
+      <li> {"isSyntaxHighlight = true : use <div contentEditable=true /> tag"->React.string} </li>
+      <AutoSuggestion
+        triggers=list{
+          {
+            triggerBy: TriggerSymbol("@"),
+            triggerOptions: list{"Alice", "Tata", "Bob", "Charlie", "Alex", "Robert", "Robson"},
+            highlightStyle: Some("color:#986BEB;font-weight:bold;font-style:italic;"),
+          },
+        }
+      />
+    </ul>
     <AutoSuggestion
       triggers=list{
         {
@@ -26,11 +51,6 @@ let make = () => {
           highlightStyle: None,
         },
       }
-      /* 
-        If isSyntaxHighlight is *false*, it will use <input />
-        but if isSyntaxHighlight is *true*, it will use <div contentEditable=true />
-      */
-      isSyntaxHighlight=true
     />
   </div>
 }
