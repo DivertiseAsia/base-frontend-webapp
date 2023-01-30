@@ -87,7 +87,6 @@ let make = (~triggers: list<Trigger.t>) => {
     })
     ->(
       filteredOptions => {
-        Js.log2("filteredOption", filteredOptions)
         setFilteredOptions(_ => filteredOptions->Belt.Option.getWithDefault(list{}))
       }
     )
