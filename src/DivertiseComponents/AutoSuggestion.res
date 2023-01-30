@@ -52,6 +52,7 @@ open Trigger
 @react.component
 let make = (~triggers: list<Trigger.t>) => {
   let (inputValue, setInputValue) = React.useState(_ => "")
+  let (currentTrigger, setCurrentTrigger) = React.useState(_ => None)
   let (filteredOptions, setFilteredOptions) = React.useState(_ => list{})
   let (showOptions, setShowOptions) = React.useState(_ => false)
   let (selectedIndex, setSelectedIndex) = React.useState(_ => 0)
@@ -64,34 +65,35 @@ let make = (~triggers: list<Trigger.t>) => {
     }
 
   React.useEffect1(() => {
-    Js.log2("inputValue", inputValue)
-
-    try {
-      triggers
-      ->Belt.List.getBy(trigger => {
-        Js.log2("regex", funcFinalRegex(trigger.triggerBy))
-        Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Js.Option.isSome
-      })
-      ->Belt.Option.mapWithDefault(None, trigger => {
-        Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Belt.Option.map(
-          match => {
-            trigger.triggerOptions->filterTriggerOptionsByAlphabet(match)
-          },
-        )
-      })
-      ->(filteredOptions =>
-        setFilteredOptions(_ => filteredOptions->Belt.Option.getWithDefault(list{})))
-      ->ignore
-    } catch {
-    | Js.Exn.Error(obj) =>
-      switch Js.Exn.message(obj) {
-      | Some(m) => Js.log("Error Message: " ++ m)
-      | None => ()
-      }
-    }
+    triggers
+    ->Belt.List.getBy(trigger => {
+      Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Js.Option.isSome
+    })
+    ->(trigger => setCurrentTrigger(_ => trigger))
+    ->ignore
 
     None
   }, [inputValue])
+
+  React.useEffect2(() => {
+    currentTrigger
+    ->Belt.Option.mapWithDefault(None, trigger => {
+      Js.log2("exec", Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue))
+      Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Belt.Option.map(
+        match => {
+          trigger.triggerOptions->filterTriggerOptionsByAlphabet(match)
+        },
+      )
+    })
+    ->(
+      filteredOptions => {
+        Js.log2("filteredOption", filteredOptions)
+        setFilteredOptions(_ => filteredOptions->Belt.Option.getWithDefault(list{}))
+      }
+    )
+
+    None
+  }, (inputValue, currentTrigger))
 
   React.useEffect1(() => {
     setShowOptions(_ => Js.List.length(filteredOptions) > 0)
@@ -100,10 +102,7 @@ let make = (~triggers: list<Trigger.t>) => {
   }, [filteredOptions])
 
   let handleSuggestionClick = suggestion => {
-    triggers
-    ->Belt.List.getBy(trigger => {
-      Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Js.Option.isSome
-    })
+    currentTrigger
     ->Belt.Option.mapWithDefault((), trigger => {
       switch inputRef.current->Js.Nullable.toOption {
       | Some(dom) =>
