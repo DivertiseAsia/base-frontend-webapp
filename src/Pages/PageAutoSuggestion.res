@@ -98,6 +98,31 @@ let make = () => {
             }
           />
         </li>
+        <li>
+          <p> {"Auto-suggestion component trigger with '@' or 'Regex(!)'"->React.string} </p>
+          <AutoSuggestion
+            triggers=list{
+              {
+                triggerBy: TriggerSymbol("@"),
+                triggerOptions: list{"Alice", "Tata", "Bob", "Charlie", "Alex", "Robert", "Robson"},
+                highlightStyle: Some("color:#567189;font-weight:bold;font-style:italic;"),
+              },
+              {
+                triggerBy: TriggerRegex("\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig")),
+                triggerOptions: list{
+                  "alice@gmail.com",
+                  "tata@gmail.com",
+                  "bob@gmail.com",
+                  "charlie@yahoo.com",
+                  "alex@gmail.com",
+                  "robert@hotmail.com",
+                  "robson@gmail.com",
+                },
+                highlightStyle: Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
+              },
+            }
+          />
+        </li>
       </ul>
     </div>
   </div>

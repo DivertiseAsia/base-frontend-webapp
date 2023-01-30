@@ -117,6 +117,7 @@ let make = (~triggers: list<Trigger.t>) => {
         )
       | None => ()
       }
+      setCurrentTrigger(_ => None)
       setShowOptions(_ => false)
     })
     ->ignore
@@ -145,12 +146,10 @@ let make = (~triggers: list<Trigger.t>) => {
           ->Belt.List.get(selectedIndex)
           ->Belt.Option.mapWithDefault((), handleSuggestionClick)
         }
-
       | "Escape" => {
           ReactEvent.Keyboard.preventDefault(event)
           setShowOptions(_ => false)
         }
-
       | _ => ()
       }
     }
