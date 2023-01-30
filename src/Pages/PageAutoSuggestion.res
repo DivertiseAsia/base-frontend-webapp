@@ -78,12 +78,12 @@ let make = () => {
         </li>
         <li>
           <p>
-            {"Auto-suggestion component with style and trigger with 'Regex(@)'"->React.string}
+            {"Auto-suggestion component with style and trigger with 'Regex(!)'"->React.string}
           </p>
           <AutoSuggestion
             triggers=list{
               {
-                triggerBy: TriggerRegex("\\s@(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig")),
+                triggerBy: TriggerRegex("\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig")),
                 triggerOptions: list{
                   "alice@gmail.com",
                   "tata@gmail.com",

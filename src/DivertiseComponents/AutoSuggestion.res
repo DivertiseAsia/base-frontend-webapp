@@ -64,19 +64,23 @@ let make = (~triggers: list<Trigger.t>) => {
     }
 
   React.useEffect1(() => {
+    Js.log2("inputValue", inputValue)
+
     try {
       triggers
       ->Belt.List.getBy(trigger => {
+        Js.log2("regex", funcFinalRegex(trigger.triggerBy))
         Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Js.Option.isSome
       })
-      ->Belt.Option.mapWithDefault(setFilteredOptions(_ => list{}), trigger => {
-        let matchtriggerSymbol = Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)
-        switch matchtriggerSymbol {
-        | None => setFilteredOptions(_ => list{})
-        | Some(match) =>
-          setFilteredOptions(_ => trigger.triggerOptions->filterTriggerOptionsByAlphabet(match))
-        }
+      ->Belt.Option.mapWithDefault(None, trigger => {
+        Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Belt.Option.map(
+          match => {
+            trigger.triggerOptions->filterTriggerOptionsByAlphabet(match)
+          },
+        )
       })
+      ->(filteredOptions =>
+        setFilteredOptions(_ => filteredOptions->Belt.Option.getWithDefault(list{})))
       ->ignore
     } catch {
     | Js.Exn.Error(obj) =>
@@ -142,10 +146,12 @@ let make = (~triggers: list<Trigger.t>) => {
           ->Belt.List.get(selectedIndex)
           ->Belt.Option.mapWithDefault((), handleSuggestionClick)
         }
+
       | "Escape" => {
           ReactEvent.Keyboard.preventDefault(event)
           setShowOptions(_ => false)
         }
+
       | _ => ()
       }
     }
