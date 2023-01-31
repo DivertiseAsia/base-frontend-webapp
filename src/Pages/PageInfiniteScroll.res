@@ -7,6 +7,7 @@ let make = () => {
 
   let createCardList = (list: React.element, page: int, loadPerPage: int, total: int) => {
     let remainder = total - page * loadPerPage
+
     // if there are no more items to load
     if remainder < 0 {
       setIsOutOfItems(_ => true)
@@ -63,16 +64,14 @@ let make = () => {
     None
   })
 
-  // * : This div is needed to collect the height of the screen (clientHeight)
-  <div className="scroll-wrapper" style={ReactDOM.Style.make(~height="100vh", ())}>
-    <InfiniteScroll
-      isLoading
-      isOutOfItems
-      loadingComponent={React.string("Loading....")}
-      endingComponent={React.string("...End...")}
-      loadMoreItems
-      onScrollPercent=0.9>
-      cardsList
-    </InfiniteScroll>
-  </div>
+  <InfiniteScroll
+    isLoading
+    isOutOfItems
+    loadingComponent={React.string("Loading....")}
+    endingComponent={React.string("...End...")}
+    loadMoreItems
+    onScrollPercent=0.9>
+    <h1> {"Infinite-scroll"->React.string} </h1>
+    cardsList
+  </InfiniteScroll>
 }

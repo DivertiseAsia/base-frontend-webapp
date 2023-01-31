@@ -59,14 +59,14 @@ let make = () => {
       switch action {
       | SetQuery(query) => {
           page: 1,
-          query: query,
+          query,
           totalResults: 0,
           books: RemoteData.NotAsked,
           isOutOfItems: false,
         }
-      | SetIsOutOfItems(isOutOfItems) => {...state, isOutOfItems: isOutOfItems}
-      | SetPage(page) => {...state, page: page}
-      | SetTotalResults(totalResults) => {...state, totalResults: totalResults}
+      | SetIsOutOfItems(isOutOfItems) => {...state, isOutOfItems}
+      | SetPage(page) => {...state, page}
+      | SetTotalResults(totalResults) => {...state, totalResults}
       | LoadBooksRequest(bookAction) => {
           ...state,
           books: WebData.updateWebData(state.books, bookAction),
@@ -101,6 +101,7 @@ let make = () => {
               )
               dispatch(SetTotalResults(numFound))
             }
+
           | _ => {
               dispatch(LoadBooksRequest(WebData.RequestSuccess(booksDocs)))
               dispatch(SetTotalResults(numFound))
@@ -133,43 +134,40 @@ let make = () => {
     dispatch(SetQuery(value))
   }
 
-  // * : This div is needed to collect the height of the screen (clientHeight)
-  <div className="scroll-wrapper" style={ReactDOM.Style.make(~height="100vh", ())}>
-    <InfiniteScroll
-      isLoading={state.books->RemoteData.isLoading}
-      isOutOfItems={state.isOutOfItems}
-      loadingComponent={React.string("Loading....")}
-      endingComponent={React.string("...End...")}
-      loadMoreItems
-      onScrollPercent=0.8>
-      <h1> {"Book Searching"->React.string} </h1>
-      <label htmlFor="search"> {"Search"->React.string} </label>
-      <input id="search" type_="text" onChange={handleSearch} />
-      <p> {("We have found: " ++ state.totalResults->Belt.Int.toString)->React.string} </p>
-      {switch state.books {
-      | NotAsked | Loading(None) => <div> {"Type something to get started"->React.string} </div>
-      | Loading(Some(books)) | Success(books) =>
-        books
-        ->Belt.List.toArray
-        ->Belt.Array.mapWithIndex((i, (currentBook: Book.t)) => {
-          <DemoBook
-            key={i->Belt.Int.toString}
-            className={i->Belt.Int.toString}
-            title={currentBook.title->Belt.Option.getWithDefault("")}
-            authorName={currentBook.authorName
-            ->Belt.Option.getWithDefault([""])
-            ->Belt.Array.map(_, i => i->React.string)}
-            publishYear={currentBook.publishYear
-            ->Belt.Option.getWithDefault([0])
-            ->Belt.Array.map(_, i => i->Belt.Int.toString->React.string)}
-            publishPlace={currentBook.publishPlace
-            ->Belt.Option.getWithDefault([""])
-            ->Belt.Array.map(_, i => i->React.string)}
-          />
-        })
-        ->React.array
-      | Failure(error) => <div> {error->React.string} </div>
-      }}
-    </InfiniteScroll>
-  </div>
+  <InfiniteScroll
+    isLoading={state.books->RemoteData.isLoading}
+    isOutOfItems={state.isOutOfItems}
+    loadingComponent={React.string("Loading....")}
+    endingComponent={React.string("...End...")}
+    loadMoreItems
+    onScrollPercent=0.9>
+    <h1> {"Book Searching"->React.string} </h1>
+    <label htmlFor="search"> {"Search"->React.string} </label>
+    <input id="search" type_="text" onChange={handleSearch} />
+    <p> {("We have found: " ++ state.totalResults->Belt.Int.toString)->React.string} </p>
+    {switch state.books {
+    | NotAsked | Loading(None) => <div> {"Type something to get started"->React.string} </div>
+    | Loading(Some(books)) | Success(books) =>
+      books
+      ->Belt.List.toArray
+      ->Belt.Array.mapWithIndex((i, currentBook: Book.t) => {
+        <DemoBook
+          key={i->Belt.Int.toString}
+          className={i->Belt.Int.toString}
+          title={currentBook.title->Belt.Option.getWithDefault("")}
+          authorName={currentBook.authorName
+          ->Belt.Option.getWithDefault([""])
+          ->Belt.Array.map(_, i => i->React.string)}
+          publishYear={currentBook.publishYear
+          ->Belt.Option.getWithDefault([0])
+          ->Belt.Array.map(_, i => i->Belt.Int.toString->React.string)}
+          publishPlace={currentBook.publishPlace
+          ->Belt.Option.getWithDefault([""])
+          ->Belt.Array.map(_, i => i->React.string)}
+        />
+      })
+      ->React.array
+    | Failure(error) => <div> {error->React.string} </div>
+    }}
+  </InfiniteScroll>
 }
