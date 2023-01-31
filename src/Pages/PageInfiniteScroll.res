@@ -71,7 +71,7 @@ let make = () => {
       loadingComponent={React.string("Loading....")}
       endingComponent={React.string("...End...")}
       loadMoreItems
-      onScrollPercent=0.8>
+      onScrollPercent=0.9>
       cardsList
     </InfiniteScroll>
   </div>

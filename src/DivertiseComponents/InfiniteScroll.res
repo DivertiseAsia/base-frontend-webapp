@@ -28,7 +28,7 @@ let make = (
           )
         }
 
-        if (scrollHeight -. clientHeight *. (1. +. (1. -. onScrollPercent)) <=  scrollTop +. 1.) {
+        if scrollHeight -. scrollHeight *. (1. -. onScrollPercent) <= scrollTop +. clientHeight {
           loadMoreItems()
         }
       }
