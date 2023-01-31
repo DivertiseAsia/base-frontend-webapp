@@ -72,6 +72,76 @@ let make = () => {
     loadMoreItems
     onScrollPercent=0.9>
     <h1> {"Infinite-scroll"->React.string} </h1>
+    <section
+      style={ReactDOM.Style.make(
+        ~margin="10px auto",
+        ~padding="10px 10px",
+        ~textAlign="left",
+        ~border="1px solid black",
+        ~width="50%",
+        ~minWidth="150px",
+        (),
+      )}>
+      <p style={ReactDOM.Style.make(~margin="5px 0px", ())}>
+        <code> {"<InfiniteScroll"->React.string} </code>
+      </p>
+      <p style={ReactDOM.Style.make(~margin="5px 10px", ())}>
+        <code> {"isLoading"->React.string} </code>
+      </p>
+      <p style={ReactDOM.Style.make(~margin="5px 10px", ())}>
+        <code> {"isOutOfItems"->React.string} </code>
+      </p>
+      <p style={ReactDOM.Style.make(~margin="5px 10px", ())}>
+        <code> {"loadingComponent={React.string(\"Loading....\")}"->React.string} </code>
+      </p>
+      <p style={ReactDOM.Style.make(~margin="5px 10px", ())}>
+        <code> {"endingComponent={React.string(\"...End...\")}"->React.string} </code>
+      </p>
+      <p style={ReactDOM.Style.make(~margin="5px 10px", ())}>
+        <code> {"loadMoreItems"->React.string} </code>
+      </p>
+      <p style={ReactDOM.Style.make(~margin="5px 10px", ())}>
+        <code> {"onScrollPercent=0.9>"->React.string} </code>
+      </p>
+      <p style={ReactDOM.Style.make(~margin="5px 20px", ())}>
+        <code> {"children"->React.string} </code>
+      </p>
+      <p style={ReactDOM.Style.make(~margin="5px 0px", ())}>
+        <code> {"</InfiniteScroll>"->React.string} </code>
+      </p>
+    </section>
+    <section
+      style={ReactDOM.Style.make(
+        ~margin="10px auto",
+        ~padding="10px 10px",
+        ~textAlign="left",
+        ~border="1px solid black",
+        ~width="50%",
+        ~minWidth="150px",
+        (),
+      )}>
+      <h2> {"Props list"->React.string} </h2>
+      <ul>
+        <li>
+          {"isLoading (Boolean: default=false) : to indicate if there are any progress to load a new element"->React.string}
+        </li>
+        <li>
+          {"isOutOfItems (Boolean: default=false) : to indicate if there are out of items"->React.string}
+        </li>
+        <li>
+          {"loadingComponent (React component) : to show at the bottom when loading a new element"->React.string}
+        </li>
+        <li>
+          {"endingComponent (React component) : to show at the bottom when out of items"->React.string}
+        </li>
+        <li>
+          {"onScrollPercent (Float: default=1.0) : trigger a new loading on percent of container's height"->React.string}
+        </li>
+        <li>
+          {"children (React component) : items to show in Infinite-scroll component"->React.string}
+        </li>
+      </ul>
+    </section>
     cardsList
   </InfiniteScroll>
 }
