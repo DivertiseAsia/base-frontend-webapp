@@ -88,33 +88,20 @@ let make = () => {
           ~minWidth="150px",
           (),
         )}>
-        <p style={ReactDOM.Style.make(~margin="5px 0px", ())}>
-          <code> {"<InfiniteScroll"->React.string} </code>
-        </p>
-        <p style={ReactDOM.Style.make(~margin="5px 10px", ())}>
-          <code> {"isLoading"->React.string} </code>
-        </p>
-        <p style={ReactDOM.Style.make(~margin="5px 10px", ())}>
-          <code> {"isOutOfItems"->React.string} </code>
-        </p>
-        <p style={ReactDOM.Style.make(~margin="5px 10px", ())}>
-          <code> {"loadingComponent={React.string(\"Loading....\")}"->React.string} </code>
-        </p>
-        <p style={ReactDOM.Style.make(~margin="5px 10px", ())}>
-          <code> {"endingComponent={React.string(\"...End...\")}"->React.string} </code>
-        </p>
-        <p style={ReactDOM.Style.make(~margin="5px 10px", ())}>
-          <code> {"loadMoreItems"->React.string} </code>
-        </p>
-        <p style={ReactDOM.Style.make(~margin="5px 10px", ())}>
-          <code> {"onScrollPercent=0.9>"->React.string} </code>
-        </p>
-        <p style={ReactDOM.Style.make(~margin="5px 20px", ())}>
-          <code> {"children"->React.string} </code>
-        </p>
-        <p style={ReactDOM.Style.make(~margin="5px 0px", ())}>
-          <code> {"</InfiniteScroll>"->React.string} </code>
-        </p>
+        <pre>
+          <code>
+            {"<InfiniteScroll
+  isLoading
+  isOutOfItems
+  loadingComponent={React.string(\"Loading....\")}
+  endingComponent={React.string(\"...End...\")}
+  loadMoreItems
+  onScrollPercent=0.9>
+    children
+</InfiniteScroll>
+"->React.string}
+          </code>
+        </pre>
       </section>
       <section
         style={ReactDOM.Style.make(
