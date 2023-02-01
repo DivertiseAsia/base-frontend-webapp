@@ -33,7 +33,6 @@ let make = () => {
           User.saveToken(token)
           {...state, token}
         }
-
       | Logout => {
           User.clearToken()
           {
@@ -42,7 +41,6 @@ let make = () => {
             user: RemoteData.NotAsked,
           }
         }
-
       | SetLocale(locale) => {...state, locale}
       },
     {
