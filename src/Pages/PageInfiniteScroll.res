@@ -72,6 +72,10 @@ let make = () => {
     loadMoreItems
     onScrollPercent=0.9>
     <h1> {"Infinite-scroll"->React.string} </h1>
+    <p> {"Showcase of using infinite-scroll with APIs"->React.string} </p>
+    <button onClick={_ => RescriptReactRouter.push(Links.infiniteScrollAPI)}>
+      {"Page Infinite-scroll APIs"->React.string}
+    </button>
     <section
       style={ReactDOM.Style.make(
         ~margin="10px auto",
