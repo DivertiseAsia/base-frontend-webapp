@@ -114,26 +114,26 @@ let make = () => {
           (),
         )}>
         <h2> {"Props list"->React.string} </h2>
-        <ul>
-          <li>
-            {"isLoading (Boolean: default=false) : to indicate if there are any progress to load a new element"->React.string}
-          </li>
-          <li>
-            {"isOutOfItems (Boolean: default=false) : to indicate if there are out of items"->React.string}
-          </li>
-          <li>
-            {"loadingComponent (React component) : to show at the bottom when loading a new element"->React.string}
-          </li>
-          <li>
-            {"endingComponent (React component) : to show at the bottom when out of items"->React.string}
-          </li>
-          <li>
-            {"onScrollPercent (Float: default=1.0) : trigger a new loading on percent of container's height"->React.string}
-          </li>
-          <li>
-            {"children (React component) : items to show in Infinite-scroll component"->React.string}
-          </li>
-        </ul>
+        {Utils.createUnorderedList([
+          {
+            "isLoading (Boolean: default=false) : to indicate if there are any progress to load a new element"->React.string
+          },
+          {
+            "isOutOfItems (Boolean: default=false) : to indicate if there are out of items"->React.string
+          },
+          {
+            "loadingComponent (React component) : to show at the bottom when loading a new element"->React.string
+          },
+          {
+            "endingComponent (React component) : to show at the bottom when out of items"->React.string
+          },
+          {
+            "onScrollPercent (Float: default=1.0) : trigger a new loading on percent of container's height"->React.string
+          },
+          {
+            "children (React component) : items to show in Infinite-scroll component"->React.string
+          },
+        ])}
       </section>
       cardsList
     </InfiniteScroll>

@@ -10,6 +10,16 @@ let saveToLocalStorage = (key, data) => Dom.Storage.setItem(key, data, Dom.Stora
 
 let loadFromLocalStorage = key => Dom.Storage.getItem(key, Dom.Storage.localStorage)
 
+let createUnorderedList = (elements: array<React.element>) => {
+  <ul>
+    {elements
+    ->Js.Array2.mapi((element, index) => {
+      <li key={`element-${index->Belt.Int.toString}`}> {element} </li>
+    })
+    ->React.array}
+  </ul>
+}
+
 let getResponseMsgFromJson = json => {
   let jsonString = Json.stringify(json)
   let re = Js.Re.fromStringWithFlags("[\\[\\]\\{\\}\"]", ~flags="g")
