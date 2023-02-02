@@ -27,11 +27,11 @@ let make = () => {
   let (state, dispatch) = React.useReducer(
     (state, action) =>
       switch (action: rootAction) {
-      | RouteTo(route) => {...state, route: route}
+      | RouteTo(route) => {...state, route}
       | UserRequest(userRequest) => {...state, user: WebData.updateWebData(state.user, userRequest)}
       | ChangeToken(token) => {
           User.saveToken(token)
-          {...state, token: token}
+          {...state, token}
         }
       | Logout => {
           User.clearToken()
@@ -41,7 +41,7 @@ let make = () => {
             user: RemoteData.NotAsked,
           }
         }
-      | SetLocale(locale) => {...state, locale: locale}
+      | SetLocale(locale) => {...state, locale}
       },
     {
       route: RescriptReactRouter.dangerouslyGetInitialUrl(),
@@ -71,7 +71,7 @@ let make = () => {
   }
 
   let userContextValues: User.Context.contextValue = {
-    user: user,
+    user,
     setToken: x => dispatch(ChangeToken(x)),
     token: state.token,
   }
@@ -91,8 +91,10 @@ let make = () => {
         }
       | None =>
         switch state.route.path {
+        | list{"demo-list"} => <PageDemoList />
         | list{"infinite-scroll"} => <PageInfiniteScroll />
         | list{"infinite-scroll-api"} => <PageInfiniteScrollAPI />
+        | list{"auto-suggestion"} => <PageAutoSuggestion />
         | list{"register"} => <PageRegister queryString={state.route.search} />
         | list{"forgot"} => <PageForgot queryString={state.route.search} />
         | list{"reset"} => <PageResetConfirm queryString={state.route.search} />

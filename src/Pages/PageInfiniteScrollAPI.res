@@ -59,14 +59,14 @@ let make = () => {
       switch action {
       | SetQuery(query) => {
           page: 1,
-          query: query,
+          query,
           totalResults: 0,
           books: RemoteData.NotAsked,
           isOutOfItems: false,
         }
-      | SetIsOutOfItems(isOutOfItems) => {...state, isOutOfItems: isOutOfItems}
-      | SetPage(page) => {...state, page: page}
-      | SetTotalResults(totalResults) => {...state, totalResults: totalResults}
+      | SetIsOutOfItems(isOutOfItems) => {...state, isOutOfItems}
+      | SetPage(page) => {...state, page}
+      | SetTotalResults(totalResults) => {...state, totalResults}
       | LoadBooksRequest(bookAction) => {
           ...state,
           books: WebData.updateWebData(state.books, bookAction),
@@ -101,6 +101,7 @@ let make = () => {
               )
               dispatch(SetTotalResults(numFound))
             }
+
           | _ => {
               dispatch(LoadBooksRequest(WebData.RequestSuccess(booksDocs)))
               dispatch(SetTotalResults(numFound))
@@ -141,7 +142,7 @@ let make = () => {
       loadingComponent={React.string("Loading....")}
       endingComponent={React.string("...End...")}
       loadMoreItems
-      onScrollPercent=0.8>
+      onScrollPercent=0.9>
       <h1> {"Book Searching"->React.string} </h1>
       <label htmlFor="search"> {"Search"->React.string} </label>
       <input id="search" type_="text" onChange={handleSearch} />
@@ -151,7 +152,7 @@ let make = () => {
       | Loading(Some(books)) | Success(books) =>
         books
         ->Belt.List.toArray
-        ->Belt.Array.mapWithIndex((i, (currentBook: Book.t)) => {
+        ->Belt.Array.mapWithIndex((i, currentBook: Book.t) => {
           <DemoBook
             key={i->Belt.Int.toString}
             className={i->Belt.Int.toString}
