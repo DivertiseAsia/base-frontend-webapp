@@ -64,33 +64,25 @@ let make = () => {
     None
   })
 
-  // * : This div is needed to collect the height of the screen (clientHeight)
-  <div className="scroll-wrapper" style={ReactDOM.Style.make(~height="100vh", ())}>
-    <InfiniteScroll
-      isLoading
-      isOutOfItems
-      loadingComponent={React.string("Loading....")}
-      endingComponent={React.string("...End...")}
-      loadMoreItems
-      onScrollPercent=0.9>
+  <>
+    <section
+      style={ReactDOM.Style.make(
+        ~margin="10px auto",
+        ~padding="10px 10px",
+        ~textAlign="left",
+        ~border="1px solid black",
+        ~width="50%",
+        ~minWidth="150px",
+        (),
+      )}>
       <h1> {"Infinite-scroll"->React.string} </h1>
       <p> {"Showcase of using infinite-scroll with APIs"->React.string} </p>
       <button onClick={_ => RescriptReactRouter.push(Links.infiniteScrollAPI)}>
         {"Page Infinite-scroll APIs"->React.string}
       </button>
-      <section
-        style={ReactDOM.Style.make(
-          ~margin="10px auto",
-          ~padding="10px 10px",
-          ~textAlign="left",
-          ~border="1px solid black",
-          ~width="50%",
-          ~minWidth="150px",
-          (),
-        )}>
-        <pre>
-          <code>
-            {"<InfiniteScroll
+      <pre>
+        <code>
+          {"<InfiniteScroll
   isLoading
   isOutOfItems
   loadingComponent={React.string(\"Loading....\")}
@@ -100,42 +92,60 @@ let make = () => {
     children
 </InfiniteScroll>
 "->React.string}
-          </code>
-        </pre>
-      </section>
-      <section
-        style={ReactDOM.Style.make(
-          ~margin="10px auto",
-          ~padding="10px 10px",
-          ~textAlign="left",
-          ~border="1px solid black",
-          ~width="50%",
-          ~minWidth="150px",
-          (),
-        )}>
-        <h2> {"Props list"->React.string} </h2>
-        {Utils.createUnorderedList([
-          {
-            "isLoading (Boolean: default=false) : to indicate if there are any progress to load a new element"->React.string
-          },
-          {
-            "isOutOfItems (Boolean: default=false) : to indicate if there are out of items"->React.string
-          },
-          {
-            "loadingComponent (React component) : to show at the bottom when loading a new element"->React.string
-          },
-          {
-            "endingComponent (React component) : to show at the bottom when out of items"->React.string
-          },
-          {
-            "onScrollPercent (Float: default=1.0) : trigger a new loading on percent of container's height"->React.string
-          },
-          {
-            "children (React component) : items to show in Infinite-scroll component"->React.string
-          },
-        ])}
-      </section>
-      cardsList
-    </InfiniteScroll>
-  </div>
+        </code>
+      </pre>
+    </section>
+    <section
+      style={ReactDOM.Style.make(
+        ~margin="10px auto",
+        ~padding="10px 10px",
+        ~textAlign="left",
+        ~border="1px solid black",
+        ~width="50%",
+        ~minWidth="150px",
+        (),
+      )}>
+      <h2> {"Props list"->React.string} </h2>
+      {Utils.createUnorderedList([
+        {
+          "isLoading (Boolean: default=false) : to indicate if there are any progress to load a new element"->React.string
+        },
+        {
+          "isOutOfItems (Boolean: default=false) : to indicate if there are out of items"->React.string
+        },
+        {
+          "loadingComponent (React component) : to show at the bottom when loading a new element"->React.string
+        },
+        {
+          "endingComponent (React component) : to show at the bottom when out of items"->React.string
+        },
+        {
+          "onScrollPercent (Float: default=1.0) : trigger a new loading on percent of container's height"->React.string
+        },
+        {
+          "children (React component) : items to show in Infinite-scroll component"->React.string
+        },
+      ])}
+    </section>
+    // * : This div is needed to collect the height of the screen (clientHeight)
+    <div
+      className="scroll-wrapper"
+      style={ReactDOM.Style.make(
+        ~height="100vh",
+        ~width="50%",
+        ~margin="0px auto",
+        ~backgroundColor="#EEEEEE",
+        (),
+      )}>
+      <InfiniteScroll
+        isLoading
+        isOutOfItems
+        loadingComponent={React.string("Loading....")}
+        endingComponent={React.string("...End...")}
+        loadMoreItems
+        onScrollPercent=0.9>
+        cardsList
+      </InfiniteScroll>
+    </div>
+  </>
 }
