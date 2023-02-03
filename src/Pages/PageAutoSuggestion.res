@@ -76,7 +76,10 @@ let make = () => {
           <AutoSuggestion
             triggers=list{
               {
-                triggerBy: TriggerRegex("\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig")),
+                triggerBy: TriggerRegex(
+                  "!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
+                  "\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
+                ),
                 triggerOptions: list{
                   "alice@gmail.com",
                   "tata@gmail.com",
@@ -101,7 +104,10 @@ let make = () => {
                 highlightStyle: Some("color:#567189;font-weight:bold;font-style:italic;"),
               },
               {
-                triggerBy: TriggerRegex("\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig")),
+                triggerBy: TriggerRegex(
+                  "!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
+                  "\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
+                ),
                 triggerOptions: list{
                   "alice@gmail.com",
                   "tata@gmail.com",

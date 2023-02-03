@@ -3,7 +3,7 @@ open Webapi.Dom
 module Trigger = {
   type triggerType =
     | TriggerSymbol(string)
-    | TriggerRegex(Js.Re.t)
+    | TriggerRegex(Js.Re.t, Js.Re.t)
 
   type t = {
     triggerBy: triggerType,
@@ -60,13 +60,18 @@ let make = (~triggers: list<Trigger.t>) => {
 
   let funcFinalRegex = (trigger: triggerType) =>
     switch trigger {
+    | TriggerSymbol(symbol) if Js.String2.length(inputValue) <= 1 =>
+      `${symbol}(\\w*)`->Js.Re.fromStringWithFlags(~flags="ig")
     | TriggerSymbol(symbol) => `\\s${symbol}(\\w*)`->Js.Re.fromStringWithFlags(~flags="ig")
-    | TriggerRegex(regex) => regex
+    | TriggerRegex(regexEmpty, _) if Js.String2.length(inputValue) <= 1 => regexEmpty
+    | TriggerRegex(_, regex) => regex 
     }
 
   React.useEffect1(() => {
+    Js.log2("inputValue", inputValue)
     triggers
     ->Belt.List.getBy(trigger => {
+      Js.log2("funcFinalRegex", funcFinalRegex(trigger.triggerBy))
       Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Js.Option.isSome
     })
     ->(trigger => setCurrentTrigger(_ => trigger))
@@ -145,10 +150,12 @@ let make = (~triggers: list<Trigger.t>) => {
           ->Belt.List.get(selectedIndex)
           ->Belt.Option.mapWithDefault((), handleSuggestionClick)
         }
+
       | "Escape" => {
           ReactEvent.Keyboard.preventDefault(event)
           setShowOptions(_ => false)
         }
+
       | _ => ()
       }
     }
