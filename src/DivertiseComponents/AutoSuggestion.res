@@ -64,7 +64,7 @@ let make = (~triggers: list<Trigger.t>) => {
       `${symbol}(\\w*)`->Js.Re.fromStringWithFlags(~flags="ig")
     | TriggerSymbol(symbol) => `\\s${symbol}(\\w*)`->Js.Re.fromStringWithFlags(~flags="ig")
     | TriggerRegex(regexEmpty, _) if Js.String2.length(inputValue) <= 1 => regexEmpty
-    | TriggerRegex(_, regex) => regex 
+    | TriggerRegex(_, regex) => regex
     }
 
   React.useEffect1(() => {
@@ -148,12 +148,10 @@ let make = (~triggers: list<Trigger.t>) => {
           ->Belt.List.get(selectedIndex)
           ->Belt.Option.mapWithDefault((), handleSuggestionClick)
         }
-
       | "Escape" => {
           ReactEvent.Keyboard.preventDefault(event)
           setShowOptions(_ => false)
         }
-
       | _ => ()
       }
     }
