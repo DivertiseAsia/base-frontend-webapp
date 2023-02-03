@@ -68,10 +68,8 @@ let make = (~triggers: list<Trigger.t>) => {
     }
 
   React.useEffect1(() => {
-    Js.log2("inputValue", inputValue)
     triggers
     ->Belt.List.getBy(trigger => {
-      Js.log2("funcFinalRegex", funcFinalRegex(trigger.triggerBy))
       Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Js.Option.isSome
     })
     ->(trigger => setCurrentTrigger(_ => trigger))
