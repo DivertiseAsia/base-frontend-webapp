@@ -1,15 +1,6 @@
 @react.component
 let make = () => {
-  <div
-    style={ReactDOM.Style.make(
-      ~margin="10px auto",
-      ~padding="10px 10px",
-      ~textAlign="left",
-      ~border="1px solid black",
-      ~width="50%",
-      ~minWidth="150px",
-      (),
-    )}>
+  <div className="center-wrapper">
     <h1> {"Components list"->React.string} </h1>
     <p>
       {"list of pages that showcase InfiniteScroll and AutoSuggestion components"->React.string}
