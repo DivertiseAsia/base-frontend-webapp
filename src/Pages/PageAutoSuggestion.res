@@ -23,12 +23,11 @@ let make = () => {
           {Utils.createUnorderedList([
             <>
               <b> {"triggerBy"->React.string} </b>
-              {" : you can send to trigger by variant `symbol` or `Regex` but Regex need to send `TriggerRegex when input is empty` and `TriggerRegex`."->React.string}
+              {" : you can send to trigger by variant `symbol` or `Regex`."->React.string}
               {Utils.createUnorderedList([
                 <code> {"triggerBy: TriggerSymbol(\"@\")"->React.string} </code>,
                 <code>
-                  {"triggerBy: TriggerRegex(\"@(\\w*)\"->Js.Re.fromStringWithFlags(~flags=\"ig\"),
-                  \"\\s@(\\w*)\"->Js.Re.fromStringWithFlags(~flags=\"ig\"))"->React.string}
+                  {"triggerBy: TriggerRegex(\"^@(\\w*)|\\s@(\\w*)\"->Js.Re.fromStringWithFlags(~flags=\"ig\"))"->React.string}
                 </code>,
               ])}
             </>,
@@ -78,8 +77,7 @@ let make = () => {
             triggers=list{
               {
                 triggerBy: TriggerRegex(
-                  "!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
-                  "\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
+                  "^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
                 ),
                 triggerOptions: list{
                   "alice@gmail.com",
@@ -106,8 +104,7 @@ let make = () => {
               },
               {
                 triggerBy: TriggerRegex(
-                  "!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
-                  "\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
+                  "^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
                 ),
                 triggerOptions: list{
                   "alice@gmail.com",
