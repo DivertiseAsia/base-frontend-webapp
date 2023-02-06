@@ -5,9 +5,13 @@ module Trigger = {
     | TriggerSymbol(string)
     | TriggerRegex(Js.Re.t)
 
+  type optionType =
+    | OptionText(list<string>)
+    | OptionComponent(list<React.element>)
+
   type t = {
     triggerBy: triggerType,
-    triggerOptions: list<string>,
+    triggerOptions: optionType,
     triggerCallback?: unit => unit,
     highlightStyle: option<string>,
   }
@@ -64,6 +68,12 @@ let make = (~triggers: list<Trigger.t>) => {
     | TriggerRegex(regex) => regex
     }
 
+  let funcFinalOption = (triggerOptions: optionType) =>
+    switch triggerOptions {
+    | OptionText(strList) => strList
+    | OptionComponent(eleList) => list{""}
+    }
+
   React.useEffect1(() => {
     triggers
     ->Belt.List.getBy(trigger => {
@@ -81,7 +91,7 @@ let make = (~triggers: list<Trigger.t>) => {
       Js.log2("exec", Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue))
       Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Belt.Option.map(
         match => {
-          trigger.triggerOptions->filterTriggerOptionsByAlphabet(match)
+          trigger.triggerOptions->funcFinalOption->filterTriggerOptionsByAlphabet(match)
         },
       )
     })
