@@ -65,16 +65,7 @@ let make = () => {
   })
 
   <>
-    <section
-      style={ReactDOM.Style.make(
-        ~margin="10px auto",
-        ~padding="10px 10px",
-        ~textAlign="left",
-        ~border="1px solid black",
-        ~width="50%",
-        ~minWidth="150px",
-        (),
-      )}>
+    <section className="center-wrapper">
       <h1> {"Infinite-scroll"->React.string} </h1>
       <p> {"Showcase of using infinite-scroll with APIs"->React.string} </p>
       <button onClick={_ => RescriptReactRouter.push(Links.infiniteScrollAPI)}>
@@ -95,16 +86,7 @@ let make = () => {
         </code>
       </pre>
     </section>
-    <section
-      style={ReactDOM.Style.make(
-        ~margin="10px auto",
-        ~padding="10px 10px",
-        ~textAlign="left",
-        ~border="1px solid black",
-        ~width="50%",
-        ~minWidth="150px",
-        (),
-      )}>
+    <section className="center-wrapper">
       <h2> {"Props list"->React.string} </h2>
       {Utils.createUnorderedList([
         {
@@ -129,7 +111,6 @@ let make = () => {
     </section>
     // * : This div is needed to collect the height of the screen (clientHeight)
     <div
-      className="scroll-wrapper"
       style={ReactDOM.Style.make(
         ~height="100vh",
         ~width="50%",

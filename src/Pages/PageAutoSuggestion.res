@@ -1,15 +1,6 @@
 @react.component
 let make = () => {
-  <div
-    style={ReactDOM.Style.make(
-      ~margin="10px auto",
-      ~padding="10px 10px",
-      ~textAlign="left",
-      ~border="1px solid black",
-      ~width="75%",
-      ~minWidth="150px",
-      (),
-    )}>
+  <div className="center-wrapper">
     <h1> {"Auto Suggestion Component"->React.string} </h1>
     <p>
       {"make an auto-suggestion with trigger to suggest with 'symbol' or 'regex'."->React.string}
