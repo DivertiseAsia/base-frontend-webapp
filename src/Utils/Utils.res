@@ -10,6 +10,16 @@ let saveToLocalStorage = (key, data) => Dom.Storage.setItem(key, data, Dom.Stora
 
 let loadFromLocalStorage = key => Dom.Storage.getItem(key, Dom.Storage.localStorage)
 
+let createUnorderedList = (elements: array<React.element>) => {
+  <ul>
+    {elements
+    ->Js.Array2.mapi((element, index) => {
+      <li key={`element-${index->Belt.Int.toString}`}> {element} </li>
+    })
+    ->React.array}
+  </ul>
+}
+
 let getResponseMsgFromJson = json => {
   let jsonString = Json.stringify(json)
   let re = Js.Re.fromStringWithFlags("[\\[\\]\\{\\}\"]", ~flags="g")
@@ -52,9 +62,9 @@ let checkIntfromStr = text =>
 
 let checkFloatfromStr: string => bool = %raw(`
   function(value) {
-    if (/^-?\d*[.,]?\d{0,2}$/.test(value)) 
+    if (/^-?\d*[.,]?\d{0,2}$/.test(value))
       return true;
-    else 
+    else
       return false;
   }
 `)
@@ -91,6 +101,8 @@ module MapOption = {
     }
 
   let mapOptStr = optStr => optStr |> mapOpt(~defaultValue="")
+  let mapOptOptStr = (optOptStr: option<option<string>>) =>
+    optOptStr |> mapOpt(~defaultValue=None) |> mapOptStr
   let mapOptInt = optInt => optInt |> mapOpt(~defaultValue=0)
   let mapOptFloat = optFloat => optFloat |> mapOpt(~defaultValue=0.)
   let mapOptList = optList => optList |> mapOpt(~defaultValue=[])
@@ -126,14 +138,20 @@ let matchOptionarrStrToStr = oparrStr =>
   | Some(arr) => MapOption.mapOptStr(Belt.Array.get(arr, 0))
   }
 
+let mapOptionarrOptStrToStr = (oparrOptStr: option<array<option<string>>>) => {
+  switch oparrOptStr {
+  | None => ""
+  | Some(arrOptStr) => MapOption.mapOptOptStr(Belt.Array.get(arrOptStr, 0))
+  }
+}
+
 let searchCaseInsensitive = (searchKeyword, fullText) => {
-  let onlyWord = matchOptionarrStrToStr(
+  let onlyWord = mapOptionarrOptStrToStr(
     Js.String.match_(Js.Re.fromStringWithFlags("[\\w\\s*]+", ~flags="g"), searchKeyword),
   )
   let searchKeyLower = Js.String.toLowerCase(onlyWord)
   let fullTextLower = Js.String.toLowerCase(fullText)
-
-  matchOptionarrStrToStr(
+  mapOptionarrOptStrToStr(
     Js.String.match_(Js.Re.fromStringWithFlags(searchKeyLower, ~flags="g"), fullTextLower),
   )
 }
@@ -182,5 +200,124 @@ let getSearchParameter = (parameter: string, queryString: string): option<string
     | "" => None
     | x => Some(x)
     }
+  }
+}
+
+module ContentEditable = {
+  open! Webapi.Dom
+
+  let spanIdKey = "data-autosuggest-span-id"
+
+  let getChildNodesAsArray = element => {
+    element->Element.childNodes->NodeList.toArray
+  }
+
+  let getSpanChildNodes = element => {
+    element
+    ->getChildNodesAsArray
+    ->Belt.Array.keepMap(childNode => {
+      if childNode->Node.nodeType == Webapi__Dom__Types.Element {
+        Some(childNode)
+      } else {
+        None
+      }
+    })
+  }
+
+  let getSpansValueAsList = element => {
+    element
+    ->getSpanChildNodes
+    ->Belt.Array.map(span => {
+      span
+      ->Element.ofNode
+      ->Belt.Option.mapWithDefault("", element => {
+        element->Element.outerHTML
+      })
+    })
+  }
+
+  let moveCursorToNextSibling = (nextSibling, ~selection) => {
+    // Add extra whitespace to next latest span
+    if nextSibling->Node.textContent->Js.String2.length <= 0 {
+      nextSibling->Node.setTextContent("\u00A0")
+    }
+
+    let newRange = Document.createRange(document)
+    newRange->Range.setStart(nextSibling, 1)
+    newRange->Range.setEnd(nextSibling, 1)
+
+    selection->Selection.removeAllRanges
+    selection->Selection.addRange(newRange)
+  }
+
+  let replaceTriggerStringFromPreviousSibling = (
+    ~replaceWith="",
+    previousSibling,
+    triggerRegex,
+  ) => {
+    previousSibling
+    ->Node.textContent
+    ->Js.String2.replaceByRe(triggerRegex, replaceWith)
+    ->Node.setTextContent(previousSibling, _)
+  }
+
+  let insertSpanNode = (newText, ~spanId, ~selectionRange as currentRange) => {
+    // Create new highlight Range to move newText Node to a span
+    let span = document->Document.createElement("span")
+    span->Element.setClassName("highlight")
+    span->Element.setAttribute(spanIdKey, spanId)
+    span->Element.setTextContent(newText)
+
+    // Insert new text Node to selectionRange
+    currentRange->Range.insertNode(span)
+  }
+
+  let insertNodeElement = (insertEl, ~spanId, ~selectionRange as currentRange) => {
+    // Add attribute extra span id key
+    insertEl->Element.setAttribute(spanIdKey, spanId)
+
+    // Insert new text Node to selectionRange
+    currentRange->Range.insertNode(insertEl)
+  }
+
+  let updateValue = (~divEl, ~triggerRegex, insertEl) => {
+    window
+    ->Window.getSelection
+    ->Belt.Option.map(selection => {
+      let selectionRange = selection->Selection.getRangeAt(0)
+      let newSpanId = divEl->getSpanChildNodes->Belt.Array.length->Belt.Int.toString
+
+      // Insert new text with style
+      // We're not use `setInnerText` because `insertNode` will insert empty text node automatically
+      insertEl->insertNodeElement(~selectionRange, ~spanId=newSpanId)
+
+      // Get latest span to update cursor and remove trigger string
+      let latestSpan =
+        divEl
+        ->getChildNodesAsArray
+        ->Belt.Array.getBy(childNode => {
+          if childNode->Node.nodeType == Webapi__Dom__Types.Element {
+            switch childNode->Element.ofNode {
+            | None => false
+            | Some(childEl) => childEl->Element.getAttribute(spanIdKey) == Some(newSpanId)
+            }
+          } else {
+            false
+          }
+        })
+
+      // Move cursor to next sibling of latest span
+      latestSpan
+      ->Belt.Option.mapWithDefault(None, Node.nextSibling)
+      ->Belt.Option.map(moveCursorToNextSibling(~selection))
+      ->ignore
+
+      // Remove trigger string from previous sibling of latest span
+      latestSpan
+      ->Belt.Option.mapWithDefault(None, Node.previousSibling)
+      ->Belt.Option.map(replaceTriggerStringFromPreviousSibling(_, triggerRegex))
+      ->ignore
+    })
+    ->ignore
   }
 }
