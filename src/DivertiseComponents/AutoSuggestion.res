@@ -1,18 +1,30 @@
 open Webapi.Dom
 
 module Trigger = {
+  type inlineSpan = option<string>
+
+  type optionRecord = {
+    component: React.element,
+    value: string,
+  }
+
   type triggerType =
     | TriggerSymbol(string)
     | TriggerRegex(Js.Re.t)
 
   type optionType =
     | OptionText(list<string>)
-    | OptionComponent(list<React.element>)
+    | OptionComponent(list<optionRecord>)
+
+  type suggestionType =
+    | SuggestedSpan(inlineSpan)
+    | SuggestedComponent(React.element)
 
   type t = {
     triggerBy: triggerType,
     triggerOptions: optionType,
     triggerCallback?: unit => unit,
+    suggestion?: suggestionType,
     highlightStyle: option<string>,
   }
 
@@ -72,12 +84,10 @@ let make = (~triggers: list<Trigger.t>) => {
   let funcFinalOption = (triggerOptions: optionType) =>
     switch triggerOptions {
     | OptionText(strList) => strList
-    | OptionComponent(_eleList) =>
-      // TODO : for me to continue
-      // eleList->Belt.List.map(ele => {
-      //   ele.Props.className
-      // })
-      list{""}
+    | OptionComponent(eleList) =>
+      eleList->Belt.List.map(ele => {
+        ele.value
+      })
     }
 
   React.useEffect1(() => {
@@ -172,24 +182,9 @@ let make = (~triggers: list<Trigger.t>) => {
     }
   }
 
-  <div className="auto-suggestion-container">
-    <div
-      className="input-field"
-      contentEditable=true
-      suppressContentEditableWarning=true
-      ref={ReactDOM.Ref.domRef(inputRef)}
-      onBlur={_ => setShowOptions(_ => false)}
-      onKeyDown={handleInputKeyDown}
-      onInput={e =>
-        setInputValue(_ => {
-          switch inputRef.current->Js.Nullable.toOption {
-          | Some(dom) => Webapi.Dom.Element.innerHTML(dom)
-          | None => ""
-          }
-        })}
-    />
-    {switch showOptions {
-    | true =>
+  let generateOption = (triggerOptions: optionType) =>
+    switch triggerOptions {
+    | OptionText(_) =>
       <ul>
         {filteredOptions
         ->Belt.List.mapWithIndex((index, suggestion) => {
@@ -209,6 +204,36 @@ let make = (~triggers: list<Trigger.t>) => {
         ->Belt.List.toArray
         ->React.array}
       </ul>
+    | OptionComponent(eleList) =>
+      eleList
+      ->Belt.List.map(ele => {
+        <div> ele.component </div>
+      })
+      ->Belt.List.toArray
+      ->React.array
+    }
+
+  <div className="auto-suggestion-container">
+    <div
+      className="input-field"
+      contentEditable=true
+      suppressContentEditableWarning=true
+      ref={ReactDOM.Ref.domRef(inputRef)}
+      onBlur={_ => setShowOptions(_ => false)}
+      onKeyDown={handleInputKeyDown}
+      onInput={e =>
+        setInputValue(_ => {
+          switch inputRef.current->Js.Nullable.toOption {
+          | Some(dom) => Webapi.Dom.Element.innerHTML(dom)
+          | None => ""
+          }
+        })}
+    />
+    {switch showOptions {
+    | true =>
+      generateOption(
+        currentTrigger->Belt.Option.map(trigger => trigger.triggerOptions)->Belt.Option.getExn,
+      )
     | false => React.null
     }}
   </div>
