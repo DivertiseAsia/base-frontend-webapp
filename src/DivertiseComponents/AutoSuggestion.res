@@ -64,14 +64,20 @@ let make = (~triggers: list<Trigger.t>) => {
 
   let funcFinalRegex = (trigger: triggerType) =>
     switch trigger {
-    | TriggerSymbol(symbol) => `\\s${symbol}(\\w*)`->Js.Re.fromStringWithFlags(~flags="ig")
+    | TriggerSymbol(symbol) =>
+      `^${symbol}(\\w*)|\\s${symbol}(\\w*)`->Js.Re.fromStringWithFlags(~flags="ig")
     | TriggerRegex(regex) => regex
     }
 
   let funcFinalOption = (triggerOptions: optionType) =>
     switch triggerOptions {
     | OptionText(strList) => strList
-    | OptionComponent(eleList) => list{""}
+    | OptionComponent(_eleList) =>
+      // TODO : for me to continue
+      // eleList->Belt.List.map(ele => {
+      //   ele.Props.className
+      // })
+      list{""}
     }
 
   React.useEffect1(() => {
@@ -155,10 +161,12 @@ let make = (~triggers: list<Trigger.t>) => {
           ->Belt.List.get(selectedIndex)
           ->Belt.Option.mapWithDefault((), handleSuggestionClick)
         }
+
       | "Escape" => {
           ReactEvent.Keyboard.preventDefault(event)
           setShowOptions(_ => false)
         }
+
       | _ => ()
       }
     }

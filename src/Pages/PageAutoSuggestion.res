@@ -54,7 +54,15 @@ let make = () => {
             triggers=list{
               {
                 triggerBy: TriggerSymbol("@"),
-                triggerOptions: list{"Alice", "Tata", "Bob", "Charlie", "Alex", "Robert", "Robson"},
+                triggerOptions: OptionText(list{
+                  "Alice",
+                  "Tata",
+                  "Bob",
+                  "Charlie",
+                  "Alex",
+                  "Robert",
+                  "Robson",
+                }),
                 highlightStyle: None,
               },
             }
@@ -67,8 +75,10 @@ let make = () => {
           <AutoSuggestion
             triggers=list{
               {
-                triggerBy: TriggerRegex("\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig")),
-                triggerOptions: list{
+                triggerBy: TriggerRegex(
+                  "^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
+                ),
+                triggerOptions: OptionText(list{
                   "alice@gmail.com",
                   "tata@gmail.com",
                   "bob@gmail.com",
@@ -76,7 +86,7 @@ let make = () => {
                   "alex@gmail.com",
                   "robert@hotmail.com",
                   "robson@gmail.com",
-                },
+                }),
                 highlightStyle: Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
               },
             }
@@ -88,12 +98,22 @@ let make = () => {
             triggers=list{
               {
                 triggerBy: TriggerSymbol("@"),
-                triggerOptions: list{"Alice", "Tata", "Bob", "Charlie", "Alex", "Robert", "Robson"},
+                triggerOptions: OptionText(list{
+                  "Alice",
+                  "Tata",
+                  "Bob",
+                  "Charlie",
+                  "Alex",
+                  "Robert",
+                  "Robson",
+                }),
                 highlightStyle: Some("color:#567189;font-weight:bold;font-style:italic;"),
               },
               {
-                triggerBy: TriggerRegex("\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig")),
-                triggerOptions: list{
+                triggerBy: TriggerRegex(
+                  "^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
+                ),
+                triggerOptions: OptionText(list{
                   "alice@gmail.com",
                   "tata@gmail.com",
                   "bob@gmail.com",
@@ -101,7 +121,31 @@ let make = () => {
                   "alex@gmail.com",
                   "robert@hotmail.com",
                   "robson@gmail.com",
-                },
+                }),
+                highlightStyle: Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
+              },
+            }
+          />
+        </>,
+        <>
+          <p>
+            {"Auto-suggestion component with style and trigger with 'Regex(!)'"->React.string}
+          </p>
+          <AutoSuggestion
+            triggers=list{
+              {
+                triggerBy: TriggerRegex(
+                  "^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
+                ),
+                triggerOptions: OptionComponent(list{
+                  <DemoOption className="option-1" name="Alice" email="alice@gmail.com" />,
+                  <DemoOption className="option-2" name="Tata" email="tata@gmail.com" />,
+                  <DemoOption className="option-3" name="Bob" email="bob@gmail.com" />,
+                  <DemoOption className="option-4" name="Charlie" email="charlie@yahoo.com" />,
+                  <DemoOption className="option-5" name="Alex" email="alex@gmail.com" />,
+                  <DemoOption className="option-4" name="Robert" email="robert@hotmail.com" />,
+                  <DemoOption className="option-5" name="Robson" email="robson@gmail.com" />,
+                }),
                 highlightStyle: Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
               },
             }
