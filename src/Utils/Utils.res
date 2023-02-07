@@ -20,6 +20,16 @@ let createUnorderedList = (elements: array<React.element>) => {
   </ul>
 }
 
+let createOrderedList = (elements: array<React.element>) => {
+  <ol>
+    {elements
+    ->Js.Array2.mapi((element, index) => {
+      <li key={`element-${index->Belt.Int.toString}`}> {element} </li>
+    })
+    ->React.array}
+  </ol>
+}
+
 let getResponseMsgFromJson = json => {
   let jsonString = Json.stringify(json)
   let re = Js.Re.fromStringWithFlags("[\\[\\]\\{\\}\"]", ~flags="g")
