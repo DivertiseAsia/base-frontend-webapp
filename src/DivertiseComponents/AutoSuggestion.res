@@ -205,9 +205,25 @@ let make = (~triggers: list<Trigger.t>) => {
         ->React.array}
       </ul>
     | OptionComponent(eleList) =>
-      eleList
-      ->Belt.List.map(ele => {
-        <div> ele.component </div>
+      filteredOptions
+      ->Belt.List.mapWithIndex((index, suggestion) => {
+        let isSelected = index === selectedIndex
+
+        eleList
+        ->Belt.List.getBy(ele => ele.value == suggestion)
+        ->Belt.Option.getWithDefault({
+          component: <> </>,
+          value: "",
+        })
+        ->(
+          ele =>
+            <div
+              onMouseOver={_ => setSelectedIndex(_ => index)}
+              onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
+              onClick={_ => handleSuggestionClick(suggestion)}>
+              ele.component
+            </div>
+        )
       })
       ->Belt.List.toArray
       ->React.array
