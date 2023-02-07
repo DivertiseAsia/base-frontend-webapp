@@ -91,14 +91,14 @@ let make = () => {
         }
       | None =>
         switch state.route.path {
-        | list{"demo-list"} => <PageDemoList />
         | list{"infinite-scroll"} => <PageInfiniteScroll />
         | list{"infinite-scroll-api"} => <PageInfiniteScrollAPI />
         | list{"auto-suggestion"} => <PageAutoSuggestion />
         | list{"register"} => <PageRegister queryString={state.route.search} />
         | list{"forgot"} => <PageForgot queryString={state.route.search} />
         | list{"reset"} => <PageResetConfirm queryString={state.route.search} />
-        | list{"login"} | _ => <PageLogin queryString={state.route.search} />
+        | list{"login"} => <PageLogin queryString={state.route.search} />
+        | _ => <PageDemoList />
         }
       }}
     </ReactIntl.IntlProvider>

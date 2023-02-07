@@ -60,7 +60,7 @@ let make = (~triggers: list<Trigger.t>) => {
 
   let funcFinalRegex = (trigger: triggerType) =>
     switch trigger {
-    | TriggerSymbol(symbol) => `\\s${symbol}(\\w*)`->Js.Re.fromStringWithFlags(~flags="ig")
+    | TriggerSymbol(symbol) => `^${symbol}(\\w*)|\\s${symbol}(\\w*)`->Js.Re.fromStringWithFlags(~flags="ig")
     | TriggerRegex(regex) => regex
     }
 

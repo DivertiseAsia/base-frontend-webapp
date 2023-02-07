@@ -12,11 +12,21 @@ body {
 }
 
 p, li, u, a, span, div {
+  -webkit-user-select: none !important;
   user-select: none !important;
 }
 
 .hidden {
   display: none;
+}
+
+.center-wrapper {
+  margin: 10px auto;
+  padding: 10px 10px;
+  text-align: left;
+  border: 1px solid black;
+  width: 75%;
+  min-width: 150px;
 }
 
 @import "popup.scss";
