@@ -77,7 +77,7 @@ let make = () => {
                   "Robert",
                   "Robson",
                 }),
-                highlightStyle: None,
+                suggestion: SuggestedSpan(None),
               },
             }
           />
@@ -125,7 +125,7 @@ let make = () => {
                   "robert@hotmail.com",
                   "robson@gmail.com",
                 }),
-                highlightStyle: Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
+                suggestion: SuggestedSpan(Some("color:#DC143C;font-weight:bold;text-decoration:underline;")),
               },
             }
           />
@@ -174,7 +174,7 @@ let make = () => {
                   "Robert",
                   "Robson",
                 }),
-                highlightStyle: Some("color:#567189;font-weight:bold;font-style:italic;"),
+                suggestion: SuggestedSpan(Some("color:#567189;font-weight:bold;font-style:italic;")),
               },
               {
                 triggerBy: TriggerRegex(
@@ -189,7 +189,7 @@ let make = () => {
                   "robert@hotmail.com",
                   "robson@gmail.com",
                 }),
-                highlightStyle: Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
+                suggestion: SuggestedSpan(Some("color:#DC143C;font-weight:bold;text-decoration:underline;")),
               },
             }
           />
@@ -214,7 +214,7 @@ let make = () => {
                   {component: <DemoOption className="option-7" name="Robson" email="robson@gmail.com" />, value: "Robson"},
                   {component: <DemoOption className="option-8" name="Ronaldo" email="ronaldo@gmail.com" />, value: "Ronaldo"},
                 }),
-                highlightStyle: Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
+                suggestion: SuggestedSpan(Some("color:#DC143C;font-weight:bold;text-decoration:underline;")),
               },
             }
           />

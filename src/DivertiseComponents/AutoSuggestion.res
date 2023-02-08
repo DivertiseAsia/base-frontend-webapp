@@ -1,7 +1,7 @@
 open Webapi.Dom
 
 module Trigger = {
-  type inlineSpan = option<string>
+  type spanHighlightStyle = option<string>
 
   type optionRecord = {
     component: React.element,
@@ -17,15 +17,14 @@ module Trigger = {
     | OptionComponent(list<optionRecord>)
 
   type suggestionType =
-    | SuggestedSpan(inlineSpan)
+    | SuggestedSpan(spanHighlightStyle)
     | SuggestedComponent(React.element)
 
   type t = {
     triggerBy: triggerType,
     triggerOptions: optionType,
     triggerCallback?: unit => unit,
-    suggestion?: suggestionType,
-    highlightStyle: option<string>,
+    suggestion: suggestionType,
   }
 
   let filterTriggerOptionsByAlphabet = (triggerOption: list<string>, match: Js.Re.result) => {
@@ -90,6 +89,14 @@ let make = (~triggers: list<Trigger.t>) => {
       })
     }
 
+  let createFinalSuggestion = (~suggestionText: string, ~suggestion: suggestionType) =>
+    switch suggestion {
+    | SuggestedSpan(style) =>
+      createSuggestionEl(~contentEditable=false, ~suggestionText, ~styles=style)
+    | SuggestedComponent(_) =>
+      createSuggestionEl(~contentEditable=false, ~suggestionText, ~styles=None)
+    }
+
   React.useEffect1(() => {
     triggers
     ->Belt.List.getBy(trigger => {
@@ -126,7 +133,7 @@ let make = (~triggers: list<Trigger.t>) => {
     None
   }, [filteredOptions])
 
-  let handleSuggestionClick = suggestion => {
+  let handleSuggestionClick = (~suggestionText: string, ~suggestion: suggestionType) => {
     currentTrigger
     ->Belt.Option.mapWithDefault((), trigger => {
       switch inputRef.current->Js.Nullable.toOption {
@@ -134,11 +141,7 @@ let make = (~triggers: list<Trigger.t>) => {
         Utils.ContentEditable.updateValue(
           ~triggerRegex=funcFinalRegex(trigger.triggerBy),
           ~divEl=dom,
-          createSuggestionEl(
-            ~contentEditable=false,
-            ~suggestionText=suggestion,
-            ~styles=trigger.highlightStyle,
-          ),
+          createFinalSuggestion(~suggestionText, ~suggestion),
         )
       | None => ()
       }
@@ -169,7 +172,13 @@ let make = (~triggers: list<Trigger.t>) => {
           ReactEvent.Keyboard.stopPropagation(event)
           filteredOptions
           ->Belt.List.get(selectedIndex)
-          ->Belt.Option.mapWithDefault((), handleSuggestionClick)
+          ->Belt.Option.mapWithDefault((), text => {
+            // TODO : use getWithDefault instead
+            currentTrigger
+            ->Belt.Option.map(trigger => trigger.suggestion)
+            ->Belt.Option.getExn
+            ->handleSuggestionClick(~suggestionText=text, ~suggestion=_)
+          })
         }
 
       | "Escape" => {
@@ -194,7 +203,11 @@ let make = (~triggers: list<Trigger.t>) => {
             className={isSelected ? "selected" : ""}
             onMouseOver={_ => setSelectedIndex(_ => index)}
             onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
-            onClick={_ => handleSuggestionClick(suggestion)}>
+            onClick={_ =>
+              currentTrigger
+              ->Belt.Option.map(trigger => trigger.suggestion)
+              ->Belt.Option.getExn
+              ->handleSuggestionClick(~suggestionText=suggestion, ~suggestion=_)}>
             {switch isSelected {
             | true => <strong> {suggestion->React.string} </strong>
             | false => suggestion->React.string
@@ -207,7 +220,7 @@ let make = (~triggers: list<Trigger.t>) => {
     | OptionComponent(eleList) =>
       filteredOptions
       ->Belt.List.mapWithIndex((index, suggestion) => {
-        let isSelected = index === selectedIndex
+        // let isSelected = index === selectedIndex
 
         eleList
         ->Belt.List.getBy(ele => ele.value == suggestion)
@@ -220,7 +233,11 @@ let make = (~triggers: list<Trigger.t>) => {
             <div
               onMouseOver={_ => setSelectedIndex(_ => index)}
               onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
-              onClick={_ => handleSuggestionClick(suggestion)}>
+              onClick={_ =>
+                currentTrigger
+                ->Belt.Option.map(trigger => trigger.suggestion)
+                ->Belt.Option.getExn
+                ->handleSuggestionClick(~suggestionText=suggestion, ~suggestion=_)}>
               ele.component
             </div>
         )
@@ -248,6 +265,7 @@ let make = (~triggers: list<Trigger.t>) => {
     {switch showOptions {
     | true =>
       generateOption(
+        // TODO : use getWithDefault instead
         currentTrigger->Belt.Option.map(trigger => trigger.triggerOptions)->Belt.Option.getExn,
       )
     | false => React.null
