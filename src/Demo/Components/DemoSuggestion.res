@@ -1,9 +1,8 @@
 @react.component
-let make = (~className: string, ~name: string, ~email: string) => {
+let make = (~className: string, ~name: string) => {
   <>
     <div className>
-      <p> {React.string(name)} </p>
-      <p> {React.string(email)} </p>
+      <span contentEditable=false> {React.string(name)} </span>
     </div>
   </>
 }

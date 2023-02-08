@@ -125,7 +125,9 @@ let make = () => {
                   "robert@hotmail.com",
                   "robson@gmail.com",
                 }),
-                suggestion: SuggestedSpan(Some("color:#DC143C;font-weight:bold;text-decoration:underline;")),
+                suggestion: SuggestedSpan(
+                  Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
+                ),
               },
             }
           />
@@ -174,7 +176,9 @@ let make = () => {
                   "Robert",
                   "Robson",
                 }),
-                suggestion: SuggestedSpan(Some("color:#567189;font-weight:bold;font-style:italic;")),
+                suggestion: SuggestedSpan(
+                  Some("color:#567189;font-weight:bold;font-style:italic;"),
+                ),
               },
               {
                 triggerBy: TriggerRegex(
@@ -189,7 +193,9 @@ let make = () => {
                   "robert@hotmail.com",
                   "robson@gmail.com",
                 }),
-                suggestion: SuggestedSpan(Some("color:#DC143C;font-weight:bold;text-decoration:underline;")),
+                suggestion: SuggestedSpan(
+                  Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
+                ),
               },
             }
           />
@@ -205,17 +211,57 @@ let make = () => {
                   "^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
                 ),
                 triggerOptions: OptionComponent(list{
-                  {component: <DemoOption className="option-1" name="Alice" email="alice@gmail.com" />, value: "alice"},
-                  {component: <DemoOption className="option-2" name="Tata" email="tata@gmail.com" />, value: "tata"},
-                  {component: <DemoOption className="option-3" name="Bob" email="bob@gmail.com" />, value: "bob"},
-                  {component: <DemoOption className="option-4" name="Charlie" email="charlie@yahoo.com" />, value: "charlie"},
-                  {component: <DemoOption className="option-5" name="Alex" email="alex@gmail.com" />, value: "alex"},
-                  {component: <DemoOption className="option-6" name="Robert" email="robert@hotmail.com" />, value: "robert"},
-                  {component: <DemoOption className="option-7" name="Robson" email="robson@gmail.com" />, value: "robson"},
-                  {component: <DemoOption className="option-8" name="Ronaldo" email="ronaldo@gmail.com" />, value: "ronaldo"},
+                  {
+                    component: <DemoOption
+                      className="option-1" name="Alice" email="alice@gmail.com"
+                    />,
+                    value: "alice",
+                  },
+                  {
+                    component: <DemoOption
+                      className="option-2" name="Tata" email="tata@gmail.com"
+                    />,
+                    value: "tata",
+                  },
+                  {
+                    component: <DemoOption className="option-3" name="Bob" email="bob@gmail.com" />,
+                    value: "bob",
+                  },
+                  {
+                    component: <DemoOption
+                      className="option-4" name="Charlie" email="charlie@yahoo.com"
+                    />,
+                    value: "charlie",
+                  },
+                  {
+                    component: <DemoOption
+                      className="option-5" name="Alex" email="alex@gmail.com"
+                    />,
+                    value: "alex",
+                  },
+                  {
+                    component: <DemoOption
+                      className="option-6" name="Robert" email="robert@hotmail.com"
+                    />,
+                    value: "robert",
+                  },
+                  {
+                    component: <DemoOption
+                      className="option-7" name="Robson" email="robson@gmail.com"
+                    />,
+                    value: "robson",
+                  },
+                  {
+                    component: <DemoOption
+                      className="option-8" name="Ronaldo" email="ronaldo@gmail.com"
+                    />,
+                    value: "ronaldo",
+                  },
                 }),
                 // suggestion: SuggestedSpan(Some("color:#DC143C;font-weight:bold;text-decoration:underline;")),
-                suggestion: SuggestedComponent(<DemoOption className="option-8" name="Ronaldo" email="ronaldo@gmail.com" />),
+                suggestion: SuggestedComponent(
+                  name => <DemoSuggestion className="suggestion" name />,
+                ),
               },
             }
           />

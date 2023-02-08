@@ -18,7 +18,7 @@ module Trigger = {
 
   type suggestionType =
     | SuggestedSpan(spanHighlightStyle)
-    | SuggestedComponent(React.element)
+    | SuggestedComponent(string => React.element)
 
   type t = {
     triggerBy: triggerType,
@@ -93,7 +93,7 @@ let make = (~triggers: list<Trigger.t>) => {
     switch suggestion {
     | SuggestedSpan(style) =>
       createSuggestionEl(~contentEditable=false, ~suggestionText, ~styles=style)
-    | SuggestedComponent(ele) => ele->ReactDOMServer.renderToString->Utils.stringToEl
+    | SuggestedComponent(eleFn) => suggestionText->eleFn->ReactDOMServer.renderToString->Utils.stringToEl
     }
 
   React.useEffect1(() => {
