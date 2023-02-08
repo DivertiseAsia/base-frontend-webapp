@@ -181,12 +181,10 @@ let make = (~triggers: list<Trigger.t>) => {
             )
           })
         }
-
       | "Escape" => {
           ReactEvent.Keyboard.preventDefault(event)
           setShowOptions(_ => false)
         }
-
       | _ => ()
       }
     }
@@ -200,8 +198,10 @@ let make = (~triggers: list<Trigger.t>) => {
         ->Belt.List.mapWithIndex((index, suggestion) => {
           let isSelected = index === selectedIndex
           <li
-            key={`${index->Belt.Int.toString}-${suggestion}`}
-            className={isSelected ? "selected" : ""}
+            key={`suggestion-${index->Belt.Int.toString}`}
+            className={isSelected
+              ? `suggestion-${index->Belt.Int.toString}-selected`
+              : `suggestion-${index->Belt.Int.toString}`}
             onMouseOver={_ => setSelectedIndex(_ => index)}
             onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
             onClick={_ =>
@@ -223,7 +223,7 @@ let make = (~triggers: list<Trigger.t>) => {
     | OptionComponent(eleList) =>
       filteredOptions
       ->Belt.List.mapWithIndex((index, suggestion) => {
-        // let isSelected = index === selectedIndex
+        let isSelected = index === selectedIndex
 
         eleList
         ->Belt.List.getBy(ele => ele.value == suggestion)
@@ -235,6 +235,9 @@ let make = (~triggers: list<Trigger.t>) => {
           ele =>
             <div
               key={`suggestion-${index->Belt.Int.toString}`}
+              className={isSelected
+                ? `suggestion-${index->Belt.Int.toString}-selected`
+                : `suggestion-${index->Belt.Int.toString}`}
               onMouseOver={_ => setSelectedIndex(_ => index)}
               onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
               onClick={_ =>
