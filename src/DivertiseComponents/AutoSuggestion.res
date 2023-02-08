@@ -173,11 +173,12 @@ let make = (~triggers: list<Trigger.t>) => {
           filteredOptions
           ->Belt.List.get(selectedIndex)
           ->Belt.Option.mapWithDefault((), text => {
-            // TODO : use getWithDefault instead
             currentTrigger
             ->Belt.Option.map(trigger => trigger.suggestion)
-            ->Belt.Option.getExn
-            ->handleSuggestionClick(~suggestionText=text, ~suggestion=_)
+            ->Belt.Option.mapWithDefault(
+              (),
+              handleSuggestionClick(~suggestionText=text, ~suggestion=_),
+            )
           })
         }
 
@@ -206,8 +207,10 @@ let make = (~triggers: list<Trigger.t>) => {
             onClick={_ =>
               currentTrigger
               ->Belt.Option.map(trigger => trigger.suggestion)
-              ->Belt.Option.getExn
-              ->handleSuggestionClick(~suggestionText=suggestion, ~suggestion=_)}>
+              ->Belt.Option.mapWithDefault(
+                (),
+                handleSuggestionClick(~suggestionText=suggestion, ~suggestion=_),
+              )}>
             {switch isSelected {
             | true => <strong> {suggestion->React.string} </strong>
             | false => suggestion->React.string
@@ -231,13 +234,16 @@ let make = (~triggers: list<Trigger.t>) => {
         ->(
           ele =>
             <div
+              key={`suggestion-${index->Belt.Int.toString}`}
               onMouseOver={_ => setSelectedIndex(_ => index)}
               onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
               onClick={_ =>
                 currentTrigger
                 ->Belt.Option.map(trigger => trigger.suggestion)
-                ->Belt.Option.getExn
-                ->handleSuggestionClick(~suggestionText=suggestion, ~suggestion=_)}>
+                ->Belt.Option.mapWithDefault(
+                  (),
+                  handleSuggestionClick(~suggestionText=suggestion, ~suggestion=_),
+                )}>
               ele.component
             </div>
         )
@@ -264,10 +270,9 @@ let make = (~triggers: list<Trigger.t>) => {
     />
     {switch showOptions {
     | true =>
-      generateOption(
-        // TODO : use getWithDefault instead
-        currentTrigger->Belt.Option.map(trigger => trigger.triggerOptions)->Belt.Option.getExn,
-      )
+      currentTrigger
+      ->Belt.Option.map(trigger => trigger.triggerOptions)
+      ->Belt.Option.mapWithDefault(React.null, generateOption)
     | false => React.null
     }}
   </div>
