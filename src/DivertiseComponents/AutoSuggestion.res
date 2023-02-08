@@ -93,8 +93,7 @@ let make = (~triggers: list<Trigger.t>) => {
     switch suggestion {
     | SuggestedSpan(style) =>
       createSuggestionEl(~contentEditable=false, ~suggestionText, ~styles=style)
-    | SuggestedComponent(_) =>
-      createSuggestionEl(~contentEditable=false, ~suggestionText, ~styles=None)
+    | SuggestedComponent(ele) => ele->ReactDOMServer.renderToString->Utils.stringToEl
     }
 
   React.useEffect1(() => {

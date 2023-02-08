@@ -214,7 +214,8 @@ let make = () => {
                   {component: <DemoOption className="option-7" name="Robson" email="robson@gmail.com" />, value: "robson"},
                   {component: <DemoOption className="option-8" name="Ronaldo" email="ronaldo@gmail.com" />, value: "ronaldo"},
                 }),
-                suggestion: SuggestedSpan(Some("color:#DC143C;font-weight:bold;text-decoration:underline;")),
+                // suggestion: SuggestedSpan(Some("color:#DC143C;font-weight:bold;text-decoration:underline;")),
+                suggestion: SuggestedComponent(<DemoOption className="option-8" name="Ronaldo" email="ronaldo@gmail.com" />),
               },
             }
           />
