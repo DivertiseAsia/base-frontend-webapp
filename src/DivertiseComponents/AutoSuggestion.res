@@ -193,6 +193,14 @@ let make = (~triggers: list<Trigger.t>) => {
     }
   }
 
+  let selectedClassName = (~index: int, ~isSelected: bool): string => {
+    if isSelected {
+      `suggestion-${index->Belt.Int.toString}-selected`
+    } else {
+      `suggestion-${index->Belt.Int.toString}`
+    }
+  }
+
   let generateOption = (triggerOptions: optionType) =>
     switch triggerOptions {
     | OptionText(_) =>
@@ -202,9 +210,7 @@ let make = (~triggers: list<Trigger.t>) => {
           let isSelected = index === selectedIndex
           <li
             key={`suggestion-${index->Belt.Int.toString}`}
-            className={isSelected
-              ? `suggestion-${index->Belt.Int.toString}-selected`
-              : `suggestion-${index->Belt.Int.toString}`}
+            className={selectedClassName(~index, ~isSelected)}
             onMouseOver={_ => setSelectedIndex(_ => index)}
             onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
             onClick={_ =>
@@ -238,9 +244,7 @@ let make = (~triggers: list<Trigger.t>) => {
           ele =>
             <div
               key={`suggestion-${index->Belt.Int.toString}`}
-              className={isSelected
-                ? `suggestion-${index->Belt.Int.toString}-selected`
-                : `suggestion-${index->Belt.Int.toString}`}
+              className={selectedClassName(~index, ~isSelected)}
               onMouseOver={_ => setSelectedIndex(_ => index)}
               onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
               onClick={_ =>
