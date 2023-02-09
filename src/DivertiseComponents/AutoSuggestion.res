@@ -90,7 +90,10 @@ let make = (~triggers: list<Trigger.t>) => {
       })
     }
 
-  let createSuggestionElement = (~suggestionText: string, ~suggestion: suggestionType): Dom.element =>
+  let createSuggestionElement = (
+    ~suggestionText: string,
+    ~suggestion: suggestionType,
+  ): Dom.element =>
     switch suggestion {
     | SuggestedSpan(style) =>
       createSuggestionEl(~contentEditable=false, ~suggestionText, ~styles=style)
@@ -182,12 +185,10 @@ let make = (~triggers: list<Trigger.t>) => {
             )
           })
         }
-
       | "Escape" => {
           ReactEvent.Keyboard.preventDefault(event)
           setShowOptions(_ => false)
         }
-
       | _ => ()
       }
     }
