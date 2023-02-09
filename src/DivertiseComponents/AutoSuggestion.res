@@ -2,10 +2,11 @@ open Webapi.Dom
 
 module Trigger = {
   type spanHighlightStyle = option<string>
+  type optionValue = string
 
   type optionRecord = {
     component: React.element,
-    value: string,
+    optionValue
   }
 
   type triggerType =
@@ -13,7 +14,7 @@ module Trigger = {
     | TriggerRegex(Js.Re.t)
 
   type optionType =
-    | OptionText(list<string>)
+    | OptionText(list<optionValue>)
     | OptionComponent(list<optionRecord>)
 
   type suggestionType =
@@ -85,7 +86,7 @@ let make = (~triggers: list<Trigger.t>) => {
     | OptionText(strList) => strList
     | OptionComponent(eleList) =>
       eleList->Belt.List.map(ele => {
-        ele.value
+        ele.optionValue
       })
     }
 
@@ -225,10 +226,10 @@ let make = (~triggers: list<Trigger.t>) => {
         let isSelected = index === selectedIndex
 
         eleList
-        ->Belt.List.getBy(ele => ele.value == suggestion)
+        ->Belt.List.getBy(ele => ele.optionValue == suggestion)
         ->Belt.Option.getWithDefault({
           component: <> </>,
-          value: "",
+          optionValue: "",
         })
         ->(
           ele =>

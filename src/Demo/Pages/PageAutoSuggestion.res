@@ -194,47 +194,47 @@ let make = () => {
                     component: <DemoOption
                       className="option-1" name="Alice" email="alice@gmail.com"
                     />,
-                    value: "alice",
+                    optionValue: "alice",
                   },
                   {
                     component: <DemoOption
                       className="option-2" name="Tata" email="tata@gmail.com"
                     />,
-                    value: "tata",
+                    optionValue: "tata",
                   },
                   {
                     component: <DemoOption className="option-3" name="Bob" email="bob@gmail.com" />,
-                    value: "bob",
+                    optionValue: "bob",
                   },
                   {
                     component: <DemoOption
                       className="option-4" name="Charlie" email="charlie@yahoo.com"
                     />,
-                    value: "charlie",
+                    optionValue: "charlie",
                   },
                   {
                     component: <DemoOption
                       className="option-5" name="Alex" email="alex@gmail.com"
                     />,
-                    value: "alex",
+                    optionValue: "alex",
                   },
                   {
                     component: <DemoOption
                       className="option-6" name="Robert" email="robert@hotmail.com"
                     />,
-                    value: "robert",
+                    optionValue: "robert",
                   },
                   {
                     component: <DemoOption
                       className="option-7" name="Robson" email="robson@gmail.com"
                     />,
-                    value: "robson",
+                    optionValue: "robson",
                   },
                   {
                     component: <DemoOption
                       className="option-8" name="Ronaldo" email="ronaldo@gmail.com"
                     />,
-                    value: "ronaldo",
+                    optionValue: "ronaldo",
                   },
                 }),
                 // suggestion: SuggestedSpan(Some("color:#DC143C;font-weight:bold;text-decoration:underline;")),
