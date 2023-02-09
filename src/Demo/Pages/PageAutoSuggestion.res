@@ -1,5 +1,16 @@
 @react.component
 let make = () => {
+  let namesList = list{"Alice", "Tata", "Bob", "Charlie", "Alex", "Robert", "Robson"}
+  let emailsList = list{
+    "alice@gmail.com",
+    "tata@gmail.com",
+    "bob@gmail.com",
+    "charlie@yahoo.com",
+    "alex@gmail.com",
+    "robert@hotmail.com",
+    "robson@gmail.com",
+  }
+
   <div className="center-wrapper">
     <h1> {"Auto Suggestion Component"->React.string} </h1>
     <p>
@@ -68,15 +79,7 @@ let make = () => {
             triggers=list{
               {
                 triggerBy: TriggerSymbol("@"),
-                triggerOptions: OptionText(list{
-                  "Alice",
-                  "Tata",
-                  "Bob",
-                  "Charlie",
-                  "Alex",
-                  "Robert",
-                  "Robson",
-                }),
+                triggerOptions: OptionText(namesList),
                 suggestion: SuggestedSpan(None),
               },
             }
@@ -116,15 +119,7 @@ let make = () => {
                 triggerBy: TriggerRegex(
                   "^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
                 ),
-                triggerOptions: OptionText(list{
-                  "alice@gmail.com",
-                  "tata@gmail.com",
-                  "bob@gmail.com",
-                  "charlie@yahoo.com",
-                  "alex@gmail.com",
-                  "robert@hotmail.com",
-                  "robson@gmail.com",
-                }),
+                triggerOptions: OptionText(emailsList),
                 suggestion: SuggestedSpan(
                   Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
                 ),
@@ -167,15 +162,7 @@ let make = () => {
             triggers=list{
               {
                 triggerBy: TriggerSymbol("@"),
-                triggerOptions: OptionText(list{
-                  "Alice",
-                  "Tata",
-                  "Bob",
-                  "Charlie",
-                  "Alex",
-                  "Robert",
-                  "Robson",
-                }),
+                triggerOptions: OptionText(namesList),
                 suggestion: SuggestedSpan(
                   Some("color:#567189;font-weight:bold;font-style:italic;"),
                 ),
@@ -184,15 +171,7 @@ let make = () => {
                 triggerBy: TriggerRegex(
                   "^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
                 ),
-                triggerOptions: OptionText(list{
-                  "alice@gmail.com",
-                  "tata@gmail.com",
-                  "bob@gmail.com",
-                  "charlie@yahoo.com",
-                  "alex@gmail.com",
-                  "robert@hotmail.com",
-                  "robson@gmail.com",
-                }),
+                triggerOptions: OptionText(emailsList),
                 suggestion: SuggestedSpan(
                   Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
                 ),
