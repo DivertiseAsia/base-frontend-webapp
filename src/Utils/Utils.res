@@ -30,7 +30,7 @@ let createOrderedList = (elements: array<React.element>) => {
   </ol>
 }
 
-let stringToEl = %raw(`
+let stringToElement = %raw(`
   function (string) {
     var parser = new DOMParser(),
         content = 'text/html',

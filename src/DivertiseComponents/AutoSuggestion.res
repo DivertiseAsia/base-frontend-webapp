@@ -6,7 +6,7 @@ module Trigger = {
 
   type optionRecord = {
     component: React.element,
-    optionValue
+    optionValue: optionValue,
   }
 
   type triggerType =
@@ -81,7 +81,7 @@ let make = (~triggers: list<Trigger.t>) => {
     | TriggerRegex(regex) => regex
     }
 
-  let funcFinalOption = (triggerOptions: optionType) =>
+  let createOptionsText = (triggerOptions: optionType): list<Trigger.optionValue> =>
     switch triggerOptions {
     | OptionText(strList) => strList
     | OptionComponent(eleList) =>
@@ -90,11 +90,12 @@ let make = (~triggers: list<Trigger.t>) => {
       })
     }
 
-  let createFinalSuggestion = (~suggestionText: string, ~suggestion: suggestionType) =>
+  let createSuggestionElement = (~suggestionText: string, ~suggestion: suggestionType): Dom.element =>
     switch suggestion {
     | SuggestedSpan(style) =>
       createSuggestionEl(~contentEditable=false, ~suggestionText, ~styles=style)
-    | SuggestedComponent(eleFn) => suggestionText->eleFn->ReactDOMServer.renderToString->Utils.stringToEl
+    | SuggestedComponent(eleFn) =>
+      suggestionText->eleFn->ReactDOMServer.renderToString->Utils.stringToElement
     }
 
   React.useEffect1(() => {
@@ -114,7 +115,7 @@ let make = (~triggers: list<Trigger.t>) => {
       Js.log2("exec", Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue))
       Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Belt.Option.map(
         match => {
-          trigger.triggerOptions->funcFinalOption->filterTriggerOptionsByAlphabet(match)
+          trigger.triggerOptions->createOptionsText->filterTriggerOptionsByAlphabet(match)
         },
       )
     })
@@ -141,7 +142,7 @@ let make = (~triggers: list<Trigger.t>) => {
         Utils.ContentEditable.updateValue(
           ~triggerRegex=funcFinalRegex(trigger.triggerBy),
           ~divEl=dom,
-          createFinalSuggestion(~suggestionText, ~suggestion),
+          createSuggestionElement(~suggestionText, ~suggestion),
         )
       | None => ()
       }
@@ -181,10 +182,12 @@ let make = (~triggers: list<Trigger.t>) => {
             )
           })
         }
+
       | "Escape" => {
           ReactEvent.Keyboard.preventDefault(event)
           setShowOptions(_ => false)
         }
+
       | _ => ()
       }
     }
