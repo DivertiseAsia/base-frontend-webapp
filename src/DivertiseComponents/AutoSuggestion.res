@@ -1,15 +1,31 @@
 open Webapi.Dom
 
 module Trigger = {
+  type spanHighlightStyle = option<string>
+  type optionValue = string
+
+  type optionRecord = {
+    component: React.element,
+    optionValue: optionValue,
+  }
+
   type triggerType =
     | TriggerSymbol(string)
     | TriggerRegex(Js.Re.t)
 
+  type optionType =
+    | OptionText(list<optionValue>)
+    | OptionComponent(list<optionRecord>)
+
+  type suggestionType =
+    | SuggestedSpan(spanHighlightStyle)
+    | SuggestedComponent(optionValue => React.element)
+
   type t = {
     triggerBy: triggerType,
-    triggerOptions: list<string>,
+    triggerOptions: optionType,
     triggerCallback?: unit => unit,
-    highlightStyle: option<string>,
+    suggestion: suggestionType,
   }
 
   let filterTriggerOptionsByAlphabet = (triggerOption: list<string>, match: Js.Re.result) => {
@@ -60,8 +76,29 @@ let make = (~triggers: list<Trigger.t>) => {
 
   let funcFinalRegex = (trigger: triggerType) =>
     switch trigger {
-    | TriggerSymbol(symbol) => `^${symbol}(\\w*)|\\s${symbol}(\\w*)`->Js.Re.fromStringWithFlags(~flags="ig")
+    | TriggerSymbol(symbol) =>
+      `^${symbol}(\\w*)|\\s${symbol}(\\w*)`->Js.Re.fromStringWithFlags(~flags="ig")
     | TriggerRegex(regex) => regex
+    }
+
+  let createOptionsText = (triggerOptions: optionType): list<Trigger.optionValue> =>
+    switch triggerOptions {
+    | OptionText(strList) => strList
+    | OptionComponent(eleList) =>
+      eleList->Belt.List.map(ele => {
+        ele.optionValue
+      })
+    }
+
+  let createSuggestionElement = (
+    ~suggestionText: string,
+    ~suggestion: suggestionType,
+  ): Dom.element =>
+    switch suggestion {
+    | SuggestedSpan(styles) =>
+      createSuggestionEl(~contentEditable=false, ~suggestionText, ~styles)
+    | SuggestedComponent(eleFn) =>
+      suggestionText->eleFn->ReactDOMServer.renderToString->Utils.stringToElement
     }
 
   React.useEffect1(() => {
@@ -81,7 +118,7 @@ let make = (~triggers: list<Trigger.t>) => {
       Js.log2("exec", Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue))
       Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Belt.Option.map(
         match => {
-          trigger.triggerOptions->filterTriggerOptionsByAlphabet(match)
+          trigger.triggerOptions->createOptionsText->filterTriggerOptionsByAlphabet(match)
         },
       )
     })
@@ -100,7 +137,7 @@ let make = (~triggers: list<Trigger.t>) => {
     None
   }, [filteredOptions])
 
-  let handleSuggestionClick = suggestion => {
+  let handleSuggestionClick = (~suggestionText: string, ~suggestion: suggestionType) => {
     currentTrigger
     ->Belt.Option.mapWithDefault((), trigger => {
       switch inputRef.current->Js.Nullable.toOption {
@@ -108,11 +145,7 @@ let make = (~triggers: list<Trigger.t>) => {
         Utils.ContentEditable.updateValue(
           ~triggerRegex=funcFinalRegex(trigger.triggerBy),
           ~divEl=dom,
-          createSuggestionEl(
-            ~contentEditable=false,
-            ~suggestionText=suggestion,
-            ~styles=trigger.highlightStyle,
-          ),
+          createSuggestionElement(~suggestionText, ~suggestion),
         )
       | None => ()
       }
@@ -143,7 +176,14 @@ let make = (~triggers: list<Trigger.t>) => {
           ReactEvent.Keyboard.stopPropagation(event)
           filteredOptions
           ->Belt.List.get(selectedIndex)
-          ->Belt.Option.mapWithDefault((), handleSuggestionClick)
+          ->Belt.Option.mapWithDefault((), text => {
+            currentTrigger
+            ->Belt.Option.map(trigger => trigger.suggestion)
+            ->Belt.Option.mapWithDefault(
+              (),
+              handleSuggestionClick(~suggestionText=text, ~suggestion=_),
+            )
+          })
         }
       | "Escape" => {
           ReactEvent.Keyboard.preventDefault(event)
@@ -153,6 +193,77 @@ let make = (~triggers: list<Trigger.t>) => {
       }
     }
   }
+
+  let selectedClassName = (~index: int, ~isSelected: bool): string => {
+    if isSelected {
+      `suggestion-${index->Belt.Int.toString}-selected`
+    } else {
+      `suggestion-${index->Belt.Int.toString}`
+    }
+  }
+
+  let generateOption = (triggerOptions: optionType) =>
+    switch triggerOptions {
+    | OptionText(_) =>
+      <ul>
+        {filteredOptions
+        ->Belt.List.mapWithIndex((index, suggestionText) => {
+          let isSelected = index === selectedIndex
+          <li
+            key={`suggestion-${index->Belt.Int.toString}`}
+            className={selectedClassName(~index, ~isSelected)}
+            onMouseOver={_ => setSelectedIndex(_ => index)}
+            onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
+            onClick={_ =>
+              currentTrigger
+              ->Belt.Option.map(trigger => trigger.suggestion)
+              ->Belt.Option.mapWithDefault(
+                (),
+                handleSuggestionClick(~suggestionText, ~suggestion=_),
+              )}>
+            {switch isSelected {
+            | true => <strong> {suggestionText->React.string} </strong>
+            | false => suggestionText->React.string
+            }}
+          </li>
+        })
+        ->Belt.List.toArray
+        ->React.array}
+      </ul>
+    | OptionComponent(eleList) =>
+      <div>
+        {filteredOptions
+        ->Belt.List.mapWithIndex((index, suggestionText) => {
+          let isSelected = index === selectedIndex
+
+          eleList
+          ->Belt.List.getBy(ele => ele.optionValue == suggestionText)
+          ->Belt.Option.getWithDefault({
+            component: <> </>,
+            optionValue: "",
+          })
+          ->(
+            ele =>
+              <div
+                key={`suggestion-${index->Belt.Int.toString}`}
+                className={selectedClassName(~index, ~isSelected)}
+                onMouseOver={_ => setSelectedIndex(_ => index)}
+                onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
+                onClick={_ =>
+                  currentTrigger
+                  ->Belt.Option.map(trigger => trigger.suggestion)
+                  ->Belt.Option.mapWithDefault(
+                    (),
+                    handleSuggestionClick(~suggestionText, ~suggestion=_),
+                  )}>
+                ele.component
+              </div>
+          )
+        })
+        ->Belt.List.toArray
+        ->React.array}
+      </div>
+    }
 
   <div className="auto-suggestion-container">
     <div
@@ -172,25 +283,9 @@ let make = (~triggers: list<Trigger.t>) => {
     />
     {switch showOptions {
     | true =>
-      <ul>
-        {filteredOptions
-        ->Belt.List.mapWithIndex((index, suggestion) => {
-          let isSelected = index === selectedIndex
-          <li
-            key={`${index->Belt.Int.toString}-${suggestion}`}
-            className={isSelected ? "selected" : ""}
-            onMouseOver={_ => setSelectedIndex(_ => index)}
-            onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
-            onClick={_ => handleSuggestionClick(suggestion)}>
-            {switch isSelected {
-            | true => <strong> {suggestion->React.string} </strong>
-            | false => suggestion->React.string
-            }}
-          </li>
-        })
-        ->Belt.List.toArray
-        ->React.array}
-      </ul>
+      currentTrigger
+      ->Belt.Option.map(trigger => trigger.triggerOptions)
+      ->Belt.Option.mapWithDefault(React.null, generateOption)
     | false => React.null
     }}
   </div>

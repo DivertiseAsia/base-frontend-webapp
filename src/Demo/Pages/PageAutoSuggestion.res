@@ -1,5 +1,16 @@
 @react.component
 let make = () => {
+  let namesList = list{"Alice", "Tata", "Bob", "Charlie", "Alex", "Robert", "Robson"}
+  let emailsList = list{
+    "alice@gmail.com",
+    "tata@gmail.com",
+    "bob@gmail.com",
+    "charlie@yahoo.com",
+    "alex@gmail.com",
+    "robert@hotmail.com",
+    "robson@gmail.com",
+  }
+
   <div className="center-wrapper">
     <h1> {"Auto Suggestion Component"->React.string} </h1>
     <p>
@@ -68,8 +79,8 @@ let make = () => {
             triggers=list{
               {
                 triggerBy: TriggerSymbol("@"),
-                triggerOptions: list{"Alice", "Tata", "Bob", "Charlie", "Alex", "Robert", "Robson"},
-                highlightStyle: None,
+                triggerOptions: OptionText(namesList),
+                suggestion: SuggestedSpan(None),
               },
             }
           />
@@ -108,16 +119,10 @@ let make = () => {
                 triggerBy: TriggerRegex(
                   "^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
                 ),
-                triggerOptions: list{
-                  "alice@gmail.com",
-                  "tata@gmail.com",
-                  "bob@gmail.com",
-                  "charlie@yahoo.com",
-                  "alex@gmail.com",
-                  "robert@hotmail.com",
-                  "robson@gmail.com",
-                },
-                highlightStyle: Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
+                triggerOptions: OptionText(emailsList),
+                suggestion: SuggestedSpan(
+                  Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
+                ),
               },
             }
           />
@@ -157,23 +162,85 @@ let make = () => {
             triggers=list{
               {
                 triggerBy: TriggerSymbol("@"),
-                triggerOptions: list{"Alice", "Tata", "Bob", "Charlie", "Alex", "Robert", "Robson"},
-                highlightStyle: Some("color:#567189;font-weight:bold;font-style:italic;"),
+                triggerOptions: OptionText(namesList),
+                suggestion: SuggestedSpan(
+                  Some("color:#567189;font-weight:bold;font-style:italic;"),
+                ),
               },
               {
                 triggerBy: TriggerRegex(
                   "^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
                 ),
-                triggerOptions: list{
-                  "alice@gmail.com",
-                  "tata@gmail.com",
-                  "bob@gmail.com",
-                  "charlie@yahoo.com",
-                  "alex@gmail.com",
-                  "robert@hotmail.com",
-                  "robson@gmail.com",
-                },
-                highlightStyle: Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
+                triggerOptions: OptionText(emailsList),
+                suggestion: SuggestedSpan(
+                  Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
+                ),
+              },
+            }
+          />
+        </>,
+        <>
+          <p>
+            {"Auto-suggestion component with style and trigger with 'Regex(!)'"->React.string}
+          </p>
+          <AutoSuggestion
+            triggers=list{
+              {
+                triggerBy: TriggerRegex(
+                  "^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
+                ),
+                triggerOptions: OptionComponent(list{
+                  {
+                    component: <DemoOption
+                      className="option-1" name="Alice" email="alice@gmail.com"
+                    />,
+                    optionValue: "alice",
+                  },
+                  {
+                    component: <DemoOption
+                      className="option-2" name="Tata" email="tata@gmail.com"
+                    />,
+                    optionValue: "tata",
+                  },
+                  {
+                    component: <DemoOption className="option-3" name="Bob" email="bob@gmail.com" />,
+                    optionValue: "bob",
+                  },
+                  {
+                    component: <DemoOption
+                      className="option-4" name="Charlie" email="charlie@yahoo.com"
+                    />,
+                    optionValue: "charlie",
+                  },
+                  {
+                    component: <DemoOption
+                      className="option-5" name="Alex" email="alex@gmail.com"
+                    />,
+                    optionValue: "alex",
+                  },
+                  {
+                    component: <DemoOption
+                      className="option-6" name="Robert" email="robert@hotmail.com"
+                    />,
+                    optionValue: "robert",
+                  },
+                  {
+                    component: <DemoOption
+                      className="option-7" name="Robson" email="robson@gmail.com"
+                    />,
+                    optionValue: "robson",
+                  },
+                  {
+                    component: <DemoOption
+                      className="option-8" name="Ronaldo" email="ronaldo@gmail.com"
+                    />,
+                    optionValue: "ronaldo",
+                  },
+                }),
+                // suggestion: SuggestedSpan(Some("color:#DC143C;font-weight:bold;text-decoration:underline;")),
+                suggestion: SuggestedComponent(
+                  name => <DemoSuggestion className="suggestion" name />,
+                ),
               },
             }
           />

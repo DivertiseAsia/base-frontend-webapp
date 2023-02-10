@@ -30,6 +30,17 @@ let createOrderedList = (elements: array<React.element>) => {
   </ol>
 }
 
+let stringToElement = %raw(`
+  function (string) {
+    var parser = new DOMParser(),
+        content = 'text/html',
+        DOM = parser.parseFromString(string, content);
+
+    // return element
+    return DOM.body.childNodes[0];
+  }
+`)
+
 let getResponseMsgFromJson = json => {
   let jsonString = Json.stringify(json)
   let re = Js.Re.fromStringWithFlags("[\\[\\]\\{\\}\"]", ~flags="g")

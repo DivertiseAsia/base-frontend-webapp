@@ -12,8 +12,8 @@ body {
 }
 
 p, li, u, a, span, div {
-  -webkit-user-select: none !important;
-  user-select: none !important;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 .hidden {
