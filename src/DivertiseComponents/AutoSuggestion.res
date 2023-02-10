@@ -19,7 +19,7 @@ module Trigger = {
 
   type suggestionType =
     | SuggestedSpan(spanHighlightStyle)
-    | SuggestedComponent(string => React.element)
+    | SuggestedComponent(optionValue => React.element)
 
   type t = {
     triggerBy: triggerType,
@@ -95,8 +95,8 @@ let make = (~triggers: list<Trigger.t>) => {
     ~suggestion: suggestionType,
   ): Dom.element =>
     switch suggestion {
-    | SuggestedSpan(style) =>
-      createSuggestionEl(~contentEditable=false, ~suggestionText, ~styles=style)
+    | SuggestedSpan(styles) =>
+      createSuggestionEl(~contentEditable=false, ~suggestionText, ~styles)
     | SuggestedComponent(eleFn) =>
       suggestionText->eleFn->ReactDOMServer.renderToString->Utils.stringToElement
     }
@@ -207,7 +207,7 @@ let make = (~triggers: list<Trigger.t>) => {
     | OptionText(_) =>
       <ul>
         {filteredOptions
-        ->Belt.List.mapWithIndex((index, suggestion) => {
+        ->Belt.List.mapWithIndex((index, suggestionText) => {
           let isSelected = index === selectedIndex
           <li
             key={`suggestion-${index->Belt.Int.toString}`}
@@ -219,11 +219,11 @@ let make = (~triggers: list<Trigger.t>) => {
               ->Belt.Option.map(trigger => trigger.suggestion)
               ->Belt.Option.mapWithDefault(
                 (),
-                handleSuggestionClick(~suggestionText=suggestion, ~suggestion=_),
+                handleSuggestionClick(~suggestionText, ~suggestion=_),
               )}>
             {switch isSelected {
-            | true => <strong> {suggestion->React.string} </strong>
-            | false => suggestion->React.string
+            | true => <strong> {suggestionText->React.string} </strong>
+            | false => suggestionText->React.string
             }}
           </li>
         })
@@ -231,36 +231,38 @@ let make = (~triggers: list<Trigger.t>) => {
         ->React.array}
       </ul>
     | OptionComponent(eleList) =>
-      filteredOptions
-      ->Belt.List.mapWithIndex((index, suggestion) => {
-        let isSelected = index === selectedIndex
+      <div>
+        {filteredOptions
+        ->Belt.List.mapWithIndex((index, suggestionText) => {
+          let isSelected = index === selectedIndex
 
-        eleList
-        ->Belt.List.getBy(ele => ele.optionValue == suggestion)
-        ->Belt.Option.getWithDefault({
-          component: <> </>,
-          optionValue: "",
+          eleList
+          ->Belt.List.getBy(ele => ele.optionValue == suggestionText)
+          ->Belt.Option.getWithDefault({
+            component: <> </>,
+            optionValue: "",
+          })
+          ->(
+            ele =>
+              <div
+                key={`suggestion-${index->Belt.Int.toString}`}
+                className={selectedClassName(~index, ~isSelected)}
+                onMouseOver={_ => setSelectedIndex(_ => index)}
+                onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
+                onClick={_ =>
+                  currentTrigger
+                  ->Belt.Option.map(trigger => trigger.suggestion)
+                  ->Belt.Option.mapWithDefault(
+                    (),
+                    handleSuggestionClick(~suggestionText, ~suggestion=_),
+                  )}>
+                ele.component
+              </div>
+          )
         })
-        ->(
-          ele =>
-            <div
-              key={`suggestion-${index->Belt.Int.toString}`}
-              className={selectedClassName(~index, ~isSelected)}
-              onMouseOver={_ => setSelectedIndex(_ => index)}
-              onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
-              onClick={_ =>
-                currentTrigger
-                ->Belt.Option.map(trigger => trigger.suggestion)
-                ->Belt.Option.mapWithDefault(
-                  (),
-                  handleSuggestionClick(~suggestionText=suggestion, ~suggestion=_),
-                )}>
-              ele.component
-            </div>
-        )
-      })
-      ->Belt.List.toArray
-      ->React.array
+        ->Belt.List.toArray
+        ->React.array}
+      </div>
     }
 
   <div className="auto-suggestion-container">
