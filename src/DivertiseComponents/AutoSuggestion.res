@@ -231,7 +231,7 @@ let make = (~triggers: list<Trigger.t>) => {
         ->React.array}
       </ul>
     | OptionComponent(eleList) =>
-      <div>
+      <div className="suggestion-wrapper">
         {filteredOptions
         ->Belt.List.mapWithIndex((index, suggestionText) => {
           let isSelected = index === selectedIndex

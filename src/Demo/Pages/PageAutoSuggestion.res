@@ -14,7 +14,7 @@ let make = () => {
   <div className="center-wrapper">
     <h1> {"Auto Suggestion Component"->React.string} </h1>
     <p>
-      {"make an auto-suggestion with trigger to suggest with 'symbol' or 'regex'."->React.string}
+      {"make an auto-suggestion with trigger to suggest by 'symbol' or 'regex'."->React.string}
     </p>
     <div className="props">
       <h2> {"Props of component"->React.string} </h2>
@@ -25,7 +25,7 @@ let make = () => {
           {Utils.createUnorderedList([
             <>
               <b> {"triggerBy"->React.string} </b>
-              {" : you can send to trigger by variant `symbol` or `Regex`."->React.string}
+              {" : you can send to trigger by variant `TriggerSymbol` or `TriggerRegex`."->React.string}
               {Utils.createUnorderedList([
                 <code> {`triggerBy: TriggerSymbol("@")`->React.string} </code>,
                 <code>
@@ -35,7 +35,7 @@ let make = () => {
             </>,
             <>
               <b> {"triggerOptions"->React.string} </b>
-              {" : a list that contain suggested content that can be in form of `texts list` or `React components list`"->React.string}
+              {" : a list that contain triggered contents that can be in form of `lists of string` or `list of React components`"->React.string}
               {Utils.createUnorderedList([
                 <pre>
                   <code>
@@ -157,7 +157,7 @@ let make = () => {
           />
         </>,
         <>
-          <p> {"Auto-suggestion component trigger with '@' or 'Regex(!)'"->React.string} </p>
+          <p> {"Auto-suggestion component trigger with '@' or 'Regex(!) that contain data of name and E-mail list'"->React.string} </p>
           <pre>
             <code>
               {`<AutoSuggestion
