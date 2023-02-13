@@ -157,7 +157,9 @@ let make = () => {
           />
         </>,
         <>
-          <p> {"Auto-suggestion component trigger with '@' or 'Regex(!) that contain data of name and E-mail list'"->React.string} </p>
+          <p>
+            {"Auto-suggestion component trigger with '@' or 'Regex(!) that contain data of name and E-mail list'"->React.string}
+          </p>
           <pre>
             <code>
               {`<AutoSuggestion
@@ -271,49 +273,35 @@ let make = () => {
                 ),
                 triggerOptions: OptionComponent(list{
                   {
-                    component: <DemoOption
-                      className="option-1" name="Alice" email="alice@gmail.com"
-                    />,
+                    component: <DemoOption name="Alice" email="alice@gmail.com" />,
                     optionValue: "alice",
                   },
                   {
-                    component: <DemoOption
-                      className="option-2" name="Tata" email="tata@gmail.com"
-                    />,
+                    component: <DemoOption name="Tata" email="tata@gmail.com" />,
                     optionValue: "tata",
                   },
                   {
-                    component: <DemoOption className="option-3" name="Bob" email="bob@gmail.com" />,
+                    component: <DemoOption name="Bob" email="bob@gmail.com" />,
                     optionValue: "bob",
                   },
                   {
-                    component: <DemoOption
-                      className="option-4" name="Charlie" email="charlie@yahoo.com"
-                    />,
+                    component: <DemoOption name="Charlie" email="charlie@yahoo.com" />,
                     optionValue: "charlie",
                   },
                   {
-                    component: <DemoOption
-                      className="option-5" name="Alex" email="alex@gmail.com"
-                    />,
+                    component: <DemoOption name="Alex" email="alex@gmail.com" />,
                     optionValue: "alex",
                   },
                   {
-                    component: <DemoOption
-                      className="option-6" name="Robert" email="robert@hotmail.com"
-                    />,
+                    component: <DemoOption name="Robert" email="robert@hotmail.com" />,
                     optionValue: "robert",
                   },
                   {
-                    component: <DemoOption
-                      className="option-7" name="Robson" email="robson@gmail.com"
-                    />,
+                    component: <DemoOption name="Robson" email="robson@gmail.com" />,
                     optionValue: "robson",
                   },
                   {
-                    component: <DemoOption
-                      className="option-8" name="Ronaldo" email="ronaldo@gmail.com"
-                    />,
+                    component: <DemoOption name="Ronaldo" email="ronaldo@gmail.com" />,
                     optionValue: "ronaldo",
                   },
                 }),

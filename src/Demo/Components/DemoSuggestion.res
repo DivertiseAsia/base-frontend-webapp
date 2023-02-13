@@ -1,6 +1,4 @@
 @react.component
 let make = (~className: string, ~name: string) => {
-  <div className>
-    <span contentEditable=false> {React.string(name)} </span>
-  </div>
+  <span className contentEditable=false> {React.string(name)} </span>
 }

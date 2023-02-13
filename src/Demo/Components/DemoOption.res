@@ -1,7 +1,7 @@
 @react.component
-let make = (~className: string, ~name: string, ~email: string) => {
-  <div className>
+let make = (~name: string, ~email: string) => {
+  <>
     <p> {React.string(name)} </p>
     <p> {React.string(email)} </p>
-  </div>
+  </>
 }
