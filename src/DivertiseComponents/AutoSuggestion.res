@@ -95,8 +95,7 @@ let make = (~triggers: list<Trigger.t>) => {
     ~suggestion: suggestionType,
   ): Dom.element =>
     switch suggestion {
-    | SuggestedSpan(styles) =>
-      createSuggestionEl(~contentEditable=false, ~suggestionText, ~styles)
+    | SuggestedSpan(styles) => createSuggestionEl(~contentEditable=false, ~suggestionText, ~styles)
     | SuggestedComponent(eleFn) =>
       suggestionText->eleFn->ReactDOMServer.renderToString->Utils.stringToElement
     }
@@ -196,9 +195,9 @@ let make = (~triggers: list<Trigger.t>) => {
 
   let selectedClassName = (~index: int, ~isSelected: bool): string => {
     if isSelected {
-      `suggestion-${index->Belt.Int.toString}-selected`
+      `option-${index->Belt.Int.toString}-selected`
     } else {
-      `suggestion-${index->Belt.Int.toString}`
+      `option-${index->Belt.Int.toString}`
     }
   }
 
@@ -210,7 +209,7 @@ let make = (~triggers: list<Trigger.t>) => {
         ->Belt.List.mapWithIndex((index, suggestionText) => {
           let isSelected = index === selectedIndex
           <li
-            key={`suggestion-${index->Belt.Int.toString}`}
+            key={`option-${index->Belt.Int.toString}`}
             className={selectedClassName(~index, ~isSelected)}
             onMouseOver={_ => setSelectedIndex(_ => index)}
             onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
@@ -231,7 +230,7 @@ let make = (~triggers: list<Trigger.t>) => {
         ->React.array}
       </ul>
     | OptionComponent(eleList) =>
-      <div>
+      <div className="option-wrapper">
         {filteredOptions
         ->Belt.List.mapWithIndex((index, suggestionText) => {
           let isSelected = index === selectedIndex
@@ -245,7 +244,7 @@ let make = (~triggers: list<Trigger.t>) => {
           ->(
             ele =>
               <div
-                key={`suggestion-${index->Belt.Int.toString}`}
+                key={`option-${index->Belt.Int.toString}`}
                 className={selectedClassName(~index, ~isSelected)}
                 onMouseOver={_ => setSelectedIndex(_ => index)}
                 onMouseDown={e => ReactEvent.Mouse.preventDefault(e)}
