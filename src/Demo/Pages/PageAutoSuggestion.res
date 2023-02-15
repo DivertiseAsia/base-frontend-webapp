@@ -108,6 +108,7 @@ let make = () => {
                 triggerBy: TriggerSymbol("@"),
                 triggerOptions: OptionText(namesList),
                 suggestion: SuggestedSpan(None),
+                isReplaceSymbol: true,
               },
             }
           />
@@ -146,12 +147,14 @@ let make = () => {
             triggers=list{
               {
                 triggerBy: TriggerRegex(
+                  "!",
                   "^!(\\w{2,})|\\s!(\\w{2,})"->Js.Re.fromStringWithFlags(~flags="ig"),
                 ),
                 triggerOptions: OptionText(emailsList),
                 suggestion: SuggestedSpan(
                   Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
                 ),
+                isReplaceSymbol: true,
               },
             }
           />
@@ -201,15 +204,18 @@ let make = () => {
                 suggestion: SuggestedSpan(
                   Some("color:#362FD9;font-weight:bold;font-style:italic;"),
                 ),
+                isReplaceSymbol: true,
               },
               {
                 triggerBy: TriggerRegex(
+                  "!",
                   "^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
                 ),
                 triggerOptions: OptionText(emailsList),
                 suggestion: SuggestedSpan(
                   Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
                 ),
+                isReplaceSymbol: true,
               },
             }
           />
@@ -269,6 +275,7 @@ let make = () => {
             triggers=list{
               {
                 triggerBy: TriggerRegex(
+                  "!",
                   "^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
                 ),
                 triggerOptions: OptionComponent(list{
@@ -308,6 +315,22 @@ let make = () => {
                 suggestion: SuggestedComponent(
                   name => <DemoSuggestion className="suggestion" name />,
                 ),
+                isReplaceSymbol: true,
+              },
+            }
+          />
+          <AutoSuggestion
+            triggers=list{
+              {
+                triggerBy: TriggerRegex(
+                  "#",
+                  "^#(\\w{2,})|\\s#(\\w{2,})"->Js.Re.fromStringWithFlags(~flags="ig"),
+                ),
+                triggerOptions: OptionText(emailsList),
+                suggestion: SuggestedSpan(
+                  Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
+                ),
+                isReplaceSymbol: false,
               },
             }
           />

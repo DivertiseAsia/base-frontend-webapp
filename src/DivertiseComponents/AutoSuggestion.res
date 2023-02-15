@@ -11,7 +11,7 @@ module Trigger = {
 
   type triggerType =
     | TriggerSymbol(string)
-    | TriggerRegex(Js.Re.t)
+    | TriggerRegex(string, Js.Re.t)
 
   type optionType =
     | OptionText(list<optionValue>)
@@ -26,6 +26,7 @@ module Trigger = {
     triggerOptions: optionType,
     triggerCallback?: unit => unit,
     suggestion: suggestionType,
+    isReplaceSymbol: bool,
   }
 
   let filterTriggerOptionsByAlphabet = (triggerOption: list<string>, match: Js.Re.result) => {
@@ -74,11 +75,17 @@ let make = (~triggers: list<Trigger.t>) => {
   let (selectedIndex, setSelectedIndex) = React.useState(_ => 0)
   let inputRef = React.useRef(Js.Nullable.null)
 
+  let funcFinalSymbol = (trigger: triggerType) =>
+    switch trigger {
+    | TriggerSymbol(symbol) => symbol
+    | TriggerRegex(symbol, _) => symbol
+    }
+
   let funcFinalRegex = (trigger: triggerType) =>
     switch trigger {
     | TriggerSymbol(symbol) =>
       `^${symbol}(\\w*)|\\s${symbol}(\\w*)`->Js.Re.fromStringWithFlags(~flags="ig")
-    | TriggerRegex(regex) => regex
+    | TriggerRegex(_, regex) => regex
     }
 
   let createOptionsText = (triggerOptions: optionType): list<Trigger.optionValue> =>
@@ -141,11 +148,23 @@ let make = (~triggers: list<Trigger.t>) => {
     ->Belt.Option.mapWithDefault((), trigger => {
       switch inputRef.current->Js.Nullable.toOption {
       | Some(dom) =>
-        Utils.ContentEditable.updateValue(
-          ~triggerRegex=funcFinalRegex(trigger.triggerBy),
-          ~divEl=dom,
-          createSuggestionElement(~suggestionText, ~suggestion),
-        )
+        if trigger.isReplaceSymbol {
+          Utils.ContentEditable.updateValue(
+            ~triggerRegex=funcFinalRegex(trigger.triggerBy),
+            ~divEl=dom,
+            createSuggestionElement(~suggestionText, ~suggestion),
+          )
+        } else {
+          Utils.ContentEditable.updateValue(
+            ~triggerRegex=funcFinalRegex(trigger.triggerBy),
+            ~divEl=dom,
+            createSuggestionElement(
+              ~suggestionText=funcFinalSymbol(trigger.triggerBy) ++ suggestionText,
+              ~suggestion,
+            ),
+          )
+        }
+
       | None => ()
       }
       setCurrentTrigger(_ => None)
