@@ -114,7 +114,7 @@ let make = () => {
         </>,
         <>
           <p>
-            {"Auto-suggestion component with style and trigger with 'Regex(!)'"->React.string}
+            {"Auto-suggestion component with style and trigger with 'Regex(!)' and make it trigger when input 2 or more characters."->React.string}
           </p>
           <pre>
             <code>
@@ -122,7 +122,7 @@ let make = () => {
   triggers=list{
     {
       triggerBy: TriggerRegex(
-        "^!(\\\\w*)|\\\\s!(\\\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
+        "^!(\\\\w{2,})|\\\\s!(\\\\w{2,})"->Js.Re.fromStringWithFlags(~flags="ig"),
       ),
       triggerOptions: OptionText(list{
         "alice@gmail.com",
@@ -146,7 +146,7 @@ let make = () => {
             triggers=list{
               {
                 triggerBy: TriggerRegex(
-                  "^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
+                  "^!(\\w{2,})|\\s!(\\w{2,})"->Js.Re.fromStringWithFlags(~flags="ig"),
                 ),
                 triggerOptions: OptionText(emailsList),
                 suggestion: SuggestedSpan(
