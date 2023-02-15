@@ -29,7 +29,7 @@ let make = () => {
               {Utils.createUnorderedList([
                 <code> {`triggerBy: TriggerSymbol("@")`->React.string} </code>,
                 <code>
-                  {`triggerBy: TriggerRegex("^@(\\w*)|\\s@(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"))`->React.string}
+                  {`triggerBy: TriggerRegex("@", "^@(\\w*)|\\s@(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"))`->React.string}
                 </code>,
               ])}
             </>,
@@ -79,6 +79,14 @@ let make = () => {
                 </code>,
               ])}
             </>,
+            <>
+              <b> {"isReplaceSymbol"->React.string} </b>
+              {" : boolean to select if you need symbol at the first of suggestion."->React.string}
+              {Utils.createUnorderedList([
+                <code> {`isReplaceSymbol: true`->React.string} </code>,
+                <code> {`isReplaceSymbol: false`->React.string} </code>,
+              ])}
+            </>,
           ])}
         </>,
       ])}
@@ -96,6 +104,7 @@ let make = () => {
       triggerBy: TriggerSymbol("@"),
       triggerOptions: OptionText(list{"Alice", "Tata", "Bob", "Charlie", "Alex", "Robert", "Robson"}),
       suggestion: SuggestedSpan(None),
+      isReplaceSymbol: true,
     },
   }
 />
@@ -123,20 +132,14 @@ let make = () => {
   triggers=list{
     {
       triggerBy: TriggerRegex(
-        "^!(\\\\w{2,})|\\\\s!(\\\\w{2,})"->Js.Re.fromStringWithFlags(~flags="ig"),
+        "!",
+        "^!(\\\\w{2,}@?\\\\w*.\\\\w*)|\\\\s!(\\\\w{2,}@?\\\\w*.\\\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
       ),
-      triggerOptions: OptionText(list{
-        "alice@gmail.com",
-        "tata@gmail.com",
-        "bob@gmail.com",
-        "charlie@yahoo.com",
-        "alex@gmail.com",
-        "robert@hotmail.com",
-        "robson@gmail.com",
-      }),
+      triggerOptions: OptionText(emailsList),
       suggestion: SuggestedSpan(
         Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
       ),
+      isReplaceSymbol: true,
     },
   }
 />
@@ -148,7 +151,9 @@ let make = () => {
               {
                 triggerBy: TriggerRegex(
                   "!",
-                  "^!(\\w{2,})|\\s!(\\w{2,})"->Js.Re.fromStringWithFlags(~flags="ig"),
+                  "^!(\\w{2,}@?\\w*.\\w*)|\\s!(\\w{2,}@?\\w*.\\w*)"->Js.Re.fromStringWithFlags(
+                    ~flags="ig",
+                  ),
                 ),
                 triggerOptions: OptionText(emailsList),
                 suggestion: SuggestedSpan(
@@ -173,10 +178,11 @@ let make = () => {
       suggestion: SuggestedSpan(
         Some("color:#362FD9;font-weight:bold;font-style:italic;"),
       ),
+      isReplaceSymbol: true,
     },
     {
       triggerBy: TriggerRegex(
-        "^!(\\\\w*)|\\\\s!(\\\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
+        "^!(\\\\w@?\\\\w*.\\\\w*)|\\\\s!(\\\\w{2,}@?\\\\w*.\\\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
       ),
       triggerOptions: OptionText(list{
         "alice@gmail.com",
@@ -190,6 +196,7 @@ let make = () => {
       suggestion: SuggestedSpan(
         Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
       ),
+      isReplaceSymbol: true,
     },
   }
 />
@@ -209,7 +216,9 @@ let make = () => {
               {
                 triggerBy: TriggerRegex(
                   "!",
-                  "^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
+                  "^!(\\w@?\\w*.\\w*)|\\s!(\\w{2,}@?\\w*.\\w*)"->Js.Re.fromStringWithFlags(
+                    ~flags="ig",
+                  ),
                 ),
                 triggerOptions: OptionText(emailsList),
                 suggestion: SuggestedSpan(
@@ -265,6 +274,7 @@ let make = () => {
         },
       }),
       suggestion: SuggestedComponent(name => <DemoSuggestion className="suggestion" name />),
+      isReplaceSymbol: true,
     },
   }
 />
@@ -319,12 +329,42 @@ let make = () => {
               },
             }
           />
+        </>,
+        <>
+          <p>
+            {"Auto-suggestion component with style and trigger with 'Regex(#)'"->React.string}
+          </p>
+          <pre>
+            <code>
+              {`<AutoSuggestion
+    triggers=list{
+      {
+        triggerBy: TriggerRegex(
+          "#",
+          "^#(\\w{2,}@?\\w*.\\w*)|\\s#(\\w{2,}@?\\w*.\\w*)"->Js.Re.fromStringWithFlags(
+            ~flags="ig",
+          ),
+        ),
+        triggerOptions: OptionText(emailsList),
+        suggestion: SuggestedSpan(
+          Some("color:#DC143C;font-weight:bold;text-decoration:underline;"),
+        ),
+        isReplaceSymbol: false,
+      },
+    }
+  />
+</>
+`->React.string}
+            </code>
+          </pre>
           <AutoSuggestion
             triggers=list{
               {
                 triggerBy: TriggerRegex(
                   "#",
-                  "^#(\\w{2,})|\\s#(\\w{2,})"->Js.Re.fromStringWithFlags(~flags="ig"),
+                  "^#(\\w{2,}@?\\w*.\\w*)|\\s#(\\w{2,}@?\\w*.\\w*)"->Js.Re.fromStringWithFlags(
+                    ~flags="ig",
+                  ),
                 ),
                 triggerOptions: OptionText(emailsList),
                 suggestion: SuggestedSpan(
