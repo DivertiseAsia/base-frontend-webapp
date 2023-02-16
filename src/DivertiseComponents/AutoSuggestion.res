@@ -110,7 +110,12 @@ let make = (~triggers: list<Trigger.t>) => {
   React.useEffect1(() => {
     triggers
     ->Belt.List.getBy(trigger => {
-      Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Js.Option.isSome
+      Js.Re.exec_(
+        funcFinalRegex(trigger.triggerBy),
+        inputValue
+        ->Js.String2.lastIndexOf(funcFinalSymbol(trigger.triggerBy))
+        ->Js.String2.sliceToEnd(inputValue, ~from=_),
+      )->Js.Option.isSome
     })
     ->(trigger => setCurrentTrigger(_ => trigger))
     ->ignore
@@ -121,8 +126,12 @@ let make = (~triggers: list<Trigger.t>) => {
   React.useEffect2(() => {
     currentTrigger
     ->Belt.Option.mapWithDefault(None, trigger => {
-      Js.log2("exec", Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue))
-      Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Belt.Option.map(
+      Js.Re.exec_(
+        funcFinalRegex(trigger.triggerBy),
+        inputValue
+        ->Js.String2.lastIndexOf(funcFinalSymbol(trigger.triggerBy))
+        ->Js.String2.sliceToEnd(inputValue, ~from=_),
+      )->Belt.Option.map(
         match => {
           trigger.triggerOptions->createOptionsText->filterTriggerOptionsByAlphabet(match)
         },
