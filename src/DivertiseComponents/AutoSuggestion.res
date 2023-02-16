@@ -40,7 +40,7 @@ module Trigger = {
         ->Belt.Option.getWithDefault(Js.Nullable.null)
         ->Js.Nullable.toOption
         ->Belt.Option.getWithDefault("")
-        ->Js.Re.fromStringWithFlags(~flags="ig"),
+        ->Js.Re.fromStringWithFlags(~flags="gim"),
         _,
       )
       ->Js.Option.isSome
@@ -84,7 +84,7 @@ let make = (~triggers: list<Trigger.t>) => {
   let funcFinalRegex = (trigger: triggerType) =>
     switch trigger {
     | TriggerSymbol(symbol) =>
-      `^${symbol}(\\w*)|\\s${symbol}(\\w*)`->Js.Re.fromStringWithFlags(~flags="ig")
+      `^${symbol}(\\w*)|\\s${symbol}(\\w*)`->Js.Re.fromStringWithFlags(~flags="gim")
     | TriggerRegex(_, regex) => regex
     }
 
@@ -110,6 +110,10 @@ let make = (~triggers: list<Trigger.t>) => {
   React.useEffect1(() => {
     triggers
     ->Belt.List.getBy(trigger => {
+      Js.Re.setLastIndex(
+        funcFinalRegex(trigger.triggerBy),
+        inputValue->Js.String2.lastIndexOf(funcFinalSymbol(trigger.triggerBy)),
+      )
       Js.Re.exec_(
         funcFinalRegex(trigger.triggerBy),
         inputValue
@@ -126,6 +130,7 @@ let make = (~triggers: list<Trigger.t>) => {
   React.useEffect2(() => {
     currentTrigger
     ->Belt.Option.mapWithDefault(None, trigger => {
+      Js.log(Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue))
       Js.Re.exec_(
         funcFinalRegex(trigger.triggerBy),
         inputValue

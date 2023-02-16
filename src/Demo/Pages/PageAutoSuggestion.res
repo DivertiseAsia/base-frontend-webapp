@@ -29,7 +29,7 @@ let make = () => {
               {Utils.createUnorderedList([
                 <code> {`triggerBy: TriggerSymbol("@")`->React.string} </code>,
                 <code>
-                  {`triggerBy: TriggerRegex("@", "^@(\\w*)|\\s@(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"))`->React.string}
+                  {`triggerBy: TriggerRegex("@", "^@(\\w*)|\\s@(\\w*)"->Js.Re.fromStringWithFlags(~flags="gim"))`->React.string}
                 </code>,
               ])}
             </>,
@@ -133,7 +133,7 @@ let make = () => {
     {
       triggerBy: TriggerRegex(
         "!",
-        "^!(\\\\w{2,}@?\\\\w*.\\\\w*)|\\\\s!(\\\\w{2,}@?\\\\w*.\\\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
+        "^!(\\\\w{1,}@?\\\\w*.\\\\w*)|\\\\s!(\\\\w{1,}@?\\\\w*.\\\\w*)"->Js.Re.fromStringWithFlags(~flags="gim"),
       ),
       triggerOptions: OptionText(emailsList),
       suggestion: SuggestedSpan(
@@ -151,8 +151,8 @@ let make = () => {
               {
                 triggerBy: TriggerRegex(
                   "!",
-                  "^!(\\w{2,}@?\\w*.\\w*)|\\s!(\\w{2,}@?\\w*.\\w*)"->Js.Re.fromStringWithFlags(
-                    ~flags="ig",
+                  "^!(\\w{1,}@?\\w*.\\w*)|\\s!(\\w{1,}@?\\w*.\\w*)"->Js.Re.fromStringWithFlags(
+                    ~flags="gim",
                   ),
                 ),
                 triggerOptions: OptionText(emailsList),
@@ -182,7 +182,7 @@ let make = () => {
     },
     {
       triggerBy: TriggerRegex(
-        "^!(\\\\w@?\\\\w*.\\\\w*)|\\\\s!(\\\\w{2,}@?\\\\w*.\\\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
+        "^!(\\\\w*@?\\\\w*.\\\\w*)|\\\\s!(\\\\w*@?\\\\w*.\\\\w*)"->Js.Re.fromStringWithFlags(~flags="gim"),
       ),
       triggerOptions: OptionText(list{
         "alice@gmail.com",
@@ -216,8 +216,8 @@ let make = () => {
               {
                 triggerBy: TriggerRegex(
                   "!",
-                  "^!(\\w@?\\w*.\\w*)|\\s!(\\w{2,}@?\\w*.\\w*)"->Js.Re.fromStringWithFlags(
-                    ~flags="ig",
+                  "^!(\\w*@?\\w*.\\w*)|\\s!(\\w*@?\\w*.\\w*)"->Js.Re.fromStringWithFlags(
+                    ~flags="gim",
                   ),
                 ),
                 triggerOptions: OptionText(emailsList),
@@ -238,7 +238,7 @@ let make = () => {
               {`<AutoSuggestion
   triggers=list{
     {
-      triggerBy: TriggerRegex("^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig")),
+      triggerBy: TriggerRegex("^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="gim")),
       triggerOptions: OptionComponent(list{
         {
           component: <DemoOption className="option-1" name="Alice" email="alice@gmail.com" />,
@@ -286,7 +286,7 @@ let make = () => {
               {
                 triggerBy: TriggerRegex(
                   "!",
-                  "^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="ig"),
+                  "^!(\\w*)|\\s!(\\w*)"->Js.Re.fromStringWithFlags(~flags="gim"),
                 ),
                 triggerOptions: OptionComponent(list{
                   {
@@ -341,8 +341,8 @@ let make = () => {
       {
         triggerBy: TriggerRegex(
           "#",
-          "^#(\\w{2,}@?\\w*.\\w*)|\\s#(\\w{2,}@?\\w*.\\w*)"->Js.Re.fromStringWithFlags(
-            ~flags="ig",
+          "^#(\\w{1,}@?\\w*.\\w*)|\\s#(\\w{1,}@?\\w*.\\w*)"->Js.Re.fromStringWithFlags(
+            ~flags="gim",
           ),
         ),
         triggerOptions: OptionText(emailsList),
@@ -362,8 +362,8 @@ let make = () => {
               {
                 triggerBy: TriggerRegex(
                   "#",
-                  "^#(\\w{2,}@?\\w*.\\w*)|\\s#(\\w{2,}@?\\w*.\\w*)"->Js.Re.fromStringWithFlags(
-                    ~flags="ig",
+                  "^#(\\w{1,}@?\\w*.\\w*)|\\s#(\\w{1,}@?\\w*.\\w*)"->Js.Re.fromStringWithFlags(
+                    ~flags="gim",
                   ),
                 ),
                 triggerOptions: OptionText(emailsList),
