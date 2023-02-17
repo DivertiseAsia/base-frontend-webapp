@@ -36,7 +36,8 @@ module Trigger = {
       ->Js.Re.exec_(
         match
         ->Js.Re.captures
-        ->Belt.Array.get(1)
+        ->Js.Array2.filteri((item, index) => !Js.Nullable.isNullable(item) && index > 0)
+        ->Belt.Array.get(0)
         ->Belt.Option.getWithDefault(Js.Nullable.null)
         ->Js.Nullable.toOption
         ->Belt.Option.getWithDefault("")
@@ -112,14 +113,11 @@ let make = (~triggers: list<Trigger.t>) => {
     ->Belt.List.getBy(trigger => {
       Js.Re.setLastIndex(
         funcFinalRegex(trigger.triggerBy),
-        inputValue->Js.String2.lastIndexOf(funcFinalSymbol(trigger.triggerBy)),
-      )
-      Js.Re.exec_(
-        funcFinalRegex(trigger.triggerBy),
         inputValue
         ->Js.String2.lastIndexOf(funcFinalSymbol(trigger.triggerBy))
-        ->Js.String2.sliceToEnd(inputValue, ~from=_),
-      )->Js.Option.isSome
+        ->(index => index > 0 ? index - 1 : index),
+      )
+      Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Js.Option.isSome
     })
     ->(trigger => setCurrentTrigger(_ => trigger))
     ->ignore
@@ -131,12 +129,7 @@ let make = (~triggers: list<Trigger.t>) => {
     currentTrigger
     ->Belt.Option.mapWithDefault(None, trigger => {
       Js.log(Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue))
-      Js.Re.exec_(
-        funcFinalRegex(trigger.triggerBy),
-        inputValue
-        ->Js.String2.lastIndexOf(funcFinalSymbol(trigger.triggerBy))
-        ->Js.String2.sliceToEnd(inputValue, ~from=_),
-      )->Belt.Option.map(
+      Js.Re.exec_(funcFinalRegex(trigger.triggerBy), inputValue)->Belt.Option.map(
         match => {
           trigger.triggerOptions->createOptionsText->filterTriggerOptionsByAlphabet(match)
         },
