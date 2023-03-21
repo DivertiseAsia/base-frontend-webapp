@@ -30,6 +30,7 @@
     "react": "^17.0.2",
     "react-dom": "17.0.2",
     "react-intl": "^6.0.5",
+    "react-recycled-list": "^1.0.7",
     "rescript": "^10.0.1",
     "rescript-react-intl": "^3.0.0",
     "rescript-webapi": "^0.7.0"
