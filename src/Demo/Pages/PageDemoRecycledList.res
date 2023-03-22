@@ -5,7 +5,7 @@ let simpleListDemo = () => {
     )
 
   <ReactRecycledList.FixedList
-    height=500.0 rowComponent={Row.make} data={data->Belt.List.toArray} rowHeight=100.0
+    height=300.0 rowComponent={Row.Grid.make} data={data->Belt.List.toArray} rowHeight=100.0 column=4
   />
 }
 
