@@ -94,6 +94,7 @@ let make = () => {
         | list{"infinite-scroll"} => <PageInfiniteScroll />
         | list{"infinite-scroll-api"} => <PageInfiniteScrollAPI />
         | list{"auto-suggestion"} => <PageAutoSuggestion />
+        | list{"recycled-list"} => <PageDemoRecycledList />
         | list{"register"} => <PageRegister queryString={state.route.search} />
         | list{"forgot"} => <PageForgot queryString={state.route.search} />
         | list{"reset"} => <PageResetConfirm queryString={state.route.search} />
