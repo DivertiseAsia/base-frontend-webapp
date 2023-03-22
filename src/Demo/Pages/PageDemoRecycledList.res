@@ -4,12 +4,12 @@ let simpleListDemo = () => {
       `index ${index->Belt.Int.toString}`->React.string
     )
 
-  <RecycledList rowComponent={Row.make} data={data->Belt.List.toArray} rowHeight=20.0 />
+  <ReactRecycledList.FixedList
+    height=500.0 rowComponent={Row.make} data={data->Belt.List.toArray} rowHeight=100.0
+  />
 }
 
 @react.component
 let make = () => {
-  <div style={ReactDOM.Style.make(~height="500px", ~overflowY="auto", ~width="100%", ())}>
-    {simpleListDemo()}
-  </div>
+  simpleListDemo()
 }
