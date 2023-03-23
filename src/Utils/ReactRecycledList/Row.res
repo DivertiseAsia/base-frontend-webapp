@@ -22,7 +22,7 @@ module SimpleRow = {
 }
 
 module Grid = {
-  let make = ({data, dataIndex, dataEndIndex, top, height}: props<'a>) => {
+  let make = ({data, dataIndex, dataEndIndex, top, height, column}: props<'a>) => {
     let rowData = data->Js.Array2.slice(~start=dataIndex, ~end_=dataEndIndex)
 
     <div
@@ -40,7 +40,7 @@ module Grid = {
       ->Js.Array2.mapi((item, index) =>
         <div
           style={ReactDOM.Style.make(
-            ~width=`${Belt.Int.toString(100 / (dataEndIndex - dataIndex))}%`,
+            ~width=`${Belt.Int.toString(100 / column)}%`,
             ~textAlign="center",
             (),
           )}
