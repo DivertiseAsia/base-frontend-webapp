@@ -217,9 +217,7 @@ let responsiveCustomWindowDemo = () => {
     />
   }
 
-  <div style={ReactDOM.Style.make(~width="100%", ~height="50vh", ())}>
-    <ReactRecycledList.ResponsiveWindowContainer render={renderList} />
-  </div>
+  <ReactRecycledList.ResponsiveWindowContainer render={renderList} />
 }
 
 @react.component
