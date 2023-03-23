@@ -173,6 +173,55 @@ let fullWindowVariableListGrid = () => {
   />
 }
 
+let responsiveContainerDemo = () => {
+  let renderList = ({width, height}: ReactRecycledList.dimension) => {
+    let column = width > 1200.0 ? 2 : 1
+
+    <ReactRecycledList.FixedList
+      height
+      rowComponent={Row.Grid.make}
+      data={generateData(1000)}
+      rowHeight=100.0
+      column
+      onVisibleRowChange={({
+        firstVisibleRowIndex,
+        firstVisibleDataIndex,
+        lastVisibleRowIndex,
+        lastVisibleDataIndex,
+        lastRowIndex,
+      }) => ()}
+    />
+  }
+
+  <div style={ReactDOM.Style.make(~width="100%", ~height="50vh", ())}>
+    <ReactRecycledList.ResponsiveContainer render={renderList} />
+  </div>
+}
+
+let responsiveCustomWindowDemo = () => {
+  let renderList = ({width, height}: ReactRecycledList.dimension) => {
+    let column = width > 1200.0 ? 2 : 1
+
+    <ReactRecycledList.FullWindowFixedList
+      rowComponent={Row.Grid.make}
+      data={generateData(1000)}
+      rowHeight=100.0
+      column
+      onVisibleRowChange={({
+        firstVisibleRowIndex,
+        firstVisibleDataIndex,
+        lastVisibleRowIndex,
+        lastVisibleDataIndex,
+        lastRowIndex,
+      }) => ()}
+    />
+  }
+
+  <div style={ReactDOM.Style.make(~width="100%", ~height="50vh", ())}>
+    <ReactRecycledList.ResponsiveWindowContainer render={renderList} />
+  </div>
+}
+
 @react.component
 let make = () => {
   <>
@@ -184,5 +233,7 @@ let make = () => {
     {fullWindowFixedListGrid()}
     {fullWindowVariableListSimpleRow()}
     {fullWindowVariableListGrid()}
+    {responsiveContainerDemo()}
+    {responsiveCustomWindowDemo()}
   </>
 }

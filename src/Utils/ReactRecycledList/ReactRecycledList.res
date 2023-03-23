@@ -16,6 +16,8 @@ type visibilityInfo = {
   lastRowIndex: int,
 }
 
+type dimension = {height: float, width: float}
+
 module FixedList = {
   @react.component @module("react-recycled-list")
   external make: (
@@ -62,4 +64,14 @@ module FullWindowVariableList = {
     ~column: int,
     ~onVisibleRowChange: visibilityInfo => unit,
   ) => React.element = "FullWindowVariableList"
+}
+
+module ResponsiveContainer = {
+  @react.component @module("react-recycled-list")
+  external make: (~render: dimension => React.element) => React.element = "ResponsiveContainer"
+}
+
+module ResponsiveWindowContainer = {
+  @react.component @module("react-recycled-list")
+  external make: (~render: dimension => React.element) => React.element = "ResponsiveWindowContainer"
 }
