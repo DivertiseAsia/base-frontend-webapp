@@ -8,7 +8,11 @@ module SimpleRow = {
       style={ReactDOM.Style.make(
         ~top={`${top->Belt.Float.toString}px`},
         ~height={`${height->Belt.Float.toString}px`},
+        ~width="100%",
         ~position="absolute",
+        ~display="flex",
+        ~alignItems="center",
+        ~justifyContent="center",
         (),
       )}
       className="react-recycled-row">
