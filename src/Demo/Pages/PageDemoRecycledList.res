@@ -1,14 +1,12 @@
 let generateData = (amount: int): array<React.element> => {
   Belt.List.makeBy(amount, i => i + 1)
-  ->Belt.List.mapWithIndex((index, _) => `index ${index->Belt.Int.toString}`->React.string)
+  ->Belt.List.mapWithIndex((index, _) => `index ${(index + 1)->Belt.Int.toString}`->React.string)
   ->Belt.List.toArray
 }
 
 let randomRowHeights = (data: array<React.element>, ~column: int=1, ()): array<float> => {
-  Belt.List.makeBy((data->Js.Array2.length / column)->Belt.Int.toFloat->Js.Math.ceil_int, i =>
-    i + 1
-  )
-  ->Belt.List.mapWithIndex((index, _) => Js.Math.random_int(60, 140)->Belt.Int.toFloat)
+  Belt.List.makeBy(data->Js.Array2.length / column, i => i + 1)
+  ->Belt.List.map(_ => Js.Math.random_int(60, 140)->Belt.Int.toFloat)
   ->Belt.List.toArray
 }
 
@@ -54,7 +52,7 @@ let variableListSimpleRow = () => {
     rowHeights={randomRowHeights(data, ())}
     rowComponent={Row.SimpleRow.make}
     data
-    rowHeight=100.0
+    rowHeight=80.0
     column=1
     onVisibleRowChange={({
       firstVisibleRowIndex,
@@ -74,7 +72,7 @@ let variableListGrid = () => {
     rowHeights={randomRowHeights(data, ~column=4, ())}
     rowComponent={Row.Grid.make}
     data
-    rowHeight=100.0
+    rowHeight=80.0
     column=4
     onVisibleRowChange={({
       firstVisibleRowIndex,
@@ -125,7 +123,7 @@ let fullWindowVariableListSimpleRow = () => {
     rowComponent={Row.SimpleRow.make}
     rowHeights={randomRowHeights(data, ())}
     data
-    rowHeight=100.0
+    rowHeight=80.0
     column=1
     onVisibleRowChange={({
       firstVisibleRowIndex,
@@ -133,17 +131,7 @@ let fullWindowVariableListSimpleRow = () => {
       lastVisibleRowIndex,
       lastVisibleDataIndex,
       lastRowIndex,
-    }) => {
-      Js.logMany([
-        firstVisibleRowIndex,
-        firstVisibleDataIndex,
-        lastVisibleRowIndex,
-        lastVisibleDataIndex,
-        lastRowIndex,
-      ])
-      Js.log(randomRowHeights(data, ()))
-      Js.log(data)
-    }}
+    }) => ()}
   />
 }
 
@@ -153,8 +141,8 @@ let fullWindowVariableListGrid = () => {
   <ReactRecycledList.FullWindowVariableList
     rowComponent={Row.Grid.make}
     data
-    rowHeights={randomRowHeights(data, ~column=4, ())}
-    rowHeight=100.0
+    rowHeights={randomRowHeights(data, ())}
+    rowHeight=80.0
     column=4
     onVisibleRowChange={({
       firstVisibleRowIndex,
@@ -162,14 +150,7 @@ let fullWindowVariableListGrid = () => {
       lastVisibleRowIndex,
       lastVisibleDataIndex,
       lastRowIndex,
-    }) =>
-      Js.logMany([
-        firstVisibleRowIndex,
-        firstVisibleDataIndex,
-        lastVisibleRowIndex,
-        lastVisibleDataIndex,
-        lastRowIndex,
-      ])}
+    }) => ()}
   />
 }
 
@@ -223,6 +204,7 @@ let responsiveCustomWindowDemo = () => {
 @react.component
 let make = () => {
   <>
+    <h1> {"React recycled list"->React.string} </h1>
     {fixedListSimpleRow()}
     {fixedListGrid()}
     {variableListSimpleRow()}
