@@ -25,7 +25,7 @@ module FixedList = {
     ~rowComponent: React.component<rowComponentProps<'a>>,
     ~rowHeight: float,
     ~height: float,
-    ~column: int,
+    ~column: int=?,
     ~onVisibleRowChange: visibilityInfo => unit,
   ) => React.element = "FixedList"
 }
@@ -38,7 +38,7 @@ module VariableList = {
     ~rowHeight: float,
     ~rowComponent: React.component<rowComponentProps<'a>>,
     ~height: float,
-    ~column: int,
+    ~column: int=?,
     ~onVisibleRowChange: visibilityInfo => unit,
   ) => React.element = "VariableList"
 }
@@ -49,21 +49,9 @@ module FullWindowFixedList = {
     ~data: array<'data>,
     ~rowComponent: React.component<rowComponentProps<'a>>,
     ~rowHeight: float,
-    ~column: int,
+    ~column: int=?,
     ~onVisibleRowChange: visibilityInfo => unit,
   ) => React.element = "FullWindowFixedList"
-}
-
-module FullWindowVariableList = {
-  @react.component @module("react-recycled-list")
-  external make: (
-    ~data: array<'data>,
-    ~rowComponent: React.component<rowComponentProps<'a>>,
-    ~rowHeights: array<float>,
-    ~rowHeight: float,
-    ~column: int,
-    ~onVisibleRowChange: visibilityInfo => unit,
-  ) => React.element = "FullWindowVariableList"
 }
 
 module ResponsiveContainer = {
@@ -73,5 +61,6 @@ module ResponsiveContainer = {
 
 module ResponsiveWindowContainer = {
   @react.component @module("react-recycled-list")
-  external make: (~render: dimension => React.element) => React.element = "ResponsiveWindowContainer"
+  external make: (~render: dimension => React.element) => React.element =
+    "ResponsiveWindowContainer"
 }

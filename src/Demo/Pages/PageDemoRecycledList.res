@@ -16,13 +16,12 @@ let fixedListSimpleRow = () => {
     rowComponent={Row.SimpleRow.make}
     data={generateData(1000)}
     rowHeight=100.0
-    column=1
     onVisibleRowChange={({
-      firstVisibleRowIndex,
-      firstVisibleDataIndex,
-      lastVisibleRowIndex,
-      lastVisibleDataIndex,
-      lastRowIndex,
+      firstVisibleRowIndex: _,
+      firstVisibleDataIndex: _,
+      lastVisibleRowIndex: _,
+      lastVisibleDataIndex: _,
+      lastRowIndex: _,
     }) => ()}
   />
 }
@@ -35,11 +34,11 @@ let fixedListGrid = () => {
     rowHeight=100.0
     column=4
     onVisibleRowChange={({
-      firstVisibleRowIndex,
-      firstVisibleDataIndex,
-      lastVisibleRowIndex,
-      lastVisibleDataIndex,
-      lastRowIndex,
+      firstVisibleRowIndex: _,
+      firstVisibleDataIndex: _,
+      lastVisibleRowIndex: _,
+      lastVisibleDataIndex: _,
+      lastRowIndex: _,
     }) => ()}
   />
 }
@@ -53,13 +52,12 @@ let variableListSimpleRow = () => {
     rowComponent={Row.SimpleRow.make}
     data
     rowHeight=80.0
-    column=1
     onVisibleRowChange={({
-      firstVisibleRowIndex,
-      firstVisibleDataIndex,
-      lastVisibleRowIndex,
-      lastVisibleDataIndex,
-      lastRowIndex,
+      firstVisibleRowIndex: _,
+      firstVisibleDataIndex: _,
+      lastVisibleRowIndex: _,
+      lastVisibleDataIndex: _,
+      lastRowIndex: _,
     }) => ()}
   />
 }
@@ -75,11 +73,11 @@ let variableListGrid = () => {
     rowHeight=80.0
     column=4
     onVisibleRowChange={({
-      firstVisibleRowIndex,
-      firstVisibleDataIndex,
-      lastVisibleRowIndex,
-      lastVisibleDataIndex,
-      lastRowIndex,
+      firstVisibleRowIndex: _,
+      firstVisibleDataIndex: _,
+      lastVisibleRowIndex: _,
+      lastVisibleDataIndex: _,
+      lastRowIndex: _,
     }) => ()}
   />
 }
@@ -89,13 +87,12 @@ let fullWindowFixedListSimpleRow = () => {
     rowComponent={Row.SimpleRow.make}
     data={generateData(1000)}
     rowHeight=100.0
-    column=1
     onVisibleRowChange={({
-      firstVisibleRowIndex,
-      firstVisibleDataIndex,
-      lastVisibleRowIndex,
-      lastVisibleDataIndex,
-      lastRowIndex,
+      firstVisibleRowIndex: _,
+      firstVisibleDataIndex: _,
+      lastVisibleRowIndex: _,
+      lastVisibleDataIndex: _,
+      lastRowIndex: _,
     }) => ()}
   />
 }
@@ -107,49 +104,11 @@ let fullWindowFixedListGrid = () => {
     rowHeight=100.0
     column=4
     onVisibleRowChange={({
-      firstVisibleRowIndex,
-      firstVisibleDataIndex,
-      lastVisibleRowIndex,
-      lastVisibleDataIndex,
-      lastRowIndex,
-    }) => ()}
-  />
-}
-
-let fullWindowVariableListSimpleRow = () => {
-  let data = generateData(1000)
-
-  <ReactRecycledList.FullWindowVariableList
-    rowComponent={Row.SimpleRow.make}
-    rowHeights={randomRowHeights(data, ())}
-    data
-    rowHeight=80.0
-    column=1
-    onVisibleRowChange={({
-      firstVisibleRowIndex,
-      firstVisibleDataIndex,
-      lastVisibleRowIndex,
-      lastVisibleDataIndex,
-      lastRowIndex,
-    }) => ()}
-  />
-}
-
-let fullWindowVariableListGrid = () => {
-  let data = generateData(1000)
-
-  <ReactRecycledList.FullWindowVariableList
-    rowComponent={Row.Grid.make}
-    data
-    rowHeights={randomRowHeights(data, ())}
-    rowHeight=80.0
-    column=4
-    onVisibleRowChange={({
-      firstVisibleRowIndex,
-      firstVisibleDataIndex,
-      lastVisibleRowIndex,
-      lastVisibleDataIndex,
-      lastRowIndex,
+      firstVisibleRowIndex: _,
+      firstVisibleDataIndex: _,
+      lastVisibleRowIndex: _,
+      lastVisibleDataIndex: _,
+      lastRowIndex: _,
     }) => ()}
   />
 }
@@ -165,11 +124,11 @@ let responsiveContainerDemo = () => {
       rowHeight=100.0
       column
       onVisibleRowChange={({
-        firstVisibleRowIndex,
-        firstVisibleDataIndex,
-        lastVisibleRowIndex,
-        lastVisibleDataIndex,
-        lastRowIndex,
+        firstVisibleRowIndex: _,
+        firstVisibleDataIndex: _,
+        lastVisibleRowIndex: _,
+        lastVisibleDataIndex: _,
+        lastRowIndex: _,
       }) => ()}
     />
   }
@@ -180,7 +139,7 @@ let responsiveContainerDemo = () => {
 }
 
 let responsiveCustomWindowDemo = () => {
-  let renderList = ({width, height}: ReactRecycledList.dimension) => {
+  let renderList = ({width, height: _}: ReactRecycledList.dimension) => {
     let column = width > 1200.0 ? 2 : 1
 
     <ReactRecycledList.FullWindowFixedList
@@ -189,11 +148,11 @@ let responsiveCustomWindowDemo = () => {
       rowHeight=100.0
       column
       onVisibleRowChange={({
-        firstVisibleRowIndex,
-        firstVisibleDataIndex,
-        lastVisibleRowIndex,
-        lastVisibleDataIndex,
-        lastRowIndex,
+        firstVisibleRowIndex: _,
+        firstVisibleDataIndex: _,
+        lastVisibleRowIndex: _,
+        lastVisibleDataIndex: _,
+        lastRowIndex: _,
       }) => ()}
     />
   }
@@ -211,8 +170,6 @@ let make = () => {
     {variableListGrid()}
     {fullWindowFixedListSimpleRow()}
     {fullWindowFixedListGrid()}
-    {fullWindowVariableListSimpleRow()}
-    {fullWindowVariableListGrid()}
     {responsiveContainerDemo()}
     {responsiveCustomWindowDemo()}
   </>
