@@ -57,7 +57,6 @@ let make = () => {
 
   React.useEffect1(() => {
     if state.token !== "" {
-      RescriptReactRouter.push(Links.home)
       Api.getProfile(~token=state.token, ~callback=x => dispatch(UserRequest(x))) |> ignore
     } else {
       Js.log("User is logged out")
