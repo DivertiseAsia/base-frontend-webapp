@@ -1,4 +1,8 @@
-# cards-front
+# base-frontend-webapp
+
+## About
+
+This is a base project used for multiple projects with Divertise Asia. It serves as a good scaffold to work from. Please note this project is unmaintained and behind the current versions that exist for rescript and other libraries.
 
 ## Get Started
 
@@ -35,3 +39,7 @@ npm run server
 ## Customize the project
 
 Find and replace `cards-front` with your desired project name
+
+## Note on other branches
+
+They contain features that have not been able to be merged back to main. If you want to use them go ahead, but they have not been fully tested out.
